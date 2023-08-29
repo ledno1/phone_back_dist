@@ -1,0 +1,376 @@
+* {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    list-style: none;
+    text-decoration: none;
+    color: inherit;
+    font-weight: normal;
+    font-family: "微软雅黑";
+    box-sizing: border-box;
+    font-style: normal;
+}
+
+body {
+    width: 100%;
+    overflow-x: hidden;
+}
+
+img {
+    vertical-align: middle;
+    max-width: 100%;
+    text-align: center;
+}
+
+.bg-orange {
+    background: #44bf16;
+}
+
+.bg-blue {
+    background: #499de3;
+}
+
+.bg-gary {
+    background: #ededed;
+}
+
+.btn {
+    color: #FFFFFF;
+    height: 5%;
+    outline: none;
+}
+
+.wfull {
+    width: 100%;
+}
+
+/*影片信息*/
+
+.movie-info {
+    width: 90%;
+    margin: 0 auto;
+    padding: .6rem 0;
+}
+
+.thumb {
+    text-align: center;
+}
+
+.thumb img {
+    vertical-align: middle;
+    max-width: 100%;
+    text-align: center;
+}
+
+.info {
+    text-align: center;
+    padding-top: .75rem;
+}
+
+.info h1 {
+    font-size: .4rem;
+    color: #000;
+    font-weight: 650;
+}
+
+.info p {
+    font-size: .26rem;
+    color: #a4a4a4;
+    margin-top: .18rem;
+}
+
+.fare {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0.4cm 1cm 1cm 1cm;
+}
+
+.fare .pirce {
+    font-size: 0.9rem;
+    color: #ec7043;
+}
+
+.fare .tip {
+    font-size: .27rem;
+    margin-left: .2rem;
+    color: #a4a4a4;
+}
+
+.fare .tip i {
+    text-decoration: line-through;
+}
+
+.buy {
+    justify-content: center;
+    padding: 0cm 2cm 0cm 2cm;
+}
+
+.buy .btn {
+    border-radius: .8rem;
+    margin-bottom: .28rem;
+}
+
+.buy p {
+    font-size: .30rem;
+    color: #a4a4a4;
+    text-align: center;
+}
+
+/*对话框*/
+
+.dialog {
+    width: 90%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #FFFFFF;
+    border-radius: .1rem;
+}
+
+.dialog .title {
+    font-size: .38rem;
+    text-align: center;
+    padding: .3rem 0;
+    border-bottom: .01rem solid #e0e0e0;
+    position: relative;
+}
+
+.dialog .title .close {
+    display: inline-block;
+    position: absolute;
+    left: .35rem;
+    top: .35rem;
+    font-size: .4rem;
+}
+
+.dialog .content {
+    padding: 0 .35rem .35rem .35rem;
+}
+
+/*支付方式*/
+
+.pay-type {
+    display: none;
+}
+
+.pay-type .dialog {
+    z-index: 2;
+}
+
+.pay-type .mask {
+    position: fixed;
+    content: "";
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: rgba(0, 0, 0, .5);
+    top: 0;
+    left: 0;
+    z-index: 1;
+}
+
+.pay-type .dialog .content p.name {
+    font-size: .28rem;
+    text-align: center;
+    padding-top: .3rem;
+}
+
+.pay-type .dialog .content p.price {
+    font-size: .7rem;
+    text-align: center;
+    padding-top: .1rem;
+}
+
+.pay-type .dialog .content .wx-pay {
+    font-size: .35rem;
+    padding: .1rem 0;
+    border-bottom: .01rem solid #e5e5e6;
+    border-top: .01rem solid #e5e5e6;
+    margin-top: .3rem;
+    display: flex;
+    align-items: center;
+}
+
+.pay-type .dialog .content .wx-pay i {
+    font-size: .8rem;
+    margin-right: .3rem;
+    margin-left: .3rem;
+    color: #5ac53a;
+}
+
+.pay-type .dialog .content .btn {
+    margin-top: .3rem;
+}
+
+/*支付密码弹窗*/
+
+.pay-password {
+    display: none;
+}
+
+.pay-password .dialog {
+    width: 80%;
+    position: absolute;
+    top: 1.3rem;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #FFFFFF;
+    border-radius: .1rem;
+    z-index: 4;
+}
+
+.pay-password .mask {
+    position: fixed;
+    content: "";
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: rgba(0, 0, 0, .5);
+    top: 0;
+    left: 0;
+    z-index: 2;
+}
+
+.pay-password .dialog .title {
+    border: none;
+}
+
+.pay-password .dialog .content p.name {
+    font-size: .34rem;
+    text-align: center;
+    padding-top: .2rem;
+}
+
+.pay-password .dialog .content p.price {
+    font-size: .7rem;
+    text-align: center;
+    padding-top: .1rem;
+}
+
+.pay-password .dialog .content .pay-type {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: .3rem 0;
+    border-top: .01rem solid #e0e0e0;
+    margin-top: .4rem;
+}
+
+.pay-password .dialog .content .pay-type span {
+    font-size: .28rem;
+}
+
+.pay-password .dialog .content .pay-type span.type {
+    font-size: .24rem;
+    color: #a4a4a4;
+}
+
+.pay-password .dialog .content .pay-type span i.rmb {
+    color: #f1c939;
+}
+
+.pay-password .dialog .content .pay-type span i.arrow {
+    color: #a4a4a4;
+}
+
+.pay-password .dialog .content .password ul {
+    display: flex;
+    justify-content: space-between;
+    padding: .2rem;
+}
+
+.pay-password .dialog .content .password ul li {
+    width: .7rem;
+    height: .7rem;
+    line-height: .7rem;
+    background: #ededed;
+    border-radius: .05rem;
+    text-align: center;
+    font-size: .7rem;
+    font-weight: bold;
+}
+
+/*支付键盘*/
+
+.pay-password .pay-keyboard {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    z-index: 4;
+    background: #FFFFFF;
+}
+
+.pay-password .pay-keyboard dl {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.pay-password .pay-keyboard dl dd {
+    width: 100%;
+    border-bottom: .01rem solid #f5f5f5;
+    border-right: .01rem solid #f5f5f5;
+    text-align: center;
+    height: 1.0rem;
+    line-height: 1.0rem;
+    font-size: .3rem;
+}
+
+.pay-password .pay-keyboard dl dd:last-child {
+    border-right: 0;
+}
+
+.pay-password .pay-keyboard dl:last-child dd {
+    border-bottom: 0;
+}
+
+.pay-password .pay-keyboard dl dd:active {
+    background: rgba(0, 0, 0, .1);
+}
+
+/*支付成功*/
+
+.pay-success {
+    display: none;
+}
+
+.pay-success .dialog {
+    z-index: 5;
+}
+
+.pay-success .mask {
+    position: fixed;
+    content: "";
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: rgba(0, 0, 0, .5);
+    top: 0;
+    left: 0;
+    z-index: 1;
+}
+
+.pay-success .dialog .icon {
+    padding: .8rem 0 .6rem 0;
+    text-align: center;
+}
+
+.pay-success .dialog .icon i {
+    font-size: 1.2rem;
+    color: #7dc53b;
+}
+
+.pay-success .dialog p.txt {
+    font-size: .3rem;
+    text-align: center;
+}
+
+.pay-success .dialog .btn {
+    margin-top: .3rem;
+}
