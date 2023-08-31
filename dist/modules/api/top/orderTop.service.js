@@ -444,7 +444,7 @@ let OrderTopService = class OrderTopService {
         console.log("执行回调" + oInfo.mNotifyUrl);
         let md5Key = await this.topUserService.getMd5Key(oInfo.mid);
         await this.setOrderCallbackStatus(order.oid, "强制回调");
-        let res = await this.notifyRequest(oInfo.mNotifyUrl, tNotify, md5Key);
+        let res = await this.notifyRequest(oInfo.mNotifyUrl.toString().replace(' ', ''), tNotify, md5Key);
         if (res.result) {
             await this.proxyUserService.setOrderCommission(oInfo);
             let balance = await this.proxyUserService.updateBalance(oInfo.SysUser.uuid, oInfo.amount * order.lRate / 10000, "sub");
