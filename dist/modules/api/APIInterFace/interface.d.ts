@@ -53,15 +53,6 @@ export declare class PayCheck {
     nonceStr: string;
     sign: string;
 }
-export declare class ALiPayNotify {
-    type: string;
-    no: string;
-    money: string;
-    mark: string;
-    dt: string;
-    idnumber: string;
-    sign: string;
-}
 export declare class SysPay extends Pay {
     amount?: number;
     subChannel?: number;

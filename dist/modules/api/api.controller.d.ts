@@ -10,8 +10,8 @@ export declare class ApiController {
     private readonly channelService;
     private redis;
     constructor(apiService: ApiService, paramConfigService: SysParamConfigService, channelService: ChannelService, redis: RedisService);
-    pay(body: Pay): Promise<string | PayResponse | 1>;
-    payTest(body: any, user: IAdminUser): Promise<string | PayResponse | 1>;
+    pay(body: Pay): Promise<string | 1 | PayResponse>;
+    payTest(body: any, user: IAdminUser): Promise<string | 1 | PayResponse>;
     payCheck(body: PayCheck): Promise<{
         merId: any;
         orderId: any;
@@ -20,7 +20,7 @@ export declare class ApiController {
         orderAmt: string;
         nonceStr: string;
     }>;
-    getpayurl(body: any, req: any): Promise<{
+    getpayurl(body: any): Promise<{
         code: number;
         price?: undefined;
         orderid?: undefined;
@@ -69,6 +69,4 @@ export declare class ApiController {
         showOrderid?: undefined;
         status?: undefined;
     }>;
-    alipayNotify(body: any, query: any): Promise<"fail" | "success">;
-    startcheck(query: any): Promise<void>;
 }

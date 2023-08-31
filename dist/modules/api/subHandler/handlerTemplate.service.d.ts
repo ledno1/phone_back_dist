@@ -2,7 +2,7 @@ import { OnModuleInit } from "@nestjs/common";
 import { EntityManager } from "typeorm";
 import { RedisService } from "@/shared/services/redis.service";
 import { UtilService } from "@/shared/services/util.service";
-import { ALiPayNotify, PayResponse, SysPay } from "@/modules/api/APIInterFace/interface";
+import { PayResponse, SysPay } from "@/modules/api/APIInterFace/interface";
 import { ChannelType, HaveAmount, OrderRedis, PayAccountAndMerchant, ProcessModel, ServiceHandler } from "@/modules/api/subHandler/InerFace";
 import { TopService } from "@/modules/usersys/top/top.service";
 import { ProxyService } from "@/modules/usersys/proxy/proxy.service";
@@ -17,8 +17,6 @@ export declare class HandlerTemplateService implements ServiceHandler, OnModuleI
     private orderQueue;
     private util;
     constructor(redisService: RedisService, entityManager: EntityManager, topUserService: TopService, proxyUserService: ProxyService, orderQueue: Queue, util: UtilService);
-    autoCallback(params: ALiPayNotify, p: PayAccount): Promise<void>;
-    test(): Promise<void>;
     private redlock;
     private readonly queueKey;
     private readonly lastUuidKey;

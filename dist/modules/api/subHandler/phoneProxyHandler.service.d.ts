@@ -2,7 +2,7 @@ import { OnModuleInit } from "@nestjs/common";
 import { EntityManager } from "typeorm";
 import { RedisService } from "@/shared/services/redis.service";
 import { UtilService } from "@/shared/services/util.service";
-import { ALiPayNotify, Pay, PayResponse, SysPay } from "@/modules/api/APIInterFace/interface";
+import { Pay, PayResponse, SysPay } from "@/modules/api/APIInterFace/interface";
 import { ChannelType, HaveAmount, OrderRedis, PayAccountAndMerchant, ProcessModel, ServiceHandler } from "@/modules/api/subHandler/InerFace";
 import { PayAccount } from "@/entities/resource/payaccount.entity";
 import { ProxyCharging } from "@/entities/resource/proxyChargin.entity";
@@ -30,6 +30,4 @@ export declare class PhoneHandlerService implements ServiceHandler, OnModuleInit
     model: ProcessModel;
     checkOrderApi(params: OrderRedis): Promise<boolean>;
     outTime(params: OrderRedis): Promise<void>;
-    test(): Promise<void>;
-    autoCallback(params: ALiPayNotify, p: PayAccount): Promise<void>;
 }

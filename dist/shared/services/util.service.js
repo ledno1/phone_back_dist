@@ -43,8 +43,7 @@ const CryptoJS = __importStar(require("crypto-js"));
 const dayjs_1 = __importDefault(require("dayjs"));
 const otplib_1 = require("otplib");
 const qrcode_1 = __importDefault(require("qrcode"));
-const socks_proxy_agent_1 = __importDefault(require("socks-proxy-agent"));
-const axios = require("axios");
+const request = require("request");
 let UtilService = class UtilService {
     httpService;
     constructor(httpService) {
@@ -109,11 +108,6 @@ let UtilService = class UtilService {
     getNowTimestamp() {
         return (0, dayjs_1.default)().valueOf() / 1000;
     }
-    dayjs(t = undefined) {
-        if (t)
-            return (0, dayjs_1.default)(t);
-        return (0, dayjs_1.default)();
-    }
     dayjsFormat(t) {
         return (0, dayjs_1.default)(t).format("YYYY-MM-DD HH:mm:ss");
     }
@@ -142,32 +136,12 @@ let UtilService = class UtilService {
     }
     async requestPost(url, params, headers = {
         "Content-Type": "application/x-www-form-urlencoded"
-    }, proxy = false, timeout = 30 * 1000) {
-        let config;
-        if (proxy) {
-            const httpsAgent = new socks_proxy_agent_1.default.SocksProxyAgent(proxy);
-            config = {
-                proxy: {
-                    host: "45.89.230.134",
-                    port: 59394,
-                    protocol: "http",
-                    auth: {
-                        username: "asi",
-                        password: "asihacker"
-                    }
-                },
-                headers,
-                timeout
-            };
-        }
-        else {
-            config = {
-                proxy: proxy ? proxy : false,
-                headers,
-                timeout
-            };
-        }
-        let { data } = await this.httpService.axiosRef.post(url, params, config);
+    }, timeout = 15000) {
+        let { data } = await this.httpService.axiosRef.post(url, params, {
+            proxy: false,
+            headers,
+            timeout
+        });
         return data;
     }
     checkSign(obj, yan) {

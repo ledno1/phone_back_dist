@@ -26,8 +26,6 @@ const sys_user_entity_1 = __importDefault(require("../../../entities/admin/sys-u
 const param_config_service_1 = require("../../admin/system/param-config/param-config.service");
 const api_exception_1 = require("../../../common/exceptions/api.exception");
 const config_1 = require("@nestjs/config");
-const lodash_1 = require("lodash");
-const top_entity_1 = require("../../../entities/order/top.entity");
 let CommissionService = class CommissionService {
     logRepository;
     configService;
@@ -113,12 +111,6 @@ let CommissionService = class CommissionService {
     async statistics(params, user) {
         let isBind = await this.entityManager.query(`SELECT googleSecret FROM sys_user WHERE uuid = '${user.uuid}'`);
         if (user.roleLabel == "admin") {
-            let date;
-            let createdAt = [this.util.dayjsFormat(this.util.dayjs().startOf("day").valueOf()), this.util.dayjsFormat(this.util.dayjs().endOf("day").valueOf())];
-            let todayStatics = await this.statistics2({ createdAt });
-            date = this.util.dayjs().subtract(1, "day").valueOf();
-            createdAt = [this.util.dayjsFormat(this.util.dayjs(date).startOf("day").valueOf()), this.util.dayjsFormat(this.util.dayjs(date).endOf("day").valueOf())];
-            let yesterdayStatics = await this.statistics2({ createdAt });
             let zhList = await this.entityManager.query(`SELECT COUNT(*)AS total FROM zh`);
             let yesterdayTopOrder = await this.entityManager.query(`SELECT SUM(amount) AS amountTotal,COUNT(*) AS orderTotal FROM top_order WHERE (status = 1 OR status = 4 OR status = 3) AND DATE_FORMAT(created_at,'%Y-%m-%d') = DATE_FORMAT(DATE_SUB(NOW(),INTERVAL 1 DAY),'%Y-%m-%d')`);
             let todayTopOrder = await this.entityManager.query(`SELECT SUM(amount) AS amountTotal,COUNT(*) AS orderTotal FROM top_order WHERE (status = 1 OR status = 4 OR status = 3) AND  DATE_FORMAT(created_at,'%Y-%m-%d') = DATE_FORMAT(NOW(),'%Y-%m-%d')`);
@@ -132,20 +124,16 @@ let CommissionService = class CommissionService {
                `);
             let channelList = await this.entityManager.query(`SELECT id,name FROM channel WHERE isUse = 1 and  parentId is not null`);
             let pay = await this.paramConfigService.findValueByKey("pay_open");
-            let aLiPayModel = await this.paramConfigService.findValueByKey("aLiPayModel");
             return {
-                ZHCount: zhList[0].total,
-                todayOrder: todayTopOrder[0].orderTotal,
+                ZHCount: zhList[0]?.total ? zhList[0]?.total : 0,
+                todayOrder: todayTopOrder[0]?.orderTotal ? todayTopOrder[0]?.orderTotal : 0,
                 todaySale: todayTopOrder[0].amountTotal ? todayTopOrder[0].amountTotal : 0,
-                yesterdayOrder: yesterdayTopOrder[0].orderTotal,
+                yesterdayOrder: yesterdayTopOrder[0].orderTotal ? yesterdayTopOrder[0].orderTotal : 0,
                 yesterdaySale: yesterdayTopOrder[0].amountTotal ? yesterdayTopOrder[0].amountTotal : 0,
                 link: linkList,
                 sysOpen: pay == "1" ? true : false,
                 googleCodeBind: isBind[0].googleSecret ? true : false,
-                channelList,
-                aLiPayModel: aLiPayModel == "1" ? true : false,
-                yesterdayStatics,
-                todayStatics
+                channelList
             };
         }
         else if (user.roleLabel == "top") {
@@ -165,11 +153,7 @@ let CommissionService = class CommissionService {
                 return userData;
             });
             let channelList = await this.entityManager.query(`SELECT id,name FROM channel WHERE isUse = 1 and  parentId is not null`);
-            return Object.assign({
-                googleCodeBind: isBind[0].googleSecret ? true : false,
-                whiteIp: qb.whiteIp,
-                channelList
-            }, {
+            return Object.assign({ googleCodeBind: isBind[0].googleSecret ? true : false, whiteIp: qb.whiteIp, channelList }, {
                 topOrder,
                 link: linkList
             });
@@ -224,14 +208,6 @@ let CommissionService = class CommissionService {
                 else if (user.roleLabel == "ma") {
                     await this.userRepository.update({ uuid: user.uuid }, { selfOpen: open });
                 }
-                break;
-            case "aLiPayModel":
-                if (user.roleLabel == "admin") {
-                    let { aLiPayModel } = params;
-                    let t = aLiPayModel ? "1" : "0";
-                    await this.paramConfigService.updateValueByKey("aLiPayModel", t);
-                }
-                return 1;
                 break;
             case "googleOpen":
                 await this.redisService.getRedis().del(`googleQrUrl:${user.uuid}`);
@@ -329,62 +305,6 @@ let CommissionService = class CommissionService {
                 return 1;
                 break;
         }
-    }
-    async statistics2(params, user = undefined) {
-        let { page, limit, oid, lOid, accountNumber, amount, createdAt, channelName, callback, status, mOid } = params;
-        amount ? amount = Number(amount) * 100 : 0;
-        let totalAmount = null, totalSuccessCount = null, totalCount = null;
-        let qbSuccessTotal = await this.entityManager.createQueryBuilder(top_entity_1.TopOrder, "order")
-            .leftJoin("order.zh", "zh")
-            .leftJoin("channel", "channel", "channel.id = order.channel")
-            .select(["SUM(order.amount) AS totalAmount", "COUNT(order.id) AS totalCount"])
-            .where(user && user.id != 1 ? "order.sysUserId = :mid" : "1=1", { mid: user?.id })
-            .andWhere(accountNumber ? "zh.accountNumber = :accountNumber" : "1=1", { accountNumber })
-            .andWhere(amount ? "order.amount = :amount" : "1=1", { amount: !(0, lodash_1.isNaN)(amount) ? amount : null })
-            .andWhere(createdAt ? "order.created_at BETWEEN :createdStart AND :createdEnd" : "1=1", {
-            createdStart: createdAt ? createdAt[0] : this.util.dayjsFormat(new Date()),
-            createdEnd: createdAt ? createdAt[1] : this.util.dayjsFormat(new Date())
-        })
-            .andWhere(channelName ? "order.channel = :channelName" : "1=1", { channelName })
-            .andWhere("(order.status = 1 OR order.status = 3 OR order.status = 4)")
-            .getRawOne();
-        let qbFailTotal = await this.entityManager.createQueryBuilder(top_entity_1.TopOrder, "order")
-            .leftJoin("order.zh", "zh")
-            .leftJoin("channel", "channel", "channel.id = order.channel")
-            .select(["SUM(order.amount) AS totalAmount", "COUNT(order.id) AS totalCount"])
-            .where(user && user.id != 1 ? "order.sysUserId = :mid" : "1=1", { mid: user?.id })
-            .andWhere(accountNumber ? "zh.accountNumber = :accountNumber" : "1=1", { accountNumber })
-            .andWhere(amount ? "order.amount = :amount" : "1=1", { amount: !(0, lodash_1.isNaN)(amount) ? amount : null })
-            .andWhere(createdAt ? "order.created_at BETWEEN :createdStart AND :createdEnd" : "1=1", {
-            createdStart: createdAt ? createdAt[0] : this.util.dayjsFormat(new Date()),
-            createdEnd: createdAt ? createdAt[1] : this.util.dayjsFormat(new Date())
-        })
-            .andWhere(channelName ? "order.channel = :channelName" : "1=1", { channelName })
-            .andWhere("(order.status = -1 OR order.status = 2 )")
-            .getRawOne();
-        let qbTotal = await this.entityManager.createQueryBuilder(top_entity_1.TopOrder, "order")
-            .leftJoin("order.zh", "zh")
-            .leftJoin("channel", "channel", "channel.id = order.channel")
-            .select(["COUNT(order.id) AS totalCount"])
-            .where(user && user.id != 1 ? "order.sysUserId = :mid" : "1=1", { mid: user?.id })
-            .andWhere(accountNumber ? "zh.accountNumber = :accountNumber" : "1=1", { accountNumber })
-            .andWhere(amount ? "order.amount = :amount" : "1=1", { amount: !(0, lodash_1.isNaN)(amount) ? amount : null })
-            .andWhere(createdAt ? "order.created_at BETWEEN :createdStart AND :createdEnd" : "1=1", {
-            createdStart: createdAt ? createdAt[0] : this.util.dayjsFormat(new Date()),
-            createdEnd: createdAt ? createdAt[1] : this.util.dayjsFormat(new Date())
-        })
-            .andWhere(channelName ? "order.channel = :channelName" : "1=1", { channelName })
-            .getRawOne();
-        totalAmount = qbSuccessTotal.totalAmount;
-        totalSuccessCount = qbSuccessTotal.totalCount;
-        totalCount = qbTotal.totalCount;
-        return {
-            totalFailCount: qbFailTotal.totalCount ? qbFailTotal.totalCount : 0,
-            totalFailAmount: qbFailTotal.totalAmount ? qbFailTotal.totalAmount : 0,
-            totalAmount: totalAmount ? totalAmount : 0,
-            totalSuccessCount: totalSuccessCount ? totalSuccessCount : 0,
-            totalCount: totalCount ? totalCount : 0,
-        };
     }
 };
 CommissionService = __decorate([

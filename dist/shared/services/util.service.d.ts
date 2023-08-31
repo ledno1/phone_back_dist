@@ -14,7 +14,6 @@ export declare class UtilService {
     generateUUIDSelf(): string;
     generateRandomValue(length: number, placeholder?: string): string;
     getNowTimestamp(): any;
-    dayjs(t?: any): any;
     dayjsFormat(t: any): any;
     unique(arr: any[], key: string): any[];
     ascesign(obj: any, yan: string): string;
@@ -23,7 +22,7 @@ export declare class UtilService {
     }, timeout?: number): Promise<any>;
     requestPost(url: string, params: any, headers?: {
         "Content-Type": string;
-    }, proxy?: any, timeout?: number): Promise<any>;
+    }, timeout?: number): Promise<any>;
     checkSign(obj: any, yan: string): boolean;
     createSeedSecret: (userName: any, appName?: string) => Promise<{
         secret: string;

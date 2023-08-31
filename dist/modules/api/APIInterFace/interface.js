@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.PayResponseError = exports.PayResponse = exports.SysPay = exports.ALiPayNotify = exports.PayCheck = exports.Pay = exports.KaKaResponseData = exports.KaKaResponse = exports.KaKaCode = exports.KaKa = void 0;
+exports.PayResponseError = exports.PayResponse = exports.SysPay = exports.PayCheck = exports.Pay = exports.KaKaResponseData = exports.KaKaResponse = exports.KaKaCode = exports.KaKa = void 0;
 const swagger_1 = require("@nestjs/swagger");
 const class_validator_1 = require("class-validator");
 class KaKa {
@@ -166,16 +166,6 @@ __decorate([
     __metadata("design:type", String)
 ], PayCheck.prototype, "sign", void 0);
 exports.PayCheck = PayCheck;
-class ALiPayNotify {
-    type;
-    no;
-    money;
-    mark;
-    dt;
-    idnumber;
-    sign;
-}
-exports.ALiPayNotify = ALiPayNotify;
 class SysPay extends Pay {
     amount;
     subChannel;

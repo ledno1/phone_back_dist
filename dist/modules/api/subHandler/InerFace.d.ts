@@ -1,8 +1,7 @@
-import { ALiPayNotify, PayResponse, SysPay } from "@/modules/api/APIInterFace/interface";
+import { PayResponse, SysPay } from "@/modules/api/APIInterFace/interface";
 import { PayAccount } from "@/entities/resource/payaccount.entity";
 import { ProxyCharging } from "@/entities/resource/proxyChargin.entity";
 import { TopOrder } from "@/entities/order/top.entity";
-import { IAdminUser } from "@/modules/admin/admin.interface";
 export declare enum ChannelType {
     PROXY = "proxy",
     DIRECT = "direct"
@@ -10,9 +9,6 @@ export declare enum ChannelType {
 export declare enum ProcessModel {
     SERVICE = "service",
     CHECK = "check"
-}
-export declare enum PayMode {
-    aLiPayCheckMode = "aLiPayCheckMode"
 }
 export declare class HaveAmount {
     username: string;
@@ -43,7 +39,7 @@ export interface ServiceHandler {
     redisOrderName: string;
     model: ProcessModel;
     defaultSystemOutTime: number;
-    result(params: SysPay, user: IAdminUser): Promise<PayResponse | string>;
+    result(params: SysPay): Promise<PayResponse | string>;
     haveAmount(params: SysPay): Promise<HaveAmount[]>;
     findMerchant(params: SysPay, h: HaveAmount[], oid: string): Promise<PayAccountAndMerchant | null>;
     findOrder(params: SysPay, user: HaveAmount): Promise<void>;
@@ -56,6 +52,4 @@ export interface ServiceHandler {
     checkOrder(params: SysPay): Promise<void>;
     checkOrderApi(params: OrderRedis): Promise<boolean>;
     checkOrderBySql(params: OrderRedis): Promise<boolean>;
-    test(): any;
-    autoCallback(params: ALiPayNotify, p: PayAccount): Promise<any>;
 }

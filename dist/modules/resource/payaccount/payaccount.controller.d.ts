@@ -4,9 +4,9 @@ export declare class PayAccountController {
     private readonly zhService;
     constructor(zhService: PayAccountService);
     findOne(query: any, user: IAdminUser): Promise<1 | {
-        list: any;
+        list: any[];
         pagination: {
-            total: any;
+            total: number;
             page: number;
             size: number;
         };
@@ -28,13 +28,5 @@ export declare class PayAccountController {
         id?: undefined;
         uid?: undefined;
     }>;
-    edit(body: any, user: IAdminUser): Promise<{
-        code: number;
-        msg: string;
-        address?: undefined;
-    } | {
-        code: number;
-        address: string;
-        msg?: undefined;
-    }>;
+    edit(body: any, user: IAdminUser): Promise<void>;
 }

@@ -16,7 +16,6 @@ const takeLinkAPI_entity_1 = require("./takeLinkAPI.entity");
 let Channel = class Channel extends base_entity_1.BaseEntity {
     id;
     name;
-    amountType;
     rate;
     strategy;
     isPublic;
@@ -35,10 +34,6 @@ __decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", String)
 ], Channel.prototype, "name", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ type: "varchar", nullable: true }),
-    __metadata("design:type", String)
-], Channel.prototype, "amountType", void 0);
 __decorate([
     (0, typeorm_1.Column)({ nullable: true }),
     __metadata("design:type", String)

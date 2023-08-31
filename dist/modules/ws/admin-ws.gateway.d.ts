@@ -9,4 +9,5 @@ export declare class AdminWSGateway implements OnGatewayConnection, OnGatewayDis
     afterInit(): void;
     handleConnection(client: Socket): Promise<void>;
     handleDisconnect(client: Socket): Promise<void>;
+    handleMessage(client: Socket, payload: any): string;
 }

@@ -41,10 +41,8 @@ const proxyChargingAPI_service_1 = require("./proxyChargingAPI.service");
 const proxyChargin_service_1 = require("../resource/proxyCharging/proxyChargin.service");
 const wxChannelAPI_service_1 = require("./wxChannelAPI.service");
 const handlerTemplate_service_1 = require("./subHandler/handlerTemplate.service");
-const InerFace_1 = require("./subHandler/InerFace");
 const aLiPayHandler_service_1 = require("./subHandler/aLiPayHandler.service");
 const phoneProxyHandler_service_1 = require("./subHandler/phoneProxyHandler.service");
-const payaccount_entity_1 = require("../../entities/resource/payaccount.entity");
 let ApiService = class ApiService {
     redisService;
     util;
@@ -101,7 +99,7 @@ let ApiService = class ApiService {
                 this.ALIAYCHANNEL = e.id;
             }
         });
-        let host = process_1.default.env.PAY_HOST;
+        let host = process_1.default.env.HOST;
         if (!host) {
             throw new Error("未设置收银台域名");
         }
@@ -137,18 +135,16 @@ let ApiService = class ApiService {
             }
         });
     }
-    async payMd5(body, user = null) {
+    async payMd5(body) {
         let { merId, sign, attch } = body;
         if (sign == "test00001111") {
-            if (!user)
-                throw new api_exception_1.ApiException(60003);
             body.orderId = this.util.generateUUID();
-            body.notifyUrl = `https://www.baidu.com`;
+            body.notifyUrl = this.host + "/api/pay/query";
             if (body.channel == this.QQPAYCHANNEL) {
                 return await this.payByQQ(body);
             }
             else if (body.channel == this.ALIAYCHANNEL) {
-                return await this.payByALI(body, user);
+                return await this.payByALI(body);
             }
             else if (body.channel == this.WXPAYCHANNEL) {
                 return await this.payByWX(body);
@@ -175,7 +171,7 @@ let ApiService = class ApiService {
         }
         throw new api_exception_1.ApiException(60003);
     }
-    async payByALI(body, user = null) {
+    async payByALI(body) {
         let subChannelList = await this.channelService.getSubChannel(this.ALIAYCHANNEL);
         if (!subChannelList || subChannelList.length == 0)
             throw new api_exception_1.ApiException(60011);
@@ -191,7 +187,7 @@ let ApiService = class ApiService {
         if (!handlerService)
             throw new api_exception_1.ApiException(60103);
         try {
-            let res = await handlerService.result(body, user);
+            let res = await handlerService.result(body);
             return res;
         }
         catch (e) {
@@ -472,8 +468,8 @@ let ApiService = class ApiService {
         }
         throw new api_exception_1.ApiException(60032);
     }
-    async getPayUrl(params, reqs) {
-        let { orderid, channel, action, os } = params;
+    async getPayUrl(params) {
+        let { orderid, channel, action } = params;
         let orderInfo = await this.redisService.getRedis().get(`orderClient:${orderid}`);
         let code = 0;
         if (action == "checkorder") {
@@ -498,6 +494,7 @@ let ApiService = class ApiService {
             return { code: -1 };
         }
         else if (action == "orderinfo") {
+            console.log("获取订单详情");
             if (orderInfo) {
                 orderInfo = JSON.parse(orderInfo);
                 orderInfo = orderInfo;
@@ -512,18 +509,13 @@ let ApiService = class ApiService {
                 if (handlerService) {
                     res = await handlerService.checkOrderBySql(orderRedis);
                 }
-                let r = await this.paramConfigService.findValueByKey("devLog");
-                if (r == "1") {
-                    console.dir(reqs.connection.remoteAddress);
-                    console.log(`${this.util.dayjs().format("YYYY-MM-DD HH:mm:ss")}==${order.mOid}到支付宝收银台,金额${order.amount / 100}元,通道${order.channel}`);
-                }
                 return {
                     code: 1,
                     price: (realAmount / 100).toString(),
                     orderid: order.oid,
                     userid: resource.uid,
                     createAt: createAt,
-                    showOrderid: order.mOid,
+                    showOrderid: showOrder,
                     status: res
                 };
             }
@@ -537,60 +529,7 @@ let ApiService = class ApiService {
             if (!orderInfo)
                 return { code: 3, msg: "订单超时,请重新拉取" };
             orderInfo = JSON.parse(orderInfo);
-            let o = orderInfo;
-            if (os && os.length > 0 && os.length <= 32 && (os == "ios" || os == "android" || os == "windows" || os == "macOS")) {
-                try {
-                    await this.entityManager.update(top_entity_1.TopOrder, { oid: orderInfo.oid }, { os });
-                }
-                catch (e) {
-                    console.error("收银台更新订单客户端系统类型出错", e);
-                    common_1.Logger.error("收银台更新订单客户端系统类型出错");
-                    common_1.Logger.error(e.toString());
-                }
-            }
-            let r = await this.paramConfigService.findValueByKey("devLog");
-            if (r == "1") {
-                console.dir(reqs.connection.remoteAddress);
-                console.log(`${this.util.dayjs().format("YYYY-MM-DD HH:mm:ss")}==${params.os}==${o.mOid}到收银台,金额${o.amount / 100}元,通道${o.channel}`);
-            }
             return { code, msg: "ok", url: orderInfo.url, qrcode: orderInfo.qrcode, outTime: orderInfo.outTime };
-        }
-    }
-    async alipayNotify(params, query) {
-        let checkMode = await this.paramConfigService.findValueByKey(InerFace_1.PayMode.aLiPayCheckMode);
-        if (checkMode == "1") {
-            let { type, no, money, mark, dt, idnumber, sign } = params;
-            let { id, channel } = query;
-            let p = await this.entityManager.findOne(payaccount_entity_1.PayAccount, { where: { uid: idnumber } });
-            if (!p) {
-                console.error(`通知 ${idnumber} 不存在 ${money}`);
-                return "fail";
-            }
-            let md5Key = this.util.md5(p.id + p.uid);
-            if (md5Key != id) {
-                console.error(`通知 ${idnumber} 校验错误 ${money}`);
-                return "fail";
-            }
-            let handlerService = this.handlerMap.get(Number(channel));
-            if (!handlerService)
-                return "fail";
-            let r = await handlerService.autoCallback(params, p);
-            return r ? "success" : "fail";
-        }
-    }
-    sid;
-    async test(params) {
-        let { action } = params;
-        let handlerService = this.handlerMap.get(18);
-        handlerService.test();
-        if (action == "start") {
-            let handlerService = this.handlerMap.get(18);
-            this.sid = setInterval(async () => {
-                handlerService.test();
-            }, 20000);
-        }
-        else {
-            clearImmediate(this.sid);
         }
     }
 };

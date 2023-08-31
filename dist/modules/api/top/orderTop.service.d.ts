@@ -1,4 +1,3 @@
-import { OnModuleInit } from "@nestjs/common";
 import { RedisService } from "@/shared/services/redis.service";
 import { UtilService } from "@/shared/services/util.service";
 import { ZhService } from "@/modules/resource/zh/zh.service";
@@ -14,7 +13,7 @@ import { LinkObj } from "@/modules/api/dto/interface";
 import { SysParamConfigService } from "@/modules/admin/system/param-config/param-config.service";
 import { Queue } from "bull";
 import { ProxyChargingUser } from "@/modules/api/proxyChargingAPI.service";
-export declare class OrderTopService implements OnModuleInit {
+export declare class OrderTopService {
     private redisService;
     private util;
     private zhService;
@@ -28,12 +27,9 @@ export declare class OrderTopService implements OnModuleInit {
     private orderQueue;
     private defaultSystemOutTime;
     constructor(redisService: RedisService, util: UtilService, zhService: ZhService, linkService: LinkService, proxyUserService: ProxyService, topUserService: TopService, proxyCharging: ProxyChargingService, paramConfigService: SysParamConfigService, entityManager: EntityManager, orderRepository: Repository<TopOrder>, orderQueue: Queue);
-    onModuleInit(): Promise<void>;
     notifyRequest(url: any, notify: Notify, yan: string): Promise<NotifyResult>;
     page(params: any, user: IAdminUser): Promise<{
         totalAmount: any;
-        totalSuccessCount: any;
-        totalCount: any;
         list: any[];
         pagination: {
             total: number;
@@ -41,27 +37,8 @@ export declare class OrderTopService implements OnModuleInit {
             size: number;
         };
     }>;
-    statistic(params: any): Promise<"日期格式不正确,例子:2020-01-01" | {
-        查询时间: any;
-        日期: any;
-        成功总额: string;
-        成功笔数: any;
-        安卓成功率: string;
-        苹果成功率: string;
-        总笔数: any;
-        总额: string;
-        无法录入笔数: any;
-        无法录入总额: string;
-        合计总笔数: number;
-        合计总额: string;
-        失败总额: string;
-        失败笔数: any;
-        成功率: string;
-    }>;
-    pageByAdmin(params: any, user?: IAdminUser): Promise<{
+    pageByAdmin(params: any, user: IAdminUser): Promise<{
         totalAmount: any;
-        totalSuccessCount: any;
-        totalCount: any;
         list: any[];
         pagination: {
             total: number;
@@ -71,8 +48,6 @@ export declare class OrderTopService implements OnModuleInit {
     }>;
     pageByProxy(params: any, user: IAdminUser): Promise<{
         totalAmount: any;
-        totalSuccessCount: any;
-        totalCount: any;
         list: any[];
         pagination: {
             total: number;
@@ -82,8 +57,6 @@ export declare class OrderTopService implements OnModuleInit {
     }>;
     pageByTop(params: any, user: IAdminUser): Promise<{
         totalAmount: any;
-        totalSuccessCount: any;
-        totalCount: any;
         list: any[];
         pagination: {
             total: number;
@@ -93,8 +66,6 @@ export declare class OrderTopService implements OnModuleInit {
     }>;
     pageByMa(params: any, user: IAdminUser): Promise<{
         totalAmount: any;
-        totalSuccessCount: any;
-        totalCount: any;
         list: any[];
         pagination: {
             total: number;
@@ -102,18 +73,7 @@ export declare class OrderTopService implements OnModuleInit {
             size: number;
         };
     }>;
-    statisticsTemp(params: any, user?: IAdminUser): Promise<{
-        tempTotalAmount: any;
-        tempTotalCount: any;
-    }>;
-    statistics(params: any, user?: IAdminUser): Promise<{
-        totalFailCount: any;
-        totalFailAmount: any;
-        totalAmount: any;
-        totalSuccessCount: any;
-        totalCount: any;
-    }>;
-    callback(params: any, user: IAdminUser): Promise<NotifyResult>;
+    callback(params: any, user: IAdminUser): Promise<void>;
     orderOuTtime(job: any): Promise<void>;
     setOrderStatus(oid: string, status: number): Promise<void>;
     setOrderCallbackStatus(oid: string, callbackInfo: any): Promise<void>;

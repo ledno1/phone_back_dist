@@ -41,12 +41,6 @@ let HandlerTemplateService = class HandlerTemplateService {
         this.orderQueue = orderQueue;
         this.util = util;
     }
-    autoCallback(params, p) {
-        throw new Error("Method not implemented.");
-    }
-    test() {
-        throw new Error("Method not implemented.");
-    }
     redlock = null;
     queueKey = "pay:user:phoneQueue";
     lastUuidKey = "pay:user:phoneLastUuid";

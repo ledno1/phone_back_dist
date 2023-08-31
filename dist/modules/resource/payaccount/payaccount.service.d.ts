@@ -6,38 +6,29 @@ import { IAdminUser } from "@/modules/admin/admin.interface";
 import SysUser from "@/entities/admin/sys-user.entity";
 import { ZhPage } from "@/modules/resource/zh/interface";
 import { PayAccount } from "@/entities/resource/payaccount.entity";
-import { SysParamConfigService } from "@/modules/admin/system/param-config/param-config.service";
-declare enum CheckStatus {
-    "success" = "success",
-    "deny" = "deny",
-    "failed" = "failed",
-    "error" = "error"
-}
 export declare class PayAccountService implements OnModuleInit {
     private payAccountRepository;
     private userRepository;
     private entityManager;
-    private paramConfigService;
     private redisService;
     private util;
     private revisionInfo;
     private task_page_map;
     private mainFrameUrl;
-    private pupHost;
-    constructor(payAccountRepository: Repository<PayAccount>, userRepository: Repository<SysUser>, entityManager: EntityManager, paramConfigService: SysParamConfigService, redisService: RedisService, util: UtilService);
+    constructor(payAccountRepository: Repository<PayAccount>, userRepository: Repository<SysUser>, entityManager: EntityManager, redisService: RedisService, util: UtilService);
     onModuleInit(): Promise<void>;
     page(params: ZhPage, user: IAdminUser): Promise<1 | {
-        list: any;
+        list: any[];
         pagination: {
-            total: any;
+            total: number;
             page: number;
             size: number;
         };
     }>;
     getByPage(params: any, userid: number): Promise<{
-        list: any;
+        list: any[];
         pagination: {
-            total: any;
+            total: number;
             page: number;
             size: number;
         };
@@ -60,15 +51,11 @@ export declare class PayAccountService implements OnModuleInit {
         uid?: undefined;
     }>;
     addAppid(params: any, user: IAdminUser): Promise<number>;
-    edit(params: any, user: IAdminUser): Promise<{
-        code: number;
-        msg: string;
-        address?: undefined;
-    } | {
-        code: number;
-        address: string;
-        msg?: undefined;
+    addByFile(filePath: any, userinfo: any): Promise<void>;
+    edit(params: any, user: IAdminUser): Promise<void>;
+    newTask(): Promise<{
+        browser: any;
+        page: any;
     }>;
-    requestApi(uid: string, cookies: string, ctoken: string): Promise<boolean | Array<any> | CheckStatus>;
+    getTaskLength(): number;
 }
-export {};

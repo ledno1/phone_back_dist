@@ -30,7 +30,6 @@ const wxChannelAPI_service_1 = require("./wxChannelAPI.service");
 const aLiPayHandler_service_1 = require("./subHandler/aLiPayHandler.service");
 const phoneProxyHandler_service_1 = require("./subHandler/phoneProxyHandler.service");
 const handlerTemplate_service_1 = require("./subHandler/handlerTemplate.service");
-const top_temp_entity_1 = require("../../entities/order/top_temp.entity");
 let ApiModule = class ApiModule {
 };
 ApiModule = __decorate([
@@ -40,8 +39,7 @@ ApiModule = __decorate([
             resource_module_1.ResourceModule,
             usersys_module_1.UsersysModule,
             typeorm_1.TypeOrmModule.forFeature([
-                top_entity_1.TopOrder,
-                top_temp_entity_1.TopOrderTemp
+                top_entity_1.TopOrder
             ]),
             bull_1.BullModule.registerQueueAsync({
                 name: 'order',

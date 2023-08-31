@@ -37,28 +37,6 @@ export declare class CommissionService {
         sysOpen: boolean;
         googleCodeBind: boolean;
         channelList: any;
-        aLiPayModel: boolean;
-        yesterdayStatics: {
-            totalFailCount: any;
-            totalFailAmount: any;
-            totalAmount: any;
-            totalSuccessCount: any;
-            totalCount: any;
-        };
-        todayStatics: {
-            totalFailCount: any;
-            totalFailAmount: any;
-            totalAmount: any;
-            totalSuccessCount: any;
-            totalCount: any;
-        };
     }>;
     edit(params: any, user: IAdminUser): Promise<string | 1>;
-    statistics2(params: any, user?: IAdminUser): Promise<{
-        totalFailCount: any;
-        totalFailAmount: any;
-        totalAmount: any;
-        totalSuccessCount: any;
-        totalCount: any;
-    }>;
 }
