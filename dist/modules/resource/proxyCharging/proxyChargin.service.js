@@ -61,7 +61,9 @@ let ProxyChargingService = class ProxyChargingService {
         let { page, limit, oid, lOid, accountNumber, amount, createdAt, channelName, callback, status, action } = params;
         if (action == "use") {
             let ls = await this.paramsConfig.findValueByKey("proxyChargingType");
+            console.log(ls);
             if (ls) {
+                console.log(ls.split(",").map((n) => ({ label: n, value: n })));
                 return ls.split(",").map((n) => ({ label: n, value: n }));
             }
             else {

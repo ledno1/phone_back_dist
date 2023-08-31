@@ -14,10 +14,11 @@ import { ChannelService } from "@/modules/resource/channel/channel.service";
 import { ProxyChargingAPIService } from "@/modules/api/proxyChargingAPI.service";
 import { ProxyChargingService } from "@/modules/resource/proxyCharging/proxyChargin.service";
 import { WxChannelAPIService } from "@/modules/api/wxChannelAPI.service";
-import { Pay, SysPay } from "@/modules/api/APIInterFace/interface";
+import { ALiPayNotify, Pay, SysPay } from "@/modules/api/APIInterFace/interface";
 import { HandlerTemplateService } from "@/modules/api/subHandler/handlerTemplate.service";
 import { ALiPayHandlerService } from "@/modules/api/subHandler/aLiPayHandler.service";
 import { PhoneHandlerService } from "@/modules/api/subHandler/phoneProxyHandler.service";
+import { IAdminUser } from "@/modules/admin/admin.interface";
 export declare class ApiService implements OnModuleInit {
     private redisService;
     private util;
@@ -43,8 +44,8 @@ export declare class ApiService implements OnModuleInit {
     private handlerMap;
     constructor(redisService: RedisService, util: UtilService, topUserService: TopService, proxyUserService: ProxyService, linkService: LinkService, topOrderService: OrderTopService, zhService: ZhService, paramConfigService: SysParamConfigService, channelService: ChannelService, proxyChargingAPI: ProxyChargingAPIService, proxyChargingService: ProxyChargingService, wxChannelAPIService: WxChannelAPIService, aLiPayHandlerService: ALiPayHandlerService, phoneHandlerService: PhoneHandlerService, handlerTemplateService: HandlerTemplateService, entityManager: EntityManager, orderQueue: Queue);
     onModuleInit(): Promise<void>;
-    payMd5(body: Pay): Promise<string | import("@/modules/api/APIInterFace/interface").PayResponse>;
-    payByALI(body: SysPay): Promise<string | import("@/modules/api/APIInterFace/interface").PayResponse>;
+    payMd5(body: Pay, user?: IAdminUser): Promise<string | import("@/modules/api/APIInterFace/interface").PayResponse>;
+    payByALI(body: SysPay, user?: IAdminUser): Promise<string | import("@/modules/api/APIInterFace/interface").PayResponse>;
     payByWX(body: Pay): Promise<{
         code: number;
         payurl: string;
@@ -80,7 +81,7 @@ export declare class ApiService implements OnModuleInit {
         orderAmt: string;
         nonceStr: string;
     }>;
-    getPayUrl(params: any): Promise<{
+    getPayUrl(params: any, reqs: any): Promise<{
         code: number;
         price?: undefined;
         orderid?: undefined;
@@ -92,6 +93,8 @@ export declare class ApiService implements OnModuleInit {
         url?: undefined;
         qrcode?: undefined;
         outTime?: undefined;
+        mode?: undefined;
+        mOid?: undefined;
     } | {
         code: number;
         price: string;
@@ -104,6 +107,8 @@ export declare class ApiService implements OnModuleInit {
         url?: undefined;
         qrcode?: undefined;
         outTime?: undefined;
+        mode?: undefined;
+        mOid?: undefined;
     } | {
         code: number;
         msg: string;
@@ -116,12 +121,16 @@ export declare class ApiService implements OnModuleInit {
         url?: undefined;
         qrcode?: undefined;
         outTime?: undefined;
+        mode?: undefined;
+        mOid?: undefined;
     } | {
         code: number;
         msg: string;
         url: any;
         qrcode: any;
         outTime: any;
+        mode: string;
+        mOid: string;
         price?: undefined;
         orderid?: undefined;
         userid?: undefined;
@@ -129,4 +138,7 @@ export declare class ApiService implements OnModuleInit {
         showOrderid?: undefined;
         status?: undefined;
     }>;
+    alipayNotify(params: ALiPayNotify, query: any): Promise<"success" | "fail">;
+    private sid;
+    test(params: any): Promise<void>;
 }

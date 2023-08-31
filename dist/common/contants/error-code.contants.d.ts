@@ -76,6 +76,7 @@ export declare const ErrorCodeMap: {
     readonly 60012: "没有配置拉取平台";
     readonly 60013: "无法提取符合条件的支付连接";
     readonly 60014: "无符合话单";
+    readonly 60015: "不支持该订单金额";
     readonly 70001: "没有配置订单金额限定";
     readonly 70002: "该运营商禁止入单";
     readonly 80001: "保存失败";

@@ -59,6 +59,9 @@ const channel_service_1 = require("../../resource/channel/channel.service");
 const sys_balance_entity_1 = require("../../../entities/admin/sys-balance.entity");
 const schedule_1 = require("@nestjs/schedule");
 const dayjs_1 = __importDefault(require("dayjs"));
+const top_temp_entity_1 = require("../../../entities/order/top_temp.entity");
+const admin_ws_service_1 = require("../../ws/admin-ws.service");
+const REQ = require("request-promise-native");
 class TopOrderRedirect extends top_entity_1.TopOrder {
     url;
 }
@@ -72,7 +75,8 @@ let ALiPayHandlerService = class ALiPayHandlerService {
     paramConfigService;
     channelService;
     util;
-    constructor(redisService, entityManager, topUserService, proxyUserService, orderQueue, paramConfigService, channelService, util) {
+    adminWSService;
+    constructor(redisService, entityManager, topUserService, proxyUserService, orderQueue, paramConfigService, channelService, util, adminWSService) {
         this.redisService = redisService;
         this.entityManager = entityManager;
         this.topUserService = topUserService;
@@ -81,15 +85,16 @@ let ALiPayHandlerService = class ALiPayHandlerService {
         this.paramConfigService = paramConfigService;
         this.channelService = channelService;
         this.util = util;
+        this.adminWSService = adminWSService;
     }
     async onModuleInit() {
         if (process.env.NODE_ENV == "development") {
             this.defaultSystemOutTime = 160;
         }
         else {
-            this.defaultSystemOutTime = 280;
+            this.defaultSystemOutTime = 160;
         }
-        this.host = process.env.HOST;
+        this.host = process.env.PAY_HOST;
         this.redlock = new redlock_1.default([this.redisService.getRedis()], {
             driftFactor: 0.01,
             retryCount: -1,
@@ -114,30 +119,70 @@ let ALiPayHandlerService = class ALiPayHandlerService {
     redisOrderName = "aLiPayTopOrder";
     channelType = InerFace_1.ChannelType.DIRECT;
     nameKey = "直达支付";
-    result(params) {
+    result(params, userinfo) {
         return new Promise(async (resolve, reject) => {
             let account = null, user = null;
+            let { nonceStr, desc } = params;
             let o = params.orderAmt.toString().split(".");
-            console.log(o);
             let oid = "ALI_" + params.subChannel + "_" + this.util.generateUUID() + o[0].padStart(4, "0") + (o.length > 1 ? o[1].padEnd(2, "0") : "00");
             try {
                 let t = Date.now();
                 console.log(`${process.pid} 处理 => 支付直达,请求方${params.merId}订单号:${params.orderId},金额:${params.amount}}`);
                 let res = null;
-                let h = await this.haveAmount(params);
-                account = await this.findMerchant(params, h, oid);
-                console.log("支付账户", account.payAccount.name, "id", account.payAccount.id, `实际收到金额${account.payAccount.realAmount}`);
+                if (nonceStr === "test" && desc != "0") {
+                    let u = new InerFace_1.HaveAmount();
+                    u.uuid = userinfo.uuid;
+                    u.id = userinfo.id;
+                    u.rate = 0;
+                    u.username = userinfo.username;
+                    u.count = 1;
+                    let h = [u];
+                    params.ip = "1.1.1.1";
+                    let link = await this.findPayAccountAndUpdate(params, u, oid);
+                    account = {
+                        merchant: u,
+                        payAccount: link
+                    };
+                    console.log("测试订单 = 支付账户", account.payAccount.name, "id", account.payAccount.id, `实际收到金额${account.payAccount.realAmount}`);
+                }
+                else {
+                    let h = await this.haveAmount(params);
+                    account = await this.findMerchant(params, h, oid);
+                    console.log("支付账户", account.payAccount.name, "id", account.payAccount.id, `实际收到金额${account.payAccount.realAmount}`);
+                }
                 await this.createOrder(params, account, oid);
-                console.error("支付派生类模板耗时" + (Date.now() - t));
+                console.log("支付派生类模板耗时" + (Date.now() - t));
                 let s = `${this.host}/ali.html?no=${oid}`;
                 resolve(res || { code: 1, payurl: s, sysorderno: oid, orderno: params.orderId });
             }
             catch (e) {
-                console.log("支付派生类模板异常", e);
+                console.error("支付派生类模板异常", e);
                 this.rollback(params, account?.payAccount, account?.merchant, oid);
                 if ((0, lodash_1.isNaN)(e)) {
                     reject(61100);
                     return;
+                }
+                else if (e == 61102) {
+                    try {
+                        let tempOrder = new top_entity_1.TopOrder();
+                        tempOrder.SysUser = null;
+                        tempOrder.amount = params.amount;
+                        tempOrder.mid = Number(params.merId);
+                        tempOrder.oid = oid;
+                        tempOrder.mOid = params.orderId;
+                        tempOrder.mIp = params.ip;
+                        tempOrder.mNotifyUrl = params.notifyUrl;
+                        tempOrder.channel = params.subChannel;
+                        tempOrder.parentChannel = Number(params.channel);
+                        tempOrder.lOid = "zfb_DIRECT_无匹配支付宝账户";
+                        tempOrder.lRate = 0;
+                        tempOrder.pid = 0;
+                        tempOrder.status = -1;
+                        tempOrder.callback = 0;
+                        await this.entityManager.save(tempOrder);
+                    }
+                    catch (e) {
+                    }
                 }
                 reject(e);
             }
@@ -157,7 +202,6 @@ let ALiPayHandlerService = class ALiPayHandlerService {
                     .andWhere("user.balance >= :amount", { amount: params.amount })
                     .groupBy("user.id")
                     .getRawMany();
-                console.error(`流程0 执行是否有符合代充金额/支付宝账户,结果，耗时${Date.now() - t}`);
                 if (qb.length === 0) {
                     reject(61102);
                 }
@@ -202,7 +246,6 @@ let ALiPayHandlerService = class ALiPayHandlerService {
                     payUserQueue.push(nowUuid);
                     let userBalance = await this.proxyUserService.checkBalance(nowUuid.uuid, amount);
                     if (userBalance) {
-                        console.error(`流程1 按照轮流策略 从商家队列中取出一个商家，并从该商家提取一个可收款支付宝账户 耗时${Date.now() - t}`);
                         link = await this.findPayAccountAndUpdate(params, nowUuid, oid);
                     }
                 } while (!link);
@@ -220,69 +263,81 @@ let ALiPayHandlerService = class ALiPayHandlerService {
                 reject(e);
             }
             finally {
-                console.error("流程耗时" + (new Date().getTime() - t));
                 try {
                     await lock.release();
                 }
                 catch (e) {
-                    console.log("释放锁失败");
+                    console.error("释放锁失败");
                 }
             }
         });
     }
     findOrder(params, user) {
         return new Promise(async (resolve, reject) => {
-            console.log("执行指定用户查找代理订单");
             resolve(1);
         });
     }
     findPayAccountAndUpdate(params, user, oid) {
         return new Promise(async (resolve, reject) => {
             try {
-                let { amount, subChannel, merId } = params;
+                let { amount, subChannel, merId, nonceStr, desc } = params;
                 let { id, uuid } = user;
                 let rate = await this.channelService.getRateByChannelId(id, subChannel, uuid);
                 let rateAmount = amount * rate / 10000;
                 let l = await this.entityManager.findOne(sys_user_entity_1.default, { where: { id } });
-                let qb = await this.entityManager.transaction(async (entityManager) => {
-                    let account = await entityManager.createQueryBuilder(payaccount_entity_1.PayAccount, "payAccount")
-                        .leftJoin("payAccount.SysUser", "user")
-                        .select(["payAccount.id", "payAccount.name", "payAccount.cookies", "payAccount.uid"])
-                        .where("payAccount.open = 1")
-                        .andWhere("payAccount.status = 1")
-                        .andWhere("payAccount.rechargeLimit-payAccount.lockLimit >= :amount", { amount: params.amount })
-                        .andWhere("user.id = :id", { id })
-                        .orderBy("payAccount.weight", "DESC")
-                        .orderBy("payAccount.updatedAt", "ASC")
-                        .getOne();
-                    if (account) {
-                        await entityManager.query(`update pay_account set lockLimit = lockLimit + ${params.amount}, totalRecharge = totalRecharge + ${params.amount} where id = ${account.id}`);
-                        await entityManager.query(`update sys_user set balance = balance - ${rateAmount} where id = ${user.id}`);
-                        console.log(`流程2.1 执行指定用户查找符合的支付宝账户,${l.id}扣款前:${l.balance / 100},扣款后:${(l.balance - rateAmount) / 100}`);
+                let checkMode = await this.paramConfigService.findValueByKey(InerFace_1.PayMode.aLiPayCheckMode);
+                let qb;
+                if (nonceStr == "test" && desc != "0") {
+                    qb = await this.entityManager.transaction(async (entityManager) => {
+                        let account = await entityManager.createQueryBuilder(payaccount_entity_1.PayAccount, "payAccount")
+                            .select(["payAccount.id", "payAccount.name", "payAccount.cookies", "payAccount.uid", "payAccount.payMode"])
+                            .where("payAccount.id = :id", { id: desc })
+                            .getOne();
                         return account;
-                    }
-                    else {
-                        return null;
-                    }
-                });
+                    });
+                    resolve(Object.assign(qb, { realAmount: 100 }));
+                    return;
+                }
+                else {
+                    qb = await this.entityManager.transaction(async (entityManager) => {
+                        let account = await entityManager.createQueryBuilder(payaccount_entity_1.PayAccount, "payAccount")
+                            .leftJoinAndSelect("payAccount.SysUser", "user")
+                            .select(["payAccount.id", "payAccount.name", "payAccount.cookies", "payAccount.uid", "payAccount.payMode"])
+                            .where("payAccount.open = 1")
+                            .andWhere(checkMode == "1" ? "1=1" : "payAccount.status = 1")
+                            .andWhere("payAccount.rechargeLimit-payAccount.lockLimit >= :amount", { amount: params.amount })
+                            .andWhere("user.id = :id", { id })
+                            .orderBy("payAccount.weight", "DESC")
+                            .orderBy("payAccount.updatedAt", "ASC")
+                            .getOne();
+                        if (account) {
+                            await entityManager.query(`update pay_account set lockLimit = lockLimit + ${params.amount}, totalRecharge = totalRecharge + ${params.amount} where id = ${account.id}`);
+                            await entityManager.query(`update sys_user set balance = balance - ${rateAmount} where id = ${user.id}`);
+                            return account;
+                        }
+                        else {
+                            return null;
+                        }
+                    });
+                }
                 if (qb) {
                     let isOk = await this.redisService.getRedis().get(`cache:status:${qb.uid}`);
-                    if (isOk && isOk == "1") {
+                    if (checkMode == "1" || (isOk && isOk == "1")) {
                         let random = 1;
                         let realAmount;
                         let is;
-                        let i = 0;
+                        let i = 1;
                         do {
-                            realAmount = amount - random;
+                            realAmount = amount - i;
                             is = await this.redisService.getRedis().get(`realAmount:${qb.uid}:${realAmount.toString()}`);
                             i++;
-                            if (1 > 50 || realAmount <= 0) {
+                            if (i > 50) {
                                 break;
                             }
-                            random = random + i;
                         } while (is);
-                        if (i > 50 || realAmount <= 0) {
+                        if (i > 50) {
                             resolve(null);
+                            return;
                         }
                         else {
                             let log = new sys_balance_entity_1.SysBalanceLog();
@@ -294,13 +349,16 @@ let ALiPayHandlerService = class ALiPayHandlerService {
                             log.orderUuid = oid;
                             log.balance = l.balance - rateAmount;
                             await this.entityManager.save(log);
-                            await this.redisService.getRedis().set(`realAmount:${qb.uid}:${realAmount}`, "1", "EX", "600");
+                            await this.redisService.getRedis().set(`realAmount:${qb.uid}:${realAmount}`, "1", "EX", "360");
                             resolve(Object.assign(qb, { realAmount: realAmount }));
                             return;
                         }
                     }
                     else {
+                        this.adminWSService.noticeUserToLogout(id, qb.name);
                         await this.entityManager.update(payaccount_entity_1.PayAccount, { id: qb.id }, { open: false, status: false });
+                        resolve(null);
+                        return;
                     }
                 }
                 resolve(qb);
@@ -313,7 +371,6 @@ let ALiPayHandlerService = class ALiPayHandlerService {
     getApiUrl(params) {
         return new Promise(async (resolve, reject) => {
             try {
-                console.log("执行获取第三方API平台拉取链接");
                 resolve();
             }
             catch (e) {
@@ -324,7 +381,6 @@ let ALiPayHandlerService = class ALiPayHandlerService {
     createOrder(params, account, oid) {
         return new Promise(async (resolve, reject) => {
             let time = await this.paramConfigService.findValueByKey("orderOutTime");
-            console.log("流程3 执行创建订单,订单超时设定:" + (Number(time) + this.defaultSystemOutTime) * 1000);
             let { merchant, payAccount } = account;
             let { amount, merId, channel, subChannel, orderId, ip, notifyUrl, orderAmt } = params;
             let rate = await this.channelService.getRateByChannelId(merchant.id, subChannel, merchant.uuid);
@@ -347,16 +403,38 @@ let ALiPayHandlerService = class ALiPayHandlerService {
                 order.lRate = rate;
                 order.pid = payAccount.id;
                 await this.entityManager.save(order);
-                let appUrl = `${this.host}/alipayu.html?orderid=${oid}`;
-                let qrcodeURL = encodeURIComponent(appUrl);
-                let schemeURL = encodeURIComponent(`alipays://platformapi/startapp?saId=10000007&clientVersion=3.7.0.0718&qrcode=${qrcodeURL}`);
-                let url = encodeURIComponent(`https://d.alipay.com/i/index.htm?pageSkin=skin-h5cashier&scheme=${schemeURL}`);
-                let urlFinal = `alipays://platformapi/startapp?appId=20000691&url=${url}`;
-                await this.redisService.getRedis().set(`orderClient:${oid}`, JSON.stringify(Object.assign(order, {
-                    url: urlFinal,
-                    qrcode: appUrl,
-                    outTime: new Date().getTime() + (Number(time) + this.defaultSystemOutTime) * 1000
-                })), "EX", Number(time) + this.defaultSystemOutTime);
+                let appUrl, urlFinal;
+                let qrCodeMode = await this.paramConfigService.findValueByKey("aLiPayQrCode");
+                if (qrCodeMode == "0") {
+                    appUrl = payAccount.payMode == 1 ? `${this.host}/alipayu1.html?orderid=${oid}` : `${this.host}/alipayu.html?orderid=${oid}`;
+                    let qrcodeURL = encodeURIComponent(appUrl);
+                    let schemeURL = encodeURIComponent(`alipays://platformapi/startapp?saId=10000007&clientVersion=3.7.0.0718&qrcode=${qrcodeURL}`);
+                    let url = encodeURIComponent(`https://d.alipay.com/i/index.htm?pageSkin=skin-h5cashier&scheme=${schemeURL}`);
+                    urlFinal = `alipays://platformapi/startapp?appId=20000691&url=${url}`;
+                    await this.redisService.getRedis().set(`orderClient:${oid}`, JSON.stringify(Object.assign(order, {
+                        url: urlFinal,
+                        qrcode: appUrl,
+                        outTime: new Date().getTime() + (Number(time) + this.defaultSystemOutTime) * 1000
+                    })), "EX", Number(time) + this.defaultSystemOutTime);
+                }
+                else if (qrCodeMode == "1") {
+                    let appUrl = "";
+                    let s = await this.entityManager.findOne(payaccount_entity_1.PayAccount, { where: { id: payAccount.id } });
+                    let amountList = s.mark.split(",");
+                    amountList.forEach((item) => {
+                        let amount = item.split("-")[0];
+                        if (amount == orderAmt || Number(amount) * 100 == params.amount) {
+                            appUrl = item.split("-")[1];
+                        }
+                    });
+                    let qrcodeURL = encodeURIComponent(appUrl);
+                    urlFinal = `alipays://platformapi/startapp?saId=10000007&clientVersion=3.7.0.0718&qrcode=${qrcodeURL}`;
+                    await this.redisService.getRedis().set(`orderClient:${oid}`, JSON.stringify(Object.assign(order, {
+                        url: urlFinal,
+                        qrcode: appUrl,
+                        outTime: new Date().getTime() + (Number(time) + this.defaultSystemOutTime) * 1000
+                    })), "EX", Number(time) + this.defaultSystemOutTime);
+                }
                 await this.redisService.getRedis().set(`order:${oid}`, JSON.stringify({
                     createAt: new Date().toLocaleString(),
                     req: params,
@@ -370,13 +448,29 @@ let ALiPayHandlerService = class ALiPayHandlerService {
                 resolve();
             }
             catch (e) {
+                if (e instanceof typeorm_2.QueryFailedError) {
+                    console.error("订单号重复");
+                    let tempOrder = new top_temp_entity_1.TopOrderTemp();
+                    tempOrder.SysUser = merchant;
+                    tempOrder.amount = amount;
+                    tempOrder.mid = Number(merId);
+                    tempOrder.oid = oid;
+                    tempOrder.mOid = orderId;
+                    tempOrder.mIp = ip;
+                    tempOrder.mNotifyUrl = notifyUrl;
+                    tempOrder.channel = subChannel;
+                    tempOrder.parentChannel = Number(channel);
+                    tempOrder.lOid = "zfb_DIRECT_" + account.payAccount.realAmount.toString();
+                    tempOrder.lRate = rate;
+                    tempOrder.pid = payAccount.id;
+                    await this.entityManager.save(tempOrder);
+                }
                 reject(61104);
             }
         });
     }
     rollback(params, resource, user, oid) {
         return new Promise(async (resolve, reject) => {
-            console.log("回滚");
             try {
                 if (resource) {
                     let order = await this.entityManager.findOne(top_entity_1.TopOrder, { where: { oid } });
@@ -388,12 +482,10 @@ let ALiPayHandlerService = class ALiPayHandlerService {
                     let amt = params.amount * rate / 10000;
                     let nowBalance;
                     await this.entityManager.transaction(async (entityManager) => {
-                        console.log("执行资源回滚");
                         await entityManager.query(`update pay_account set lockLimit = lockLimit - ${params.amount}, totalRecharge = totalRecharge - ${params.amount} where id = ${resource.id}`);
                         await entityManager.query(`update sys_user set balance = balance + ${params.amount * rate / 10000} where id = ${user.id}`);
                         let q = await entityManager.query(`select balance from sys_user where id = ${user.id}`);
                         nowBalance = q[0].balance;
-                        console.log("执行用户余额回滚,回滚后余额为" + nowBalance / 100);
                     });
                     if (nowBalance) {
                         let log = new sys_balance_entity_1.SysBalanceLog();
@@ -417,53 +509,42 @@ let ALiPayHandlerService = class ALiPayHandlerService {
     outTime(params) {
         return new Promise(async (resolve, reject) => {
             try {
+                if (!params)
+                    return;
                 let { order, resource, user, req, createAt, realAmount } = params;
-                console.log(`订单创建时间:${createAt},超时时间:${new Date().toLocaleString()},执行订单超时处理,订单号为${order.oid},资源为${resource.id},用户为${user.id}`);
-                let r = await this.checkOrderApi(params);
+                let checkMode = await this.paramConfigService.findValueByKey(InerFace_1.PayMode.aLiPayCheckMode);
+                let r = checkMode == "1" ? false : await this.checkOrderApi(params);
                 if (r) {
+                    await this.entityManager.update(top_entity_1.TopOrder, { oid: order.oid }, {
+                        status: 1
+                    });
                     let err;
+                    let body = {
+                        merId: order.mid,
+                        orderId: order.mOid,
+                        sysOrderId: order.oid,
+                        desc: "1",
+                        orderAmt: req.orderAmt,
+                        status: "1",
+                        nonceStr: this.util.generateRandomValue(8),
+                        attch: "1"
+                    };
                     try {
-                        let body = {
-                            merId: order.mid,
-                            orderId: order.mOid,
-                            sysOrderId: order.oid,
-                            desc: "",
-                            orderAmt: req.orderAmt,
-                            status: "1",
-                            nonceStr: this.util.generateRandomValue(8),
-                            attch: ""
-                        };
-                        let sign = this.util.ascesign(body, req.md5Key);
-                        body["sign"] = sign;
-                        let res = await this.util.requestPost(order.mNotifyUrl, body);
-                        console.log("回调结果", res);
-                        if (res == "success") {
-                            err = false;
-                        }
-                        else {
-                            err = JSON.stringify(res);
-                        }
+                        this.notifyRequest(order.mNotifyUrl, body, req.md5Key);
                     }
                     catch (e) {
-                        console.log("回调失败", e);
-                        common_1.Logger.error("回调失败" + JSON.stringify(e));
-                        err = e.toString();
                     }
-                    await this.entityManager.update(top_entity_1.TopOrder, { oid: order.oid }, {
-                        status: 1,
-                        callback: err ? 2 : 1,
-                        callbackInfo: err ? err : ""
-                    });
                 }
                 else {
-                    await this.rollback(req, resource, user, order.oid);
+                    if (order.mIp != "1.1.1.1")
+                        await this.rollback(req, resource, user, order.oid);
                     await this.redisService.getRedis().del(`realAmount:${resource.uid}:${realAmount}`);
                     await this.entityManager.update(top_entity_1.TopOrder, { oid: order.oid }, { status: -1 });
                 }
                 resolve();
             }
             catch (e) {
-                console.log("订单超时处理失败", e);
+                console.error("订单超时处理失败", e);
                 reject(e);
             }
         });
@@ -472,55 +553,58 @@ let ALiPayHandlerService = class ALiPayHandlerService {
         if (this.model == InerFace_1.ProcessModel.SERVICE)
             return Promise.resolve();
         return new Promise(async (resolve, reject) => {
+            let checkMode = await this.paramConfigService.findValueByKey(InerFace_1.PayMode.aLiPayCheckMode);
+            if (checkMode == "1") {
+                let orders = await this.redisService.getRedis().smembers(this.redisOrderName);
+                if (orders.length == 0)
+                    return;
+                for (let i = 0; i < orders.length; i++) {
+                    let orderInfo = await this.redisService.getRedis().get(`orderClient:${orders[i]}`);
+                    let obj = await this.redisService.getRedis().get(`order:${orders[i]}`);
+                    let orderRedis = JSON.parse(obj);
+                    if (!orderInfo) {
+                        await this.outTime(orderRedis);
+                        await this.redisService.getRedis().srem(this.redisOrderName, orders[i]);
+                    }
+                }
+                resolve();
+                return;
+            }
             try {
                 let orders = await this.redisService.getRedis().smembers(this.redisOrderName);
                 if (orders.length == 0)
                     return;
                 for (let i = 0; i < orders.length; i++) {
-                    console.log(`正在处理订单${orders[i]}`);
                     let orderInfo = await this.redisService.getRedis().get(`orderClient:${orders[i]}`);
                     let obj = await this.redisService.getRedis().get(`order:${orders[i]}`);
                     let orderRedis = JSON.parse(obj);
                     if (!orderInfo) {
-                        this.outTime(orderRedis);
+                        await this.outTime(orderRedis);
                         await this.redisService.getRedis().srem(this.redisOrderName, orders[i]);
                     }
                     else {
                         let ishave = await this.checkOrderApi(orderRedis);
-                        console.log(`订单${orders[i]}是否到账:${ishave ? "是" : "否"}`);
                         if (ishave) {
                             let { order, resource, user, req, createAt, realAmount } = orderRedis;
+                            await this.entityManager.update(top_entity_1.TopOrder, { oid: orderRedis.order.oid }, {
+                                status: 1
+                            });
                             let err;
                             let body = {
                                 merId: order.mid,
                                 orderId: order.mOid,
                                 sysOrderId: order.oid,
-                                desc: "",
+                                desc: "1",
                                 orderAmt: req.orderAmt,
                                 status: "1",
                                 nonceStr: this.util.generateRandomValue(8),
-                                attch: ""
+                                attch: "1"
                             };
-                            let sign = this.util.ascesign(body, req.md5Key);
-                            body["sign"] = sign;
                             try {
-                                let res = await this.util.requestPost(order.mNotifyUrl, body);
-                                console.log("回调结果", res);
-                                if (res == "success") {
-                                    err = false;
-                                }
-                                else {
-                                    err = JSON.stringify(res);
-                                }
+                                this.notifyRequest(order.mNotifyUrl, body, req.md5Key);
                             }
                             catch (e) {
-                                err = e.toString();
                             }
-                            await this.entityManager.update(top_entity_1.TopOrder, { oid: orderRedis.order.oid }, {
-                                status: 1,
-                                callback: err ? 2 : 1,
-                                callbackInfo: err ? err : ""
-                            });
                             await this.redisService.getRedis().srem(this.redisOrderName, orders[i]);
                         }
                     }
@@ -534,27 +618,36 @@ let ALiPayHandlerService = class ALiPayHandlerService {
     }
     updateMerchant(params, user) {
         return new Promise(async (resolve, reject) => {
-            console.log("流程2.2 更新商家余额");
             await this.proxyUserService.updateBalance(user.uuid, params.amount, "sub");
             resolve();
         });
     }
     checkOrderApi(params) {
         return new Promise(async (resolve, reject) => {
+            let { req, order, resource, user, realAmount } = params;
+            resource = resource;
             try {
-                let { req, order, resource, user, realAmount } = params;
-                resource = resource;
-                let resultList = await this.redisService.getRedis().get(`order:result:${order.oid}`);
+                let resultList = await this.redisService.getRedis().get(`order:result:${resource.uid}`);
                 if (resultList) {
-                    console.log("使用缓存充值订单结果");
                     resultList = JSON.parse(resultList);
                     let ishave = false;
                     if (resultList.length > 0) {
-                        let real = realAmount / 100;
-                        for (let i = 0; i < resultList.length; i++) {
-                            if (resultList[i].tradeAmount == real.toString()) {
-                                ishave = true;
-                                break;
+                        let qrCodeMode = await this.paramConfigService.findValueByKey("aLiPayQrCode");
+                        if (qrCodeMode == "0") {
+                            let real = realAmount / 100;
+                            for (let i = 0; i < resultList.length; i++) {
+                                if (resultList[i].tradeAmount == real.toFixed(2)) {
+                                    ishave = true;
+                                    break;
+                                }
+                            }
+                        }
+                        else if (qrCodeMode == "1") {
+                            for (let i = 0; i < resultList.length; i++) {
+                                if (order.mOid == resultList[i].transMemo) {
+                                    ishave = true;
+                                    break;
+                                }
                             }
                         }
                     }
@@ -565,37 +658,50 @@ let ALiPayHandlerService = class ALiPayHandlerService {
                 if (is == "1") {
                     let cookies = await this.redisService.getRedis().get(`cache:cookies:${resource.uid}`);
                     let ctoken = cookies.split("ctoken=")[1].split(";")[0];
-                    let list = await this.requestApi(resource.uid, cookies, ctoken);
+                    let list = await this.requestApi(resource.uid, cookies, ctoken, resource.name, user.id);
                     let ishaves = false;
                     if (!list) {
                         resolve(false);
                         return;
                     }
+                    await this.redisService.getRedis().set(`order:result:${resource.uid}`, JSON.stringify(list), "EX", 20);
                     if (list.length > 0) {
-                        let real = realAmount / 100;
-                        for (let i = 0; i < list.length; i++) {
-                            if (list[i].tradeAmount == real.toString()) {
-                                ishaves = true;
-                                break;
+                        let qrCodeMode = await this.paramConfigService.findValueByKey("aLiPayQrCode");
+                        if (qrCodeMode == "0") {
+                            let real = realAmount / 100;
+                            for (let i = 0; i < list.length; i++) {
+                                if (list[i].tradeAmount == real.toFixed(2)) {
+                                    ishaves = true;
+                                    break;
+                                }
                             }
                         }
-                        await this.redisService.getRedis().set(`order:result:${order.oid}`, JSON.stringify(list), "EX", 15);
+                        else if (qrCodeMode == "1") {
+                            for (let i = 0; i < list.length; i++) {
+                                if (order.mOid == list[i].transMemo) {
+                                    ishaves = true;
+                                    break;
+                                }
+                            }
+                        }
                     }
                     resolve(ishaves);
                     return;
                 }
                 else {
+                    console.error(`aLiPay订单查单失败,${resource.id}-${resource.name}cookies失效`);
                     common_1.Logger.error(`aLiPay订单查单失败,${resource.id}-${resource.name}cookies失效`);
                     resolve(false);
                 }
             }
             catch (e) {
+                console.error("订单查单失败", e);
                 common_1.Logger.error("订单查单失败", e, "checkOrderApi");
                 resolve(false);
             }
         });
     }
-    requestApi(uid, cookies, ctoken) {
+    requestApi(uid, cookies, ctoken, name, id, accountType = 1) {
         return new Promise(async (resolve, reject) => {
             try {
                 let url = `https://mbillexprod.alipay.com/enterprise/fundAccountDetail.json?ctoken=${ctoken}&_output_charset=utf-8`;
@@ -607,7 +713,7 @@ let ALiPayHandlerService = class ALiPayHandlerService {
                 };
                 let data = {
                     billUserId: uid,
-                    startDateInput: (0, dayjs_1.default)().subtract(8, "minute").format("YYYY-MM-DD HH:mm:ss"),
+                    startDateInput: (0, dayjs_1.default)().subtract(4, "minute").add(40, "seconds").format("YYYY-MM-DD HH:mm:ss"),
                     endDateInput: (0, dayjs_1.default)().format("YYYY-MM-DD HH:mm:ss"),
                     pageNum: "1",
                     pageSize: "100",
@@ -619,19 +725,34 @@ let ALiPayHandlerService = class ALiPayHandlerService {
                     accountType: "",
                     _input_charset: "gbk"
                 };
-                let res = await this.util.requestPost(url, data, headers);
+                if (accountType == 0) {
+                }
+                let isproxy = await this.paramConfigService.findValueByKey("isProxy");
+                let p = false;
+                if (isproxy == "1") {
+                    p = `socks://socks5:socks5@45.89.230.134:5555`;
+                }
+                let res = await this.util.requestPost(url, data, headers, p);
                 if (res.stat == "deny") {
-                    common_1.Logger.error(`aLiPay订单查单失败,${uid}===cookies失效`);
+                    console.error(`aLiPay订单查单失败,${uid}|${name} =>  cookies失效`);
+                    common_1.Logger.error(`aLiPay订单查单失败,${uid}|${name} => cookies失效`);
+                    this.adminWSService.noticeUserToLogout(id, name);
                     await this.redisService.getRedis().set(`cache:status:${uid}`, "0");
                     resolve(false);
                     return;
                 }
                 if (res.status == "failed") {
+                    console.error(`${uid}|${name} => aLiPay订单查单失败,频繁等待90秒`);
+                    this.adminWSService.noticeUserToLogout(id, name);
+                    await this.redisService.getRedis().set(`order:result:${uid}`, JSON.stringify([]), "EX", 90);
                     resolve(false);
                     return;
                 }
                 else {
                     if (res.result?.detail) {
+                        let r = await this.paramConfigService.findValueByKey("devLog");
+                        if (r == "1")
+                            console.log(`${uid}|${name} => aLiPay订单查单成功`, res.result?.detail);
                         resolve(res.result?.detail);
                         return;
                     }
@@ -639,7 +760,9 @@ let ALiPayHandlerService = class ALiPayHandlerService {
                 resolve(false);
             }
             catch (e) {
-                console.error(e.toString());
+                console.error(`查单失败${uid}|${name}请求超时` + "requestApi" + e.toString());
+                await this.redisService.getRedis().set(`order:result:${uid}`, JSON.stringify([]), "EX", 20);
+                common_1.Logger.error(e);
                 resolve(false);
             }
         });
@@ -647,7 +770,6 @@ let ALiPayHandlerService = class ALiPayHandlerService {
     checkOrderBySql(orderRedis) {
         return new Promise(async (resolve, reject) => {
             let order = await this.entityManager.findOne(top_entity_1.TopOrder, { where: { oid: orderRedis.order.oid } });
-            console.log(order.status);
             if (order && (order.status == 1 || order.status == 3 || order.status == 4)) {
                 resolve(true);
             }
@@ -657,6 +779,126 @@ let ALiPayHandlerService = class ALiPayHandlerService {
             else if (order && order.status == 2) {
                 let res = await this.checkOrderApi(orderRedis);
                 resolve(res);
+            }
+        });
+    }
+    async notifyRequest(url, notify, yan, time = 5, times = 3000) {
+        let sign = this.util.ascesign(notify, yan);
+        let form = JSON.stringify(notify);
+        form = JSON.parse(form);
+        form["sign"] = sign;
+        let that = this;
+        try {
+            this.retry(that.reqCallback, time, url, form, times).then(res => {
+                this.entityManager.update(top_entity_1.TopOrder, { oid: notify.sysOrderId }, {
+                    callback: 1,
+                    callbackInfo: "回调成功"
+                });
+            }).catch(e => {
+                this.entityManager.update(top_entity_1.TopOrder, { oid: notify.sysOrderId }, {
+                    callback: 2,
+                    callbackInfo: e.msg
+                });
+            });
+        }
+        catch (e) {
+        }
+    }
+    retry(fn, times, url, form, time) {
+        return new Promise((res, rej) => {
+            const attempt = (fn, url, form) => {
+                fn(url, form).then(res).catch(async (error) => {
+                    await this.util.sleep(time);
+                    times-- > 0 ? attempt(fn, url, form) : rej(error);
+                });
+            };
+            attempt(fn, url, form);
+        });
+    }
+    ;
+    reqCallback(url, form) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                let r = await REQ.post({ url: url, form: form });
+                console.log(form.orderId + "回调结果", r);
+                if (r && r === "success") {
+                    resolve({
+                        result: true,
+                        msg: ""
+                    });
+                }
+                reject({
+                    result: false,
+                    msg: r
+                });
+            }
+            catch (error) {
+                reject({
+                    result: false,
+                    msg: error.toString().substring(0, 30)
+                });
+            }
+        });
+    }
+    async test() {
+        this.adminWSService.noticeUserToLogout(1, "测试");
+        return;
+        let zfbList = await this.entityManager.find(payaccount_entity_1.PayAccount);
+        for (let i = 0; i < zfbList.length; i++) {
+            let cookies = await this.redisService.getRedis().get(`cache:cookies:${zfbList[i].uid}`);
+            if (cookies) {
+                let ctoken = cookies.split("ctoken=")[1].split(";")[0];
+                this.requestApi(zfbList[i].uid, cookies, ctoken, zfbList[i].name, 1);
+            }
+        }
+    }
+    autoCallback(params, p) {
+        return new Promise(async (resolve, reject) => {
+            let orders = await this.redisService.getRedis().smembers(this.redisOrderName);
+            let { type, no, money, mark, dt, idnumber, sign } = params;
+            let notifyMoney = Number(money) * 100;
+            if (orders.length == 0)
+                return;
+            let result = false;
+            try {
+                for (let i = 0; i < orders.length; i++) {
+                    let orderInfo = await this.redisService.getRedis().get(`orderClient:${orders[i]}`);
+                    if (orderInfo == null)
+                        continue;
+                    orderInfo = JSON.parse(orderInfo);
+                    console.log("通知金额", notifyMoney, "订单金额", orderInfo.amount, "通知pid", p.id, "订单pid", orderInfo.pid);
+                    if (notifyMoney == orderInfo.amount && orderInfo.pid == p.id) {
+                        await this.entityManager.update(top_entity_1.TopOrder, { oid: orders[i] }, { status: 1 });
+                        let obj = await this.redisService.getRedis().get(`order:${orders[i]}`);
+                        let orderRedis = JSON.parse(obj);
+                        let { order, resource, user, req, createAt, realAmount } = orderRedis;
+                        let body = {
+                            merId: order.mid,
+                            orderId: order.mOid,
+                            sysOrderId: order.oid,
+                            desc: "1",
+                            orderAmt: req.orderAmt,
+                            status: "1",
+                            nonceStr: this.util.generateRandomValue(8),
+                            attch: "1"
+                        };
+                        try {
+                            this.notifyRequest(order.mNotifyUrl, body, req.md5Key);
+                        }
+                        catch (e) {
+                            console.error("回调失败", e);
+                        }
+                        await this.redisService.getRedis().del(`order:${orders[i]}`);
+                        await this.redisService.getRedis().del(`orderClient:${orders[i]}`);
+                        await this.redisService.getRedis().srem(this.redisOrderName, orders[i]);
+                        result = true;
+                        break;
+                    }
+                }
+                resolve(result);
+            }
+            catch (e) {
+                resolve(false);
             }
         });
     }
@@ -676,7 +918,8 @@ ALiPayHandlerService = __decorate([
         top_service_1.TopService,
         proxy_service_1.ProxyService, Object, param_config_service_1.SysParamConfigService,
         channel_service_1.ChannelService,
-        util_service_1.UtilService])
+        util_service_1.UtilService,
+        admin_ws_service_1.AdminWSService])
 ], ALiPayHandlerService);
 exports.ALiPayHandlerService = ALiPayHandlerService;
 //# sourceMappingURL=aLiPayHandler.service.js.map

@@ -20,7 +20,7 @@ export declare class ApiController {
         orderAmt: string;
         nonceStr: string;
     }>;
-    getpayurl(body: any): Promise<{
+    getpayurl(body: any, req: any): Promise<{
         code: number;
         price?: undefined;
         orderid?: undefined;
@@ -32,6 +32,8 @@ export declare class ApiController {
         url?: undefined;
         qrcode?: undefined;
         outTime?: undefined;
+        mode?: undefined;
+        mOid?: undefined;
     } | {
         code: number;
         price: string;
@@ -44,6 +46,8 @@ export declare class ApiController {
         url?: undefined;
         qrcode?: undefined;
         outTime?: undefined;
+        mode?: undefined;
+        mOid?: undefined;
     } | {
         code: number;
         msg: string;
@@ -56,12 +60,16 @@ export declare class ApiController {
         url?: undefined;
         qrcode?: undefined;
         outTime?: undefined;
+        mode?: undefined;
+        mOid?: undefined;
     } | {
         code: number;
         msg: string;
         url: any;
         qrcode: any;
         outTime: any;
+        mode: string;
+        mOid: string;
         price?: undefined;
         orderid?: undefined;
         userid?: undefined;
@@ -69,4 +77,6 @@ export declare class ApiController {
         showOrderid?: undefined;
         status?: undefined;
     }>;
+    alipayNotify(body: any, query: any): Promise<"success" | "fail">;
+    startcheck(query: any): Promise<void>;
 }

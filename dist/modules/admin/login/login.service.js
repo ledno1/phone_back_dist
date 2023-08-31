@@ -120,7 +120,6 @@ let LoginService = class LoginService {
         if (user.id === 1) {
             const oldToken = await this.getRedisTokenById(user.id);
             if (oldToken) {
-                this.logService.saveLoginLog(user.id, ip, ua);
                 return oldToken;
             }
         }
@@ -133,11 +132,10 @@ let LoginService = class LoginService {
             .set(`admin:passwordVersion:${user.id}`, 1);
         await this.redisService
             .getRedis()
-            .set(`admin:token:${user.id}`, jwtSign, "EX", 60 * 60 * 24);
+            .set(`admin:token:${user.id}`, jwtSign, "EX", 60 * 10);
         await this.redisService
             .getRedis()
             .set(`admin:perms:${user.id}`, JSON.stringify(perms));
-        await this.logService.saveLoginLog(user.id, ip, ua);
         return jwtSign;
     }
     async clearLoginStatus(uid) {

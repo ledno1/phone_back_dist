@@ -115,7 +115,7 @@ let ChannelService = class ChannelService {
         return "ok";
     }
     async edit(params, user) {
-        let { action, name, rate, id, expireTime, data, takeLinks } = params;
+        let { action, name, rate, id, expireTime, data, takeLinks, amountType } = params;
         let isPublic = null;
         if (data)
             isPublic = data.isPublic;
@@ -127,6 +127,7 @@ let ChannelService = class ChannelService {
             channel.rate = rate;
             channel.name = name;
             channel.expireTime = expireTime;
+            channel.amountType = amountType;
             if (takeLinks.length > 0) {
                 let takeLink = await this.takeLinkService.getManyByIds(takeLinks);
                 channel.takeLinks = takeLink;
@@ -162,7 +163,7 @@ let ChannelService = class ChannelService {
     }
     async proxyChargingChannel() {
         let id = await this.channelRepository.createQueryBuilder("channel")
-            .andWhere("channel.name = '话费支付'")
+            .andWhere("channel.name = '支付宝支付'")
             .getOne();
         console.log(id);
         let qb = await this.channelRepository.createQueryBuilder("channel")

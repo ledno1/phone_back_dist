@@ -62,7 +62,7 @@ __decorate([
     __metadata("design:type", Number)
 ], ProxyCharging.prototype, "status", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: "boolean", comment: "链接创建状态", default: false }),
+    (0, typeorm_1.Column)({ type: "boolean", comment: "产码状态", default: false }),
     __metadata("design:type", Boolean)
 ], ProxyCharging.prototype, "createStatus", void 0);
 __decorate([
@@ -70,7 +70,7 @@ __decorate([
     __metadata("design:type", String)
 ], ProxyCharging.prototype, "errInfo", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: "varchar", length: 64, comment: "话单订单号", unique: true }),
+    (0, typeorm_1.Column)({ type: "varchar", length: 64, comment: "代充订单topOrder订单号", unique: true }),
     __metadata("design:type", String)
 ], ProxyCharging.prototype, "pOid", void 0);
 __decorate([
@@ -82,32 +82,32 @@ __decorate([
     __metadata("design:type", String)
 ], ProxyCharging.prototype, "mOid", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'int', comment: "乐观锁", default: 0 }),
+    (0, typeorm_1.Column)({ type: "int", comment: "乐观锁", default: 0 }),
     __metadata("design:type", Number)
 ], ProxyCharging.prototype, "version", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'int', comment: "权重,即优先级,默认0 快充 慢充 加急为 100", default: 0 }),
+    (0, typeorm_1.Column)({ type: "int", comment: "权重,即优先级,默认0 快充 慢充 加急为 100", default: 0 }),
     __metadata("design:type", Number)
 ], ProxyCharging.prototype, "weight", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'boolean', comment: "锁定状态", default: false }),
+    (0, typeorm_1.Column)({ type: "boolean", comment: "锁定状态", default: false }),
     __metadata("design:type", Boolean)
 ], ProxyCharging.prototype, "lock", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'int', comment: "拉单次数", default: 0 }),
+    (0, typeorm_1.Column)({ type: "int", comment: "拉单次数", default: 0 }),
     __metadata("design:type", Number)
 ], ProxyCharging.prototype, "count", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'boolean', comment: "关闭状态", default: false }),
+    (0, typeorm_1.Column)({ type: "boolean", comment: "关闭状态", default: false }),
     __metadata("design:type", Boolean)
 ], ProxyCharging.prototype, "isClose", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'datetime', comment: "超时时间", default: () => "CURRENT_TIMESTAMP" }),
+    (0, typeorm_1.Column)({ type: "datetime", comment: "超时时间", default: () => "CURRENT_TIMESTAMP" }),
     (0, swagger_1.ApiProperty)(),
     __metadata("design:type", Date)
 ], ProxyCharging.prototype, "outTime", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'varchar', comment: "运营商(省,市)" }),
+    (0, typeorm_1.Column)({ type: "varchar", comment: "运营商(省,市)" }),
     __metadata("design:type", String)
 ], ProxyCharging.prototype, "operator", void 0);
 __decorate([
@@ -128,7 +128,7 @@ __decorate([
 ], ProxyCharging.prototype, "lRate", void 0);
 __decorate([
     (0, typeorm_1.ManyToOne)(type => sys_user_entity_1.default, sysUser => sysUser.topOrder, {
-        createForeignKeyConstraints: false,
+        createForeignKeyConstraints: false
     }),
     __metadata("design:type", sys_user_entity_1.default)
 ], ProxyCharging.prototype, "SysUser", void 0);

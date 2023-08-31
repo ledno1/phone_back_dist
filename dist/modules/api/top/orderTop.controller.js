@@ -16,6 +16,7 @@ exports.OrderTopController = void 0;
 const common_1 = require("@nestjs/common");
 const orderTop_service_1 = require("./orderTop.service");
 const admin_user_decorator_1 = require("../../admin/core/decorators/admin-user.decorator");
+const authorize_decorator_1 = require("../../admin/core/decorators/authorize.decorator");
 let OrderTopController = class OrderTopController {
     topService;
     constructor(topService) {
@@ -26,6 +27,9 @@ let OrderTopController = class OrderTopController {
     }
     callback(body, user) {
         return this.topService.callback(body, user);
+    }
+    statistic(query, user) {
+        return this.topService.statistic(query);
     }
 };
 __decorate([
@@ -44,6 +48,15 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", void 0)
 ], OrderTopController.prototype, "callback", null);
+__decorate([
+    (0, authorize_decorator_1.Authorize)(),
+    (0, common_1.Get)('statistic'),
+    __param(0, (0, common_1.Query)()),
+    __param(1, (0, admin_user_decorator_1.AdminUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", void 0)
+], OrderTopController.prototype, "statistic", null);
 OrderTopController = __decorate([
     (0, common_1.Controller)('/order/toporder'),
     __metadata("design:paramtypes", [orderTop_service_1.OrderTopService])

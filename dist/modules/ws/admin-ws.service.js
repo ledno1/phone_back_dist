@@ -68,18 +68,27 @@ let AdminWSService = class AdminWSService {
     }
     async noticeUserToUpdateMenusByMenuIds(menuIds) {
         const roleMenus = await this.roleMenuRepository.find({
-            where: { menuId: (0, typeorm_2.In)(menuIds) },
+            where: { menuId: (0, typeorm_2.In)(menuIds) }
         });
         const roleIds = roleMenus.map((n) => n.roleId);
         await this.noticeUserToUpdateMenusByRoleIds(roleIds);
     }
     async noticeUserToUpdateMenusByRoleIds(roleIds) {
         const users = await this.userRoleRepository.find({
-            where: { roleId: (0, typeorm_2.In)(roleIds) },
+            where: { roleId: (0, typeorm_2.In)(roleIds) }
         });
         if (users) {
             const userIds = users.map((n) => n.userId);
             await this.noticeUserToUpdateMenusByUserIds(userIds);
+        }
+    }
+    async noticeUserToLogout(id, name) {
+        let i = [id, 1];
+        let sid = await this.filterSocketIdByUidArr(i);
+        if (sid) {
+            this.adminWsGateWay.socketServer
+                .to(sid.map((n) => n.id))
+                .emit(ws_event_1.ACCOUNT_COOKIES_INVALID, name);
         }
     }
 };

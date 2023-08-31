@@ -4,15 +4,15 @@ export declare class PayAccountController {
     private readonly zhService;
     constructor(zhService: PayAccountService);
     findOne(query: any, user: IAdminUser): Promise<1 | {
-        list: any[];
+        list: any;
         pagination: {
-            total: number;
+            total: any;
             page: number;
             size: number;
         };
     }>;
     del(body: any, user: IAdminUser): Promise<void>;
-    add(body: any, user: IAdminUser): Promise<1 | 0 | {
+    add(body: any, user: IAdminUser): Promise<0 | 1 | {
         image: any;
         id: any;
         cookies?: undefined;
@@ -28,5 +28,13 @@ export declare class PayAccountController {
         id?: undefined;
         uid?: undefined;
     }>;
-    edit(body: any, user: IAdminUser): Promise<void>;
+    edit(body: any, user: IAdminUser): Promise<{
+        code: number;
+        msg: string;
+        address?: undefined;
+    } | {
+        code: number;
+        address: string;
+        msg?: undefined;
+    }>;
 }

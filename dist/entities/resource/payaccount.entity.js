@@ -26,6 +26,8 @@ let PayAccount = class PayAccount extends base_entity_1.BaseEntity {
     rechargeLimit;
     lockLimit;
     totalRecharge;
+    payMode;
+    accountType;
     open;
     status;
     weight;
@@ -52,7 +54,7 @@ __decorate([
     __metadata("design:type", String)
 ], PayAccount.prototype, "cookies", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'varchar', length: 30, comment: "备注", nullable: true }),
+    (0, typeorm_1.Column)({ type: 'varchar', length: 1024, comment: "备注", nullable: true }),
     __metadata("design:type", String)
 ], PayAccount.prototype, "mark", void 0);
 __decorate([
@@ -67,6 +69,14 @@ __decorate([
     (0, typeorm_1.Column)({ type: 'int', comment: "充值总额", default: 0 }),
     __metadata("design:type", Number)
 ], PayAccount.prototype, "totalRecharge", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'int', comment: "付款模式 0自定义金额 1二维码固定金额", default: 1 }),
+    __metadata("design:type", Number)
+], PayAccount.prototype, "payMode", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'int', comment: "付款模式 0个人码 1企业码", default: 1 }),
+    __metadata("design:type", Number)
+], PayAccount.prototype, "accountType", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: 'boolean', comment: "是否开启充值", default: true }),
     __metadata("design:type", Boolean)

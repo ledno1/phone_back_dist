@@ -2,7 +2,7 @@ import { OnModuleInit } from "@nestjs/common";
 import { EntityManager } from "typeorm";
 import { RedisService } from "@/shared/services/redis.service";
 import { UtilService } from "@/shared/services/util.service";
-import { PayResponse, SysPay } from "@/modules/api/APIInterFace/interface";
+import { ALiPayNotify, PayResponse, SysPay } from "@/modules/api/APIInterFace/interface";
 import { ChannelType, HaveAmount, OrderRedis, PayAccountAndMerchant, PayAccountEx, ProcessModel, ServiceHandler } from "@/modules/api/subHandler/InerFace";
 import { TopService } from "@/modules/usersys/top/top.service";
 import { ProxyService } from "@/modules/usersys/proxy/proxy.service";
@@ -11,6 +11,8 @@ import { PayAccount } from "@/entities/resource/payaccount.entity";
 import { TopOrder } from "@/entities/order/top.entity";
 import { SysParamConfigService } from "@/modules/admin/system/param-config/param-config.service";
 import { ChannelService } from "@/modules/resource/channel/channel.service";
+import { AdminWSService } from "@/modules/ws/admin-ws.service";
+import { IAdminUser } from "@/modules/admin/admin.interface";
 export declare class TopOrderRedirect extends TopOrder {
     url: string;
 }
@@ -23,7 +25,8 @@ export declare class ALiPayHandlerService implements ServiceHandler, OnModuleIni
     private paramConfigService;
     private channelService;
     private util;
-    constructor(redisService: RedisService, entityManager: EntityManager, topUserService: TopService, proxyUserService: ProxyService, orderQueue: Queue, paramConfigService: SysParamConfigService, channelService: ChannelService, util: UtilService);
+    private adminWSService;
+    constructor(redisService: RedisService, entityManager: EntityManager, topUserService: TopService, proxyUserService: ProxyService, orderQueue: Queue, paramConfigService: SysParamConfigService, channelService: ChannelService, util: UtilService, adminWSService: AdminWSService);
     onModuleInit(): Promise<void>;
     model: ProcessModel;
     defaultSystemOutTime: number;
@@ -34,7 +37,7 @@ export declare class ALiPayHandlerService implements ServiceHandler, OnModuleIni
     redisOrderName: string;
     channelType: ChannelType;
     nameKey: string;
-    result(params: SysPay): Promise<PayResponse>;
+    result(params: SysPay, userinfo: IAdminUser): Promise<PayResponse>;
     haveAmount(params: SysPay): Promise<HaveAmount[]>;
     findMerchant(params: SysPay, payUserQueue: HaveAmount[], oid: string): Promise<PayAccountAndMerchant | null>;
     findOrder(params: SysPay, user: HaveAmount): Promise<any>;
@@ -46,6 +49,11 @@ export declare class ALiPayHandlerService implements ServiceHandler, OnModuleIni
     checkOrder(params: SysPay): Promise<void>;
     updateMerchant(params: SysPay, user: HaveAmount): Promise<void>;
     checkOrderApi(params: OrderRedis): Promise<boolean>;
-    requestApi(uid: string, cookies: string, ctoken: string): Promise<boolean | Array<any>>;
+    requestApi(uid: string, cookies: string, ctoken: string, name: string, id: number, accountType?: number): Promise<boolean | Array<any>>;
     checkOrderBySql(orderRedis: OrderRedis): Promise<boolean>;
+    notifyRequest(url: any, notify: any, yan: string, time?: number, times?: number): Promise<void>;
+    retry(fn: any, times: any, url: any, form: any, time: any): Promise<unknown>;
+    reqCallback(url: string, form: any): Promise<unknown>;
+    test(): Promise<void>;
+    autoCallback(params: ALiPayNotify, p: PayAccount): Promise<any>;
 }

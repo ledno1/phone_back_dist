@@ -139,6 +139,12 @@ let PhoneHandlerService = class PhoneHandlerService {
     outTime(params) {
         return Promise.resolve(undefined);
     }
+    test() {
+        return Promise.resolve(undefined);
+    }
+    autoCallback(params, p) {
+        return Promise.resolve(undefined);
+    }
 };
 PhoneHandlerService = __decorate([
     (0, common_1.Injectable)(),

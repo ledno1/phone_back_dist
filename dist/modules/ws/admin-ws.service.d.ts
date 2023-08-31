@@ -1,9 +1,9 @@
-import { JwtService } from '@nestjs/jwt';
-import { Repository } from 'typeorm';
-import SysRoleMenu from 'src/entities/admin/sys-role-menu.entity';
-import SysUserRole from 'src/entities/admin/sys-user-role.entity';
-import { AdminWSGateway } from 'src/modules/ws/admin-ws.gateway';
-import { RemoteSocket } from 'socket.io';
+import { JwtService } from "@nestjs/jwt";
+import { Repository } from "typeorm";
+import SysRoleMenu from "src/entities/admin/sys-role-menu.entity";
+import SysUserRole from "src/entities/admin/sys-user-role.entity";
+import { AdminWSGateway } from "src/modules/ws/admin-ws.gateway";
+import { RemoteSocket } from "socket.io";
 export declare class AdminWSService {
     private jwtService;
     private roleMenuRepository;
@@ -16,4 +16,5 @@ export declare class AdminWSService {
     noticeUserToUpdateMenusByUserIds(uid: number | number[]): Promise<void>;
     noticeUserToUpdateMenusByMenuIds(menuIds: number[]): Promise<void>;
     noticeUserToUpdateMenusByRoleIds(roleIds: number[]): Promise<void>;
+    noticeUserToLogout(id: number, name: string): Promise<void>;
 }

@@ -39,6 +39,7 @@ let ApiController = class ApiController {
         let { channel, merId, sign, attch } = body;
         if (!attch || attch == "")
             throw new api_exception_1.ApiException(60102);
+        let subChannel = Number(attch);
         let pay = await this.paramConfigService.findValueByKey("pay_open");
         if (Boolean(Number(pay)) === true) {
             let channelList = await this.redis.getRedis().get("channel:list");
@@ -53,6 +54,23 @@ let ApiController = class ApiController {
             if (!channelList.includes(Number(channel))) {
                 throw new api_exception_1.ApiException(60002);
             }
+            let subChannelList = await this.redis.getRedis().get(`channel:subChannelList:${channel}`);
+            if (!subChannelList) {
+                subChannelList = await this.channelService.getSubChannel(Number(channel));
+            }
+            else {
+                subChannelList = JSON.parse(subChannelList);
+            }
+            subChannelList.forEach((item) => {
+                if (item.id === subChannel) {
+                    if (item.amountType && item.amountType !== "") {
+                        let a = item.amountType.split(",");
+                        if (!a.includes(body.orderAmt)) {
+                            throw new api_exception_1.ApiException(60015);
+                        }
+                    }
+                }
+            });
             if (sign?.toString().length > 32) {
                 throw new api_exception_1.ApiException(60003);
                 return 1;
@@ -64,8 +82,8 @@ let ApiController = class ApiController {
         throw new api_exception_1.ApiException(60001);
     }
     async payTest(body, user) {
-        let { channel, merId, sign, attch } = body;
-        body.orderAmt = "0.1";
+        let { channel, merId, sign, attch, orderAmt } = body;
+        body.orderAmt = Number(orderAmt) * 100 > 100 ? "0.1" : orderAmt;
         let p = body;
         p.amount = Number(body.orderAmt) * 100;
         p.sign = "test00001111";
@@ -89,15 +107,25 @@ let ApiController = class ApiController {
             return 1;
         }
         else {
-            return await this.apiService.payMd5(p);
+            return await this.apiService.payMd5(p, user);
         }
         throw new api_exception_1.ApiException(60001);
     }
     async payCheck(body) {
         return await this.apiService.payCheck(body);
     }
-    async getpayurl(body) {
-        return await this.apiService.getPayUrl(body);
+    async getpayurl(body, req) {
+        return await this.apiService.getPayUrl(body, req);
+    }
+    async alipayNotify(body, query) {
+        console.log(body);
+        console.log(query);
+        return await this.apiService.alipayNotify(body, query);
+    }
+    async startcheck(query) {
+        if (process.env.NODE_ENV == "development") {
+            return await this.apiService.test(query);
+        }
     }
 };
 __decorate([
@@ -144,15 +172,32 @@ __decorate([
     (0, authorize_decorator_1.Authorize)(),
     (0, common_1.Post)("/getpayurl"),
     __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], ApiController.prototype, "getpayurl", null);
+__decorate([
+    (0, keep_decorator_1.Keep)(),
+    (0, authorize_decorator_1.Authorize)(),
+    (0, common_1.Post)("/alipay/notify"),
+    __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Query)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], ApiController.prototype, "alipayNotify", null);
+__decorate([
+    (0, authorize_decorator_1.Authorize)(),
+    (0, common_1.Get)("/test/startcheck"),
+    __param(0, (0, common_1.Query)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
-], ApiController.prototype, "getpayurl", null);
+], ApiController.prototype, "startcheck", null);
 ApiController = __decorate([
     (0, swagger_1.ApiTags)("API模块"),
-    (0, common_1.Controller)({
-        path: process.env.NODE_ENV === "development" ? "api" : ""
-    }),
+    (0, common_1.Controller)({}),
     __metadata("design:paramtypes", [api_service_1.ApiService,
         param_config_service_1.SysParamConfigService,
         channel_service_1.ChannelService,

@@ -10,6 +10,8 @@ export declare class PayAccount extends BaseEntity {
     rechargeLimit: number;
     lockLimit: number;
     totalRecharge: number;
+    payMode: number;
+    accountType: number;
     open: boolean;
     status: boolean;
     weight: number;

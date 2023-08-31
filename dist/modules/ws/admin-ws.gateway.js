@@ -38,22 +38,11 @@ let AdminWSGateway = class AdminWSGateway {
     async handleDisconnect(client) {
         client.broadcast.emit(ws_event_1.EVENT_OFFLINE);
     }
-    handleMessage(client, payload) {
-        console.log("msgToServer", payload);
-        console.log(client.id);
-        return 'Hello world!';
-    }
 };
 __decorate([
     (0, websockets_1.WebSocketServer)(),
     __metadata("design:type", socket_io_1.Server)
 ], AdminWSGateway.prototype, "wss", void 0);
-__decorate([
-    (0, websockets_1.SubscribeMessage)('msgToServer'),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [socket_io_1.Socket, Object]),
-    __metadata("design:returntype", String)
-], AdminWSGateway.prototype, "handleMessage", null);
 AdminWSGateway = __decorate([
     (0, websockets_1.WebSocketGateway)(),
     __metadata("design:paramtypes", [auth_service_1.AuthService])

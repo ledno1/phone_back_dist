@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.OrderRedis = exports.PayAccountEx = exports.PayAccountAndMerchant = exports.HaveAmount = exports.ProcessModel = exports.ChannelType = void 0;
+exports.OrderRedis = exports.PayAccountEx = exports.PayAccountAndMerchant = exports.HaveAmount = exports.PayMode = exports.ProcessModel = exports.ChannelType = void 0;
 const payaccount_entity_1 = require("../../../entities/resource/payaccount.entity");
 var ChannelType;
 (function (ChannelType) {
@@ -12,6 +12,10 @@ var ProcessModel;
     ProcessModel["SERVICE"] = "service";
     ProcessModel["CHECK"] = "check";
 })(ProcessModel = exports.ProcessModel || (exports.ProcessModel = {}));
+var PayMode;
+(function (PayMode) {
+    PayMode["aLiPayCheckMode"] = "aLiPayCheckMode";
+})(PayMode = exports.PayMode || (exports.PayMode = {}));
 class HaveAmount {
     username;
     id;

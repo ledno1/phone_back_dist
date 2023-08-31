@@ -6,6 +6,7 @@ export declare class TopOrder extends BaseEntity {
     amount: number;
     mid: number;
     status: number;
+    os: string;
     errInfo: string;
     pid: number;
     oid: string;

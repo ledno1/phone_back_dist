@@ -22,6 +22,7 @@ let TopOrder = class TopOrder extends base_entity_1.BaseEntity {
     amount;
     mid;
     status;
+    os;
     errInfo;
     pid;
     oid;
@@ -59,6 +60,10 @@ __decorate([
     }),
     __metadata("design:type", Number)
 ], TopOrder.prototype, "status", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: "varchar", length: 32, comment: "客户端访问网页收银台的设备系统类型", nullable: true }),
+    __metadata("design:type", String)
+], TopOrder.prototype, "os", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: "varchar", length: 64, comment: "订单出错事件", nullable: true }),
     __metadata("design:type", String)
