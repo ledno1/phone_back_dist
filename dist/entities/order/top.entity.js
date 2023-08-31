@@ -85,7 +85,7 @@ __decorate([
     __metadata("design:type", String)
 ], TopOrder.prototype, "mIp", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: "varchar", length: 256, comment: "上游平台回调地址" }),
+    (0, typeorm_1.Column)({ type: "varchar", length: 512, comment: "上游平台回调地址" }),
     __metadata("design:type", String)
 ], TopOrder.prototype, "mNotifyUrl", void 0);
 __decorate([
