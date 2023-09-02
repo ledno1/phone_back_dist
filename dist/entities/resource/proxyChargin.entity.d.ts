@@ -6,9 +6,10 @@ export declare class ProxyCharging extends BaseEntity {
     amount: number;
     pid: number;
     status: number;
+    codeCount: number;
     createStatus: boolean;
     errInfo: string;
-    pOid: string;
+    pUid: string;
     oid: string;
     mOid: string;
     version: number;

@@ -420,6 +420,11 @@ let ALiPayHandlerService = class ALiPayHandlerService {
                 else if (qrCodeMode == "1") {
                     let appUrl = "";
                     let s = await this.entityManager.findOne(payaccount_entity_1.PayAccount, { where: { id: payAccount.id } });
+                    if (!s.mark || s.mark == "") {
+                        console.error('该账号静态码为空');
+                        reject(61106);
+                        return;
+                    }
                     let amountList = s.mark.split(",");
                     amountList.forEach((item) => {
                         let amount = item.split("-")[0];
@@ -448,6 +453,7 @@ let ALiPayHandlerService = class ALiPayHandlerService {
                 resolve();
             }
             catch (e) {
+                console.log(e);
                 if (e instanceof typeorm_2.QueryFailedError) {
                     console.error("订单号重复");
                     let tempOrder = new top_temp_entity_1.TopOrderTemp();

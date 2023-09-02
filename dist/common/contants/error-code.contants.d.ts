@@ -58,6 +58,7 @@ export declare const ErrorCodeMap: {
     readonly 61102: "商家没有该指定金额订单";
     readonly 61103: "创建订单失败,请联系管理员";
     readonly 61104: "创建订单失败,请联系管理员";
+    readonly 61106: "静态码为空";
     readonly 60001: "暂停接单";
     readonly 60002: "没有该支付通道或通道关闭";
     readonly 60102: "必须指定子通道";

@@ -23,9 +23,10 @@ let ProxyCharging = class ProxyCharging extends base_entity_1.BaseEntity {
     amount;
     pid;
     status;
+    codeCount;
     createStatus;
     errInfo;
-    pOid;
+    pUid;
     oid;
     mOid;
     version;
@@ -46,7 +47,7 @@ __decorate([
     __metadata("design:type", Number)
 ], ProxyCharging.prototype, "id", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: "varchar", length: 64, comment: "目标号码" }),
+    (0, typeorm_1.Column)({ type: "varchar", length: 128, comment: "目标号码" }),
     __metadata("design:type", String)
 ], ProxyCharging.prototype, "target", void 0);
 __decorate([
@@ -62,19 +63,23 @@ __decorate([
     __metadata("design:type", Number)
 ], ProxyCharging.prototype, "status", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ type: "int", comment: "产码次数", default: 0 }),
+    __metadata("design:type", Number)
+], ProxyCharging.prototype, "codeCount", void 0);
+__decorate([
     (0, typeorm_1.Column)({ type: "boolean", comment: "产码状态", default: false }),
     __metadata("design:type", Boolean)
 ], ProxyCharging.prototype, "createStatus", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: "varchar", length: 64, comment: "订单出错事件", nullable: true }),
+    (0, typeorm_1.Column)({ type: "varchar", length: 256, comment: "订单出错事件", nullable: true }),
     __metadata("design:type", String)
 ], ProxyCharging.prototype, "errInfo", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: "varchar", length: 64, comment: "代充订单topOrder订单号", unique: true }),
+    (0, typeorm_1.Column)({ type: "varchar", length: 64, comment: "代充订单唯一号", unique: true }),
     __metadata("design:type", String)
-], ProxyCharging.prototype, "pOid", void 0);
+], ProxyCharging.prototype, "pUid", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: "varchar", length: 64, comment: "自身平台订单号,创建时为空", unique: true, nullable: true }),
+    (0, typeorm_1.Column)({ type: "varchar", length: 64, comment: "自身平台支付订单号,创建时为空", unique: true, nullable: true }),
     __metadata("design:type", String)
 ], ProxyCharging.prototype, "oid", void 0);
 __decorate([

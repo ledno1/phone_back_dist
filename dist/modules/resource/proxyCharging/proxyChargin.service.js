@@ -76,8 +76,8 @@ let ProxyChargingService = class ProxyChargingService {
             .leftJoin("channel", "channel", "channel.id = proxyCharging.channel")
             .select([
             "proxyCharging.id AS id", "proxyCharging.target AS target", "proxyCharging.pid AS pid", "proxyCharging.mOid AS mOid", "proxyCharging.oid AS oid", "proxyCharging.amount AS amount",
-            "proxyCharging.status AS status", "proxyCharging.callback AS callback", "proxyCharging.created_at AS createdAt", "proxyCharging.outTime AS outTime", "proxyCharging.pOid AS pOid",
-            "proxyCharging.operator AS operator"
+            "proxyCharging.status AS status", "proxyCharging.callback AS callback", "proxyCharging.created_at AS createdAt", "proxyCharging.outTime AS outTime", "proxyCharging.pUid AS pUid",
+            "proxyCharging.operator AS operator", "proxyCharging.weight AS weight", "proxyCharging.lock AS locking", "proxyCharging.isClose AS isClose"
         ])
             .addSelect("user.username AS pidName")
             .addSelect([
@@ -86,9 +86,9 @@ let ProxyChargingService = class ProxyChargingService {
             .where(user.roleLabel == "admin" ? "1=1" : "proxyCharging.sysUserId = :id", { id: user.id })
             .andWhere(oid ? "proxyCharging.oid = :oid" : "1=1", { oid })
             .andWhere(amount ? "proxyCharging.amount = :amount" : "1=1", { amount: !(0, lodash_1.isNaN)(amount) ? amount : null })
-            .andWhere(createdAt ? "DATE_FORMAT(proxyCharging.created_at,'%Y-%m-%d') >= :createdStart AND DATE_FORMAT(proxyCharging.created_at,'%Y-%m-%d') <= :createdEnd" : "1=1", {
-            createdStart: createdAt ? createdAt[0] : "",
-            createdEnd: createdAt ? createdAt[1] : ""
+            .andWhere(createdAt ? "proxyCharging.created_at BETWEEN :createdStart AND :createdEnd" : "1=1", {
+            createdStart: createdAt ? createdAt[0] : this.util.dayjsFormat(new Date()),
+            createdEnd: createdAt ? createdAt[1] : this.util.dayjsFormat(new Date())
         })
             .andWhere(channelName ? "channel.id = :channelName" : "1=1", { channelName })
             .andWhere(callback ? "proxyCharging.callback = :callback" : "1=1", { callback: callback })
@@ -108,7 +108,6 @@ let ProxyChargingService = class ProxyChargingService {
         };
     }
     async add(params, user) {
-        console.log(params);
         let { phone, amount, channel, operator } = params;
         if (params.link) {
         }
@@ -116,7 +115,6 @@ let ProxyChargingService = class ProxyChargingService {
             let channelInfo = await this.channelService.getChannelInfo(channel);
             await this.isProhibit(channelInfo.name, operator);
             let c = new proxyChargin_entity_1.ProxyCharging();
-            c.pOid = "P-" + this.util.generateUUIDSelf();
             c.parentChannel = channelInfo.parentId;
             c.pid = user.id;
             c.amount = Math.floor(Number(amount) * 100);
@@ -164,36 +162,42 @@ let ProxyChargingService = class ProxyChargingService {
         }
     }
     async edit(params, user) {
-        let { action, id, ids } = params;
-        if (id) {
-            let proxyChargingInfo = await this.proxyChargingRepository.findOne({ where: { id } });
+        let { action, ids, pUid } = params;
+        if (pUid) {
+            let obj = { pUid, pid: user.id };
+            user.roleLabel == "admin" ? delete obj.pid : null;
+            let proxyChargingInfo = await this.proxyChargingRepository.findOne({ where: obj });
+            if (!proxyChargingInfo)
+                return;
             switch (action) {
                 case "urgent":
-                    proxyChargingInfo.weight = 100;
+                    proxyChargingInfo.weight = proxyChargingInfo.weight == 100 ? 0 : 100;
                     break;
                 case "close":
                     proxyChargingInfo.isClose = true;
                     break;
                 case "lock":
-                    proxyChargingInfo.lock = true;
+                    proxyChargingInfo.lock = !proxyChargingInfo.lock;
                     break;
                 case "success":
                     proxyChargingInfo.status = 1;
                     break;
                 case "delete":
                     if (user.roleLabel == "admin") {
-                        await this.proxyChargingRepository.delete({ id });
+                        await this.proxyChargingRepository.delete(obj);
                     }
                     return "ok";
             }
             await this.proxyChargingRepository.save(proxyChargingInfo);
         }
         if (ids) {
-            let proxyChargingInfo = await this.proxyChargingRepository.find({ where: { id: (0, typeorm_2.In)(ids) } });
+            let obj = { pUid: (0, typeorm_2.In)(ids), pid: user.id };
+            user.roleLabel == "admin" ? delete obj.pid : null;
+            let proxyChargingInfo = await this.proxyChargingRepository.find({ where: obj });
             switch (action) {
                 case "urgent":
                     proxyChargingInfo.forEach((n) => {
-                        n.weight = 100;
+                        n.weight = n.weight == 100 ? 0 : 100;
                     });
                     break;
                 case "close":
@@ -203,7 +207,7 @@ let ProxyChargingService = class ProxyChargingService {
                     break;
                 case "lock":
                     proxyChargingInfo.forEach((n) => {
-                        n.lock = true;
+                        n.lock = !n.lock;
                     });
                     break;
                 case "success":
@@ -247,7 +251,13 @@ let ProxyChargingService = class ProxyChargingService {
     }
     async resetOnOutTime(id) {
         try {
-            await this.proxyChargingRepository.update({ id }, { status: 0, lock: false, oid: null, mOid: null, createStatus: false });
+            await this.proxyChargingRepository.update({ id }, {
+                status: 0,
+                lock: false,
+                oid: null,
+                mOid: null,
+                createStatus: false
+            });
         }
         catch (e) {
             console.error("话单过期,重置状态失败", e);

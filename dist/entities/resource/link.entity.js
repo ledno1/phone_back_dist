@@ -19,16 +19,29 @@ const zh_entity_1 = require("./zh.entity");
 const sys_user_entity_1 = __importDefault(require("../admin/sys-user.entity"));
 let Link = class Link extends base_entity_1.BaseEntity {
     id;
+    lUid;
     amount;
+    target;
+    parentChannel;
+    payMode;
+    useCount;
+    payStatus;
+    confirmStatus;
+    platformExpireTime;
+    placeIp;
+    proCode;
+    parseIp;
+    parseProCode;
+    buyerInfo;
+    ipInfo;
     mid;
     url;
     paymentStatus;
-    tid;
-    createStatus;
     oid;
+    createStatus;
+    gOid;
     lockTime;
     channel;
-    parentChannel;
     reuse;
     version;
     zh;
@@ -39,15 +52,71 @@ __decorate([
     __metadata("design:type", Number)
 ], Link.prototype, "id", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ type: "varchar", length: 64, comment: "支付码唯一号", unique: true }),
+    __metadata("design:type", String)
+], Link.prototype, "lUid", void 0);
+__decorate([
     (0, typeorm_1.Column)({ type: "int", comment: "充值金额,除100" }),
     __metadata("design:type", Number)
 ], Link.prototype, "amount", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: "varchar", length: 64, comment: "充值目标号码" }),
+    __metadata("design:type", String)
+], Link.prototype, "target", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: "int", comment: "父级支付通道id,支付渠道" }),
+    __metadata("design:type", Number)
+], Link.prototype, "parentChannel", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: "varchar", comment: "支付方式:h5跳转 等" }),
+    __metadata("design:type", String)
+], Link.prototype, "payMode", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: "int", comment: "使用次数", default: 0 }),
+    __metadata("design:type", Number)
+], Link.prototype, "useCount", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: "int", comment: "支付状态", default: 0 }),
+    __metadata("design:type", Number)
+], Link.prototype, "payStatus", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: "int", comment: "结算状态,是否回调到平台", default: 0 }),
+    __metadata("design:type", Number)
+], Link.prototype, "confirmStatus", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: "datetime", comment: "平台时效，支付码超时时间" }),
+    __metadata("design:type", Date)
+], Link.prototype, "platformExpireTime", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: "varchar", comment: "拉起支付时客户的ip" }),
+    __metadata("design:type", String)
+], Link.prototype, "placeIp", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: "varchar", comment: "拉起支付时客户的ip解析的省/市/区县代码" }),
+    __metadata("design:type", String)
+], Link.prototype, "proCode", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: "varchar", comment: "代理ip" }),
+    __metadata("design:type", String)
+], Link.prototype, "parseIp", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: "varchar", comment: "代理ip解析的省/市/区县代码" }),
+    __metadata("design:type", String)
+], Link.prototype, "parseProCode", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: "varchar", comment: "拉起代理的用户详细" }),
+    __metadata("design:type", String)
+], Link.prototype, "buyerInfo", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: "varchar", comment: "产码时使用的代理ip" }),
+    __metadata("design:type", String)
+], Link.prototype, "ipInfo", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: "int", comment: "提取的上游商家id 0则未提取", default: 0 }),
     __metadata("design:type", Number)
 ], Link.prototype, "mid", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: "varchar", length: 512 }),
+    (0, typeorm_1.Column)({ type: "varchar", length: 512, comment: "支付连接" }),
     __metadata("design:type", String)
 ], Link.prototype, "url", void 0);
 __decorate([
@@ -57,15 +126,15 @@ __decorate([
 __decorate([
     (0, typeorm_1.Column)({ type: "varchar", length: 64, comment: "自身系统订单号", nullable: true }),
     __metadata("design:type", String)
-], Link.prototype, "tid", void 0);
+], Link.prototype, "oid", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: "int", comment: "创建状态:-1创建失败,0未创建,1创建成功,2创建中", default: 1 }),
     __metadata("design:type", Number)
 ], Link.prototype, "createStatus", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: "varchar", length: 64, comment: "TX平台订单号", unique: true }),
+    (0, typeorm_1.Column)({ type: "varchar", length: 64, comment: "官方订单号，即产码时官方给予的", unique: true }),
     __metadata("design:type", String)
-], Link.prototype, "oid", void 0);
+], Link.prototype, "gOid", void 0);
 __decorate([
     (0, typeorm_1.Column)({ comment: "锁定时间", default: () => "CURRENT_TIMESTAMP" }),
     __metadata("design:type", Date)
@@ -74,10 +143,6 @@ __decorate([
     (0, typeorm_1.Column)({ type: "int", comment: "支付通道id" }),
     __metadata("design:type", Number)
 ], Link.prototype, "channel", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ type: "int", comment: "父级支付通道id" }),
-    __metadata("design:type", Number)
-], Link.prototype, "parentChannel", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: 'boolean', comment: "链接是否复用,继承账号的该状态" }),
     __metadata("design:type", Boolean)

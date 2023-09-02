@@ -44,7 +44,12 @@ export declare class ApiService implements OnModuleInit {
     private handlerMap;
     constructor(redisService: RedisService, util: UtilService, topUserService: TopService, proxyUserService: ProxyService, linkService: LinkService, topOrderService: OrderTopService, zhService: ZhService, paramConfigService: SysParamConfigService, channelService: ChannelService, proxyChargingAPI: ProxyChargingAPIService, proxyChargingService: ProxyChargingService, wxChannelAPIService: WxChannelAPIService, aLiPayHandlerService: ALiPayHandlerService, phoneHandlerService: PhoneHandlerService, handlerTemplateService: HandlerTemplateService, entityManager: EntityManager, orderQueue: Queue);
     onModuleInit(): Promise<void>;
-    payMd5(body: Pay, user?: IAdminUser): Promise<string | import("@/modules/api/APIInterFace/interface").PayResponse>;
+    payMd5(body: Pay, user?: IAdminUser): Promise<string | {
+        code: number;
+        payurl: string;
+        sysorderno: string;
+        orderno: string;
+    }>;
     payByALI(body: SysPay, user?: IAdminUser): Promise<string | import("@/modules/api/APIInterFace/interface").PayResponse>;
     payByWX(body: Pay): Promise<{
         code: number;
@@ -138,7 +143,7 @@ export declare class ApiService implements OnModuleInit {
         showOrderid?: undefined;
         status?: undefined;
     }>;
-    alipayNotify(params: ALiPayNotify, query: any): Promise<"success" | "fail">;
+    alipayNotify(params: ALiPayNotify, query: any): Promise<"fail" | "success">;
     private sid;
     test(params: any): Promise<void>;
 }

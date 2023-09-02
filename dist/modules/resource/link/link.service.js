@@ -49,8 +49,7 @@ let LinkService = class LinkService {
         this.util = util;
     }
     async page(params, user) {
-        console.log(params);
-        let { page, limit, paymentStatus, reuse, channelName, amount, action, username, oid, outTime } = params;
+        let { page, limit, paymentStatus, reuse, channelName, amount, action, username, oid, outTime, gOid } = params;
         let qb = null;
         if (action == "amountType") {
             let amountList = await this.linkRepository.createQueryBuilder("link")
@@ -65,22 +64,14 @@ let LinkService = class LinkService {
             outTime = outTime == "true" ? true : false;
             qb = await this.linkRepository.createQueryBuilder("link")
                 .leftJoin("link.SysUser", "SysUser")
-                .leftJoin("link.zh", "zh")
                 .innerJoin("channel", "channel", "channel.id = link.channel")
-                .select([
-                "link.id AS id", "link.amount AS amount", "link.oid AS oid", "link.reuse  AS reuse", "link.createStatus  AS createStatus", "link.paymentStatus AS paymentStatus",
-                "link.created_at AS createdAt",
-                "SysUser.username AS username", "zh.accountNumber AS accountNumber", "zh.zuid AS zuid",
-                "channel.name AS channelName"
-            ])
                 .where(user.roleLabel == "admin" ? "1=1" : "SysUser.id = :id", { id: user.id })
                 .andWhere(user.roleLabel == "admin" && username ? "SysUser.username LIKE :username" : "1=1", { username: `%${username}%` })
                 .andWhere(paymentStatus ? "link.paymentStatus = :paymentStatus" : "1=1", { paymentStatus: paymentStatus })
                 .andWhere(reuse ? "link.reuse = :reuse" : "1=1", { reuse: reuse == "true" ? true : false })
                 .andWhere(channelName ? "link.channel = :channel" : "1=1", { channel: channelName })
                 .andWhere(amount ? "link.amount = :amount" : "1=1", { amount: amount })
-                .andWhere(oid ? "link.oid = :oid" : "1=1", { oid: oid })
-                .andWhere(outTime ? "unix_timestamp(now()) > unix_timestamp(link.created_at) + channel.expireTime" : "unix_timestamp(now()) < unix_timestamp(link.created_at) + channel.expireTime")
+                .andWhere(oid ? "link.oid = :gOid" : "1=1", { gOid: gOid })
                 .orderBy("link.created_at", "DESC")
                 .offset((page - 1) * limit)
                 .limit(limit);
