@@ -14,7 +14,7 @@ export declare class ProxyCharging extends BaseEntity {
     mOid: string;
     version: number;
     weight: number;
-    lock: boolean;
+    locking: boolean;
     count: number;
     isClose: boolean;
     outTime: Date;

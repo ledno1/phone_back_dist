@@ -63,15 +63,18 @@ let LinkService = class LinkService {
         else {
             outTime = outTime == "true" ? true : false;
             qb = await this.linkRepository.createQueryBuilder("link")
-                .leftJoin("link.SysUser", "SysUser")
                 .innerJoin("channel", "channel", "channel.id = link.channel")
+                .select([
+                "link.lUid AS lUid", "link.amount AS amount", "link.gOid AS gOid", "link.target AS target", "link.createStatus  AS createStatus", "link.paymentStatus AS paymentStatus",
+                "link.created_at AS createdAt",
+                "channel.name AS channelName"
+            ])
                 .where(user.roleLabel == "admin" ? "1=1" : "SysUser.id = :id", { id: user.id })
-                .andWhere(user.roleLabel == "admin" && username ? "SysUser.username LIKE :username" : "1=1", { username: `%${username}%` })
                 .andWhere(paymentStatus ? "link.paymentStatus = :paymentStatus" : "1=1", { paymentStatus: paymentStatus })
                 .andWhere(reuse ? "link.reuse = :reuse" : "1=1", { reuse: reuse == "true" ? true : false })
                 .andWhere(channelName ? "link.channel = :channel" : "1=1", { channel: channelName })
                 .andWhere(amount ? "link.amount = :amount" : "1=1", { amount: amount })
-                .andWhere(oid ? "link.oid = :gOid" : "1=1", { gOid: gOid })
+                .andWhere(oid ? "link.gOid = :gOid" : "1=1", { gOid: gOid })
                 .orderBy("link.created_at", "DESC")
                 .offset((page - 1) * limit)
                 .limit(limit);

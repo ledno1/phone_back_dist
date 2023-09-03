@@ -16,7 +16,7 @@ import { IAdminUser } from "@/modules/admin/admin.interface";
 export declare class TopOrderRedirect extends TopOrder {
     url: string;
 }
-export declare class ALiPayHandlerService implements ServiceHandler, OnModuleInit {
+export declare class ProxyChargingHandlerService implements ServiceHandler, OnModuleInit {
     private redisService;
     private entityManager;
     private topUserService;
@@ -32,7 +32,6 @@ export declare class ALiPayHandlerService implements ServiceHandler, OnModuleIni
     defaultSystemOutTime: number;
     host: string;
     private redlock;
-    private readonly queueKey;
     private readonly lastUuidKey;
     redisOrderName: string;
     channelType: ChannelType;
@@ -40,7 +39,7 @@ export declare class ALiPayHandlerService implements ServiceHandler, OnModuleIni
     result(params: SysPay, userinfo: IAdminUser): Promise<PayResponse>;
     haveAmount(params: SysPay): Promise<HaveAmount[]>;
     findMerchant(params: SysPay, payUserQueue: HaveAmount[], oid: string): Promise<PayAccountAndMerchant | null>;
-    findProxyChargingAndUpdate(params: SysPay, user: HaveAmount, oid: string): Promise<any>;
+    findOrder(params: SysPay, user: HaveAmount): Promise<any>;
     findPayAccountAndUpdate(params: SysPay, user: HaveAmount, oid: string): Promise<PayAccount | PayAccountEx>;
     getApiUrl(params: any): Promise<void>;
     createOrder(params: SysPay, account: PayAccountAndMerchant, oid: string): Promise<void>;

@@ -2,7 +2,7 @@
 
 <head>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
-  <title>QQ钱包付款</title>
+  <title>收银台</title>
   <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no">
   <link rel="stylesheet" type="text/css" href="/newassets/wx_one/style.css">
   <script type="text/javascript" src="/newassets/css/wechat/jquery.min.js"></script>
@@ -55,7 +55,8 @@
   <script type="text/javascript">
     var paylink = null;
     var outtime = false;
-    var outtimeSecond = 300;
+    var outtimeSecond = 0;
+    var startD =false
     var time = 0;
     var getOS = function () {
       var u = navigator.userAgent
@@ -83,10 +84,11 @@
     }
 
     var orderid = getQueryVariable("no");
-    GetPayUrl();
+    GetPayUrl()
     setInterval(() => {
       GetPayUrl()
     }, 5000)
+
     if (!orderid) {
       document.getElementById("content").innerHTML = "<div>无订单号,请从新获取</div>";
     } else {
@@ -103,6 +105,24 @@
         let price = orderid.substring(orderid.length - 6, orderid.length);
         price = Number(price.substring(0, 4)) + "." + price.substring(4, price.length);
         document.getElementById("amount").innerHTML = `￥<strong>${price}</strong>`;
+        
+      });
+    }
+
+    function GetPayUrl() {
+      $.post("/getpayurl", { action: "getpayurl", orderid: orderid, channel: 1, os }, function (result) {
+        if (result.code == 0) {
+          paylink = result.url;
+          if (result.redirect)
+            window.location.href = url;
+          //将paylink转化为二维码
+          //先清空#qrcode
+          if(result.qrcode){
+            $("#qrcode").empty();
+           $("#qrcode").qrcode(result.qrcode);
+          }
+          outtimeSecond = (result.outTime - new Date().getTime()) / 1000;
+          if(outtimeSecond !=0 && !startD){
         (function (intDiff) {
           window.setInterval(function () {
             var day = 0,
@@ -125,22 +145,8 @@
             intDiff--;
           }, 1000);
         })(parseInt(outtimeSecond));
-      });
-
-
-    }
-
-    function GetPayUrl() {
-      $.post("/getpayurl", { action: "getpayurl", orderid: orderid, channel: 1, os }, function (result) {
-        if (result.code == 0) {
-          paylink = result.url;
-          if (result.redirect)
-            window.location.href = url;
-          //将paylink转化为二维码
-          //先清空#qrcode
-          $("#qrcode").empty();
-          $("#qrcode").qrcode(result.qrcode);
-          outtimeSecond = (result.outTime - new Date().getTime()) / 1000;
+        startD=true
+      }
         } else if (result.code == 3) {
           outtime = true;
         }

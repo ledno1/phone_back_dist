@@ -41,6 +41,7 @@ let HandlerTemplateService = class HandlerTemplateService {
         this.orderQueue = orderQueue;
         this.util = util;
     }
+    host;
     autoCallback(params, p) {
         throw new Error("Method not implemented.");
     }
@@ -147,7 +148,7 @@ let HandlerTemplateService = class HandlerTemplateService {
                     payUserQueue.push(nowUuid);
                     let userBalance = await this.proxyUserService.checkBalance(nowUuid.uuid, Number(orderAmt) * 100);
                     if (userBalance) {
-                        link = await this.findOrder(params);
+                        link = await this.findProxyChargingAndUpdate(params);
                     }
                 } while (!link);
                 await this.redisService.getRedis().set(this.lastUuidKey, nowUuid.uuid, "EX", 60 * 60 * 24 * 365);
@@ -166,7 +167,7 @@ let HandlerTemplateService = class HandlerTemplateService {
             }
         });
     }
-    findOrder(params) {
+    findProxyChargingAndUpdate(params) {
         return new Promise(async (resolve, reject) => {
             console.log("执行指定用户查找代理订单");
             resolve(1);

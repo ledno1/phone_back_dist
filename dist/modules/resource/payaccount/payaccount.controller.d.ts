@@ -12,7 +12,7 @@ export declare class PayAccountController {
         };
     }>;
     del(body: any, user: IAdminUser): Promise<void>;
-    add(body: any, user: IAdminUser): Promise<0 | 1 | {
+    add(body: any, user: IAdminUser): Promise<1 | 0 | {
         image: any;
         id: any;
         cookies?: undefined;

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.OrderRedis = exports.PayAccountEx = exports.PayAccountAndMerchant = exports.HaveAmount = exports.PayMode = exports.ProcessModel = exports.ChannelType = void 0;
+exports.OrderRedis = exports.PayAccountEx = exports.ProxyChargingAndMerchant = exports.PayAccountAndMerchant = exports.HaveAmount = exports.PayMode = exports.ProcessModel = exports.ChannelType = void 0;
 const payaccount_entity_1 = require("../../../entities/resource/payaccount.entity");
 var ChannelType;
 (function (ChannelType) {
@@ -29,6 +29,11 @@ class PayAccountAndMerchant {
     merchant;
 }
 exports.PayAccountAndMerchant = PayAccountAndMerchant;
+class ProxyChargingAndMerchant {
+    proxyCharging;
+    merchant;
+}
+exports.ProxyChargingAndMerchant = ProxyChargingAndMerchant;
 class PayAccountEx extends payaccount_entity_1.PayAccount {
     realAmount;
 }

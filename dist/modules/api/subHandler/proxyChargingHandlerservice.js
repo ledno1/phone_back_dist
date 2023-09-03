@@ -38,7 +38,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ALiPayHandlerService = exports.TopOrderRedirect = void 0;
+exports.ProxyChargingHandlerService = exports.TopOrderRedirect = void 0;
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
@@ -66,7 +66,7 @@ class TopOrderRedirect extends top_entity_1.TopOrder {
     url;
 }
 exports.TopOrderRedirect = TopOrderRedirect;
-let ALiPayHandlerService = class ALiPayHandlerService {
+let ProxyChargingHandlerService = class ProxyChargingHandlerService {
     redisService;
     entityManager;
     topUserService;
@@ -114,7 +114,6 @@ let ALiPayHandlerService = class ALiPayHandlerService {
     defaultSystemOutTime;
     host;
     redlock = null;
-    queueKey = "pay:user:phoneQueue";
     lastUuidKey = "pay:user:phoneLastUuid";
     redisOrderName = "aLiPayTopOrder";
     channelType = InerFace_1.ChannelType.DIRECT;
@@ -272,9 +271,9 @@ let ALiPayHandlerService = class ALiPayHandlerService {
             }
         });
     }
-    findProxyChargingAndUpdate(params, user, oid) {
+    findOrder(params, user) {
         return new Promise(async (resolve, reject) => {
-            resolve(null);
+            resolve(1);
         });
     }
     findPayAccountAndUpdate(params, user, oid) {
@@ -914,8 +913,8 @@ __decorate([
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [interface_1.SysPay]),
     __metadata("design:returntype", Promise)
-], ALiPayHandlerService.prototype, "checkOrder", null);
-ALiPayHandlerService = __decorate([
+], ProxyChargingHandlerService.prototype, "checkOrder", null);
+ProxyChargingHandlerService = __decorate([
     (0, common_1.Injectable)(),
     __param(1, (0, typeorm_1.InjectEntityManager)()),
     __param(4, (0, bull_1.InjectQueue)("order")),
@@ -926,6 +925,6 @@ ALiPayHandlerService = __decorate([
         channel_service_1.ChannelService,
         util_service_1.UtilService,
         admin_ws_service_1.AdminWSService])
-], ALiPayHandlerService);
-exports.ALiPayHandlerService = ALiPayHandlerService;
-//# sourceMappingURL=aLiPayHandler.service.js.map
+], ProxyChargingHandlerService);
+exports.ProxyChargingHandlerService = ProxyChargingHandlerService;
+//# sourceMappingURL=proxyChargingHandlerservice.js.map

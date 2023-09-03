@@ -2,7 +2,7 @@ import { ApiService } from "@/modules/api/api.service";
 import { SysParamConfigService } from "@/modules/admin/system/param-config/param-config.service";
 import { ChannelService } from "@/modules/resource/channel/channel.service";
 import { RedisService } from "@/shared/services/redis.service";
-import { Pay, PayCheck } from "@/modules/api/APIInterFace/interface";
+import { Pay, PayCheck, PayResponse } from "@/modules/api/APIInterFace/interface";
 import { IAdminUser } from "@/modules/admin/admin.interface";
 export declare class ApiController {
     private readonly apiService;
@@ -10,18 +10,8 @@ export declare class ApiController {
     private readonly channelService;
     private redis;
     constructor(apiService: ApiService, paramConfigService: SysParamConfigService, channelService: ChannelService, redis: RedisService);
-    pay(body: Pay): Promise<string | 1 | {
-        code: number;
-        payurl: string;
-        sysorderno: string;
-        orderno: string;
-    }>;
-    payTest(body: any, user: IAdminUser): Promise<string | 1 | {
-        code: number;
-        payurl: string;
-        sysorderno: string;
-        orderno: string;
-    }>;
+    pay(body: Pay): Promise<string | PayResponse | 1>;
+    payTest(body: any, user: IAdminUser): Promise<string | PayResponse | 1>;
     payCheck(body: PayCheck): Promise<{
         merId: any;
         orderId: any;
@@ -87,6 +77,6 @@ export declare class ApiController {
         showOrderid?: undefined;
         status?: undefined;
     }>;
-    alipayNotify(body: any, query: any): Promise<"fail" | "success">;
+    alipayNotify(body: any, query: any): Promise<"success" | "fail">;
     startcheck(query: any): Promise<void>;
 }

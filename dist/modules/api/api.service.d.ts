@@ -17,8 +17,8 @@ import { WxChannelAPIService } from "@/modules/api/wxChannelAPI.service";
 import { ALiPayNotify, Pay, SysPay } from "@/modules/api/APIInterFace/interface";
 import { HandlerTemplateService } from "@/modules/api/subHandler/handlerTemplate.service";
 import { ALiPayHandlerService } from "@/modules/api/subHandler/aLiPayHandler.service";
-import { PhoneHandlerService } from "@/modules/api/subHandler/phoneProxyHandler.service";
 import { IAdminUser } from "@/modules/admin/admin.interface";
+import { XiaoMangProxyChargingHandlerservice } from "@/modules/api/subHandler/XiaoMangProxyChargingHandlerservice";
 export declare class ApiService implements OnModuleInit {
     private redisService;
     private util;
@@ -33,8 +33,8 @@ export declare class ApiService implements OnModuleInit {
     private proxyChargingService;
     private wxChannelAPIService;
     private aLiPayHandlerService;
-    private phoneHandlerService;
     private handlerTemplateService;
+    private xiaoMangHandlerService;
     private entityManager;
     private orderQueue;
     private host;
@@ -42,14 +42,9 @@ export declare class ApiService implements OnModuleInit {
     private WXPAYCHANNEL;
     private ALIAYCHANNEL;
     private handlerMap;
-    constructor(redisService: RedisService, util: UtilService, topUserService: TopService, proxyUserService: ProxyService, linkService: LinkService, topOrderService: OrderTopService, zhService: ZhService, paramConfigService: SysParamConfigService, channelService: ChannelService, proxyChargingAPI: ProxyChargingAPIService, proxyChargingService: ProxyChargingService, wxChannelAPIService: WxChannelAPIService, aLiPayHandlerService: ALiPayHandlerService, phoneHandlerService: PhoneHandlerService, handlerTemplateService: HandlerTemplateService, entityManager: EntityManager, orderQueue: Queue);
+    constructor(redisService: RedisService, util: UtilService, topUserService: TopService, proxyUserService: ProxyService, linkService: LinkService, topOrderService: OrderTopService, zhService: ZhService, paramConfigService: SysParamConfigService, channelService: ChannelService, proxyChargingAPI: ProxyChargingAPIService, proxyChargingService: ProxyChargingService, wxChannelAPIService: WxChannelAPIService, aLiPayHandlerService: ALiPayHandlerService, handlerTemplateService: HandlerTemplateService, xiaoMangHandlerService: XiaoMangProxyChargingHandlerservice, entityManager: EntityManager, orderQueue: Queue);
     onModuleInit(): Promise<void>;
-    payMd5(body: Pay, user?: IAdminUser): Promise<string | {
-        code: number;
-        payurl: string;
-        sysorderno: string;
-        orderno: string;
-    }>;
+    payMd5(body: Pay, user?: IAdminUser): Promise<string | import("@/modules/api/APIInterFace/interface").PayResponse>;
     payByALI(body: SysPay, user?: IAdminUser): Promise<string | import("@/modules/api/APIInterFace/interface").PayResponse>;
     payByWX(body: Pay): Promise<{
         code: number;
@@ -143,7 +138,7 @@ export declare class ApiService implements OnModuleInit {
         showOrderid?: undefined;
         status?: undefined;
     }>;
-    alipayNotify(params: ALiPayNotify, query: any): Promise<"fail" | "success">;
+    alipayNotify(params: ALiPayNotify, query: any): Promise<"success" | "fail">;
     private sid;
     test(params: any): Promise<void>;
 }

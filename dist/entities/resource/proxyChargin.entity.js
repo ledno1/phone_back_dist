@@ -31,7 +31,7 @@ let ProxyCharging = class ProxyCharging extends base_entity_1.BaseEntity {
     mOid;
     version;
     weight;
-    lock;
+    locking;
     count;
     isClose;
     outTime;
@@ -97,7 +97,7 @@ __decorate([
 __decorate([
     (0, typeorm_1.Column)({ type: "boolean", comment: "锁定状态", default: false }),
     __metadata("design:type", Boolean)
-], ProxyCharging.prototype, "lock", void 0);
+], ProxyCharging.prototype, "locking", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: "int", comment: "拉单次数", default: 0 }),
     __metadata("design:type", Number)

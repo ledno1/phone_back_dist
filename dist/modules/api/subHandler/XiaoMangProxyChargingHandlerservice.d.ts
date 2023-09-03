@@ -3,7 +3,7 @@ import { EntityManager } from "typeorm";
 import { RedisService } from "@/shared/services/redis.service";
 import { UtilService } from "@/shared/services/util.service";
 import { ALiPayNotify, PayResponse, SysPay } from "@/modules/api/APIInterFace/interface";
-import { ChannelType, HaveAmount, OrderRedis, PayAccountAndMerchant, PayAccountEx, ProcessModel, ServiceHandler } from "@/modules/api/subHandler/InerFace";
+import { ChannelType, HaveAmount, OrderRedis, PayAccountAndMerchant, PayAccountEx, ProcessModel, ProxyChargingAndMerchant, ServiceHandler } from "@/modules/api/subHandler/InerFace";
 import { TopService } from "@/modules/usersys/top/top.service";
 import { ProxyService } from "@/modules/usersys/proxy/proxy.service";
 import { Queue } from "bull";
@@ -13,10 +13,11 @@ import { SysParamConfigService } from "@/modules/admin/system/param-config/param
 import { ChannelService } from "@/modules/resource/channel/channel.service";
 import { AdminWSService } from "@/modules/ws/admin-ws.service";
 import { IAdminUser } from "@/modules/admin/admin.interface";
+import { ProxyCharging } from "@/entities/resource/proxyChargin.entity";
 export declare class TopOrderRedirect extends TopOrder {
     url: string;
 }
-export declare class ALiPayHandlerService implements ServiceHandler, OnModuleInit {
+export declare class XiaoMangProxyChargingHandlerservice implements ServiceHandler, OnModuleInit {
     private redisService;
     private entityManager;
     private topUserService;
@@ -32,19 +33,18 @@ export declare class ALiPayHandlerService implements ServiceHandler, OnModuleIni
     defaultSystemOutTime: number;
     host: string;
     private redlock;
-    private readonly queueKey;
     private readonly lastUuidKey;
     redisOrderName: string;
     channelType: ChannelType;
     nameKey: string;
     result(params: SysPay, userinfo: IAdminUser): Promise<PayResponse>;
     haveAmount(params: SysPay): Promise<HaveAmount[]>;
-    findMerchant(params: SysPay, payUserQueue: HaveAmount[], oid: string): Promise<PayAccountAndMerchant | null>;
-    findProxyChargingAndUpdate(params: SysPay, user: HaveAmount, oid: string): Promise<any>;
+    findMerchant(params: SysPay, payUserQueue: HaveAmount[], oid: string): Promise<ProxyChargingAndMerchant | PayAccountAndMerchant | null>;
+    findProxyChargingAndUpdate(params: SysPay, user: HaveAmount, oid: string): Promise<ProxyCharging>;
     findPayAccountAndUpdate(params: SysPay, user: HaveAmount, oid: string): Promise<PayAccount | PayAccountEx>;
     getApiUrl(params: any): Promise<void>;
-    createOrder(params: SysPay, account: PayAccountAndMerchant, oid: string): Promise<void>;
-    rollback(params: SysPay, resource: PayAccount | null, user: HaveAmount | null, oid: string): Promise<void>;
+    createOrder(params: SysPay, account: ProxyChargingAndMerchant | null, oid: string): Promise<void>;
+    rollback(params: SysPay, resource: PayAccount | ProxyCharging | null, user: HaveAmount | null, oid: string): Promise<void>;
     outTime(params: OrderRedis): Promise<void>;
     checkOrder(params: SysPay): Promise<void>;
     updateMerchant(params: SysPay, user: HaveAmount): Promise<void>;
@@ -54,6 +54,6 @@ export declare class ALiPayHandlerService implements ServiceHandler, OnModuleIni
     notifyRequest(url: any, notify: any, yan: string, time?: number, times?: number): Promise<void>;
     retry(fn: any, times: any, url: any, form: any, time: any): Promise<unknown>;
     reqCallback(url: string, form: any): Promise<unknown>;
-    test(): Promise<void>;
+    test(): Promise<unknown>;
     autoCallback(params: ALiPayNotify, p: PayAccount): Promise<any>;
 }

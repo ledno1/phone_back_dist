@@ -43,8 +43,8 @@ const wxChannelAPI_service_1 = require("./wxChannelAPI.service");
 const handlerTemplate_service_1 = require("./subHandler/handlerTemplate.service");
 const InerFace_1 = require("./subHandler/InerFace");
 const aLiPayHandler_service_1 = require("./subHandler/aLiPayHandler.service");
-const phoneProxyHandler_service_1 = require("./subHandler/phoneProxyHandler.service");
 const payaccount_entity_1 = require("../../entities/resource/payaccount.entity");
+const XiaoMangProxyChargingHandlerservice_1 = require("./subHandler/XiaoMangProxyChargingHandlerservice");
 let ApiService = class ApiService {
     redisService;
     util;
@@ -59,8 +59,8 @@ let ApiService = class ApiService {
     proxyChargingService;
     wxChannelAPIService;
     aLiPayHandlerService;
-    phoneHandlerService;
     handlerTemplateService;
+    xiaoMangHandlerService;
     entityManager;
     orderQueue;
     host = null;
@@ -68,7 +68,7 @@ let ApiService = class ApiService {
     WXPAYCHANNEL;
     ALIAYCHANNEL;
     handlerMap = new Map();
-    constructor(redisService, util, topUserService, proxyUserService, linkService, topOrderService, zhService, paramConfigService, channelService, proxyChargingAPI, proxyChargingService, wxChannelAPIService, aLiPayHandlerService, phoneHandlerService, handlerTemplateService, entityManager, orderQueue) {
+    constructor(redisService, util, topUserService, proxyUserService, linkService, topOrderService, zhService, paramConfigService, channelService, proxyChargingAPI, proxyChargingService, wxChannelAPIService, aLiPayHandlerService, handlerTemplateService, xiaoMangHandlerService, entityManager, orderQueue) {
         this.redisService = redisService;
         this.util = util;
         this.topUserService = topUserService;
@@ -82,13 +82,13 @@ let ApiService = class ApiService {
         this.proxyChargingService = proxyChargingService;
         this.wxChannelAPIService = wxChannelAPIService;
         this.aLiPayHandlerService = aLiPayHandlerService;
-        this.phoneHandlerService = phoneHandlerService;
         this.handlerTemplateService = handlerTemplateService;
+        this.xiaoMangHandlerService = xiaoMangHandlerService;
         this.entityManager = entityManager;
         this.orderQueue = orderQueue;
     }
     async onModuleInit() {
-        let tempHandlerList = [this.aLiPayHandlerService, this.phoneHandlerService, this.handlerTemplateService];
+        let tempHandlerList = [this.aLiPayHandlerService, this.handlerTemplateService, this.xiaoMangHandlerService];
         let channelList = await this.channelService.channelRoot();
         channelList.forEach(e => {
             if (e.name.includes("QQ")) {
@@ -620,8 +620,8 @@ ApiService = __decorate([
         proxyChargin_service_1.ProxyChargingService,
         wxChannelAPI_service_1.WxChannelAPIService,
         aLiPayHandler_service_1.ALiPayHandlerService,
-        phoneProxyHandler_service_1.PhoneHandlerService,
         handlerTemplate_service_1.HandlerTemplateService,
+        XiaoMangProxyChargingHandlerservice_1.XiaoMangProxyChargingHandlerservice,
         typeorm_2.EntityManager, Object])
 ], ApiService);
 exports.ApiService = ApiService;

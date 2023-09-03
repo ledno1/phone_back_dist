@@ -25,6 +25,10 @@ export declare class PayAccountAndMerchant {
     payAccount: PayAccount | PayAccountEx;
     merchant: HaveAmount;
 }
+export declare class ProxyChargingAndMerchant {
+    proxyCharging: ProxyCharging;
+    merchant: HaveAmount;
+}
 export declare class PayAccountEx extends PayAccount {
     realAmount?: number;
 }
@@ -38,19 +42,20 @@ export declare class OrderRedis {
     realAmount?: number;
 }
 export interface ServiceHandler {
-    nameKey: string;
+    nameKey: string | string[];
     channelType: ChannelType;
     redisOrderName: string;
     model: ProcessModel;
     defaultSystemOutTime: number;
+    host: string;
     result(params: SysPay, user: IAdminUser): Promise<PayResponse | string>;
     haveAmount(params: SysPay): Promise<HaveAmount[]>;
-    findMerchant(params: SysPay, h: HaveAmount[], oid: string): Promise<PayAccountAndMerchant | null>;
-    findOrder(params: SysPay, user: HaveAmount): Promise<void>;
+    findMerchant(params: SysPay, h: HaveAmount[], oid: string): Promise<ProxyChargingAndMerchant | PayAccountAndMerchant | null>;
+    findProxyChargingAndUpdate(params: SysPay, user: HaveAmount, oid: string): Promise<ProxyCharging>;
     findPayAccountAndUpdate(params: SysPay, user: HaveAmount, oid: string): Promise<PayAccount | PayAccountEx>;
     updateMerchant(params: SysPay, user: HaveAmount): Promise<void>;
     getApiUrl(params: SysPay): Promise<void>;
-    createOrder(params: SysPay, account: PayAccountAndMerchant, oid: string): Promise<void>;
+    createOrder(params: SysPay, account: PayAccountAndMerchant | ProxyChargingAndMerchant, oid: string): Promise<void>;
     rollback(params: SysPay, resource: PayAccount | ProxyCharging | null, user: HaveAmount | null, oid: string): Promise<void>;
     outTime(params: OrderRedis): Promise<void>;
     checkOrder(params: SysPay): Promise<void>;

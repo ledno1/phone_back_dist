@@ -77,7 +77,7 @@ let ProxyChargingService = class ProxyChargingService {
             .select([
             "proxyCharging.id AS id", "proxyCharging.target AS target", "proxyCharging.pid AS pid", "proxyCharging.mOid AS mOid", "proxyCharging.oid AS oid", "proxyCharging.amount AS amount",
             "proxyCharging.status AS status", "proxyCharging.callback AS callback", "proxyCharging.created_at AS createdAt", "proxyCharging.outTime AS outTime", "proxyCharging.pUid AS pUid",
-            "proxyCharging.operator AS operator", "proxyCharging.weight AS weight", "proxyCharging.lock AS locking", "proxyCharging.isClose AS isClose"
+            "proxyCharging.operator AS operator", "proxyCharging.weight AS weight", "proxyCharging.locking AS locking", "proxyCharging.isClose AS isClose"
         ])
             .addSelect("user.username AS pidName")
             .addSelect([
@@ -177,7 +177,7 @@ let ProxyChargingService = class ProxyChargingService {
                     proxyChargingInfo.isClose = true;
                     break;
                 case "lock":
-                    proxyChargingInfo.lock = !proxyChargingInfo.lock;
+                    proxyChargingInfo.locking = !proxyChargingInfo.locking;
                     break;
                 case "success":
                     proxyChargingInfo.status = 1;
@@ -207,7 +207,7 @@ let ProxyChargingService = class ProxyChargingService {
                     break;
                 case "lock":
                     proxyChargingInfo.forEach((n) => {
-                        n.lock = !n.lock;
+                        n.locking = !n.locking;
                     });
                     break;
                 case "success":
@@ -227,7 +227,7 @@ let ProxyChargingService = class ProxyChargingService {
     }
     async resetStatusAndLock(data) {
         try {
-            await this.proxyChargingRepository.update({ id: data.id, createStatus: false }, { status: 0, lock: false });
+            await this.proxyChargingRepository.update({ id: data.id, createStatus: false }, { status: 0, locking: false });
         }
         catch (e) {
             console.error("话单恢复可提取失败");
@@ -253,7 +253,7 @@ let ProxyChargingService = class ProxyChargingService {
         try {
             await this.proxyChargingRepository.update({ id }, {
                 status: 0,
-                lock: false,
+                locking: false,
                 oid: null,
                 mOid: null,
                 createStatus: false
@@ -310,7 +310,7 @@ let ProxyChargingService = class ProxyChargingService {
                 let rate = await this.channelService.getRateByChannelId(id, proxyChargingInfo.channel, uuid);
                 let isChange = await entityManager.createQueryBuilder(proxyChargin_entity_1.ProxyCharging, "pc")
                     .update()
-                    .set({ lock: true, status: 2, version: () => "version + 1" })
+                    .set({ locking: true, status: 2, version: () => "version + 1" })
                     .where("id = :id", { id: proxyChargingInfo.id })
                     .andWhere("version = :version", { version: proxyChargingInfo.version })
                     .execute();

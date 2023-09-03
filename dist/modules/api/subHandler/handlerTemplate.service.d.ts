@@ -17,6 +17,7 @@ export declare class HandlerTemplateService implements ServiceHandler, OnModuleI
     private orderQueue;
     private util;
     constructor(redisService: RedisService, entityManager: EntityManager, topUserService: TopService, proxyUserService: ProxyService, orderQueue: Queue, util: UtilService);
+    host: string;
     autoCallback(params: ALiPayNotify, p: PayAccount): Promise<void>;
     test(): Promise<void>;
     private redlock;
@@ -28,7 +29,7 @@ export declare class HandlerTemplateService implements ServiceHandler, OnModuleI
     result(params: SysPay): Promise<PayResponse>;
     haveAmount(params: SysPay): Promise<HaveAmount[]>;
     findMerchant(params: SysPay): Promise<PayAccountAndMerchant | null>;
-    findOrder(params: SysPay): Promise<any>;
+    findProxyChargingAndUpdate(params: SysPay): Promise<any>;
     findPayAccountAndUpdate(params: SysPay): Promise<PayAccount>;
     getApiUrl(params: any): Promise<void>;
     createOrder(params: SysPay): Promise<void>;
