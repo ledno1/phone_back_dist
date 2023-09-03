@@ -31,6 +31,7 @@ const payaccount_entity_1 = require("../../../entities/resource/payaccount.entit
 const dayjs_1 = __importDefault(require("dayjs"));
 const param_config_service_1 = require("../../admin/system/param-config/param-config.service");
 const InerFace_1 = require("../../api/subHandler/InerFace");
+const process_1 = __importDefault(require("process"));
 var CheckStatus;
 (function (CheckStatus) {
     CheckStatus["success"] = "success";
@@ -58,8 +59,12 @@ let PayAccountService = class PayAccountService {
         this.util = util;
     }
     async onModuleInit() {
-        if (process.env.NODE_ENV == "production") {
-            this.pupHost = "http://localhost:3005";
+        if (process_1.default.env.NODE_ENV == "production") {
+            let port = process_1.default.env.PUP_PORT;
+            if (!port) {
+                throw new Error("未设置pup端口 请在.env.prod文件中设置PUP_PORT");
+            }
+            this.pupHost = "http://localhost:" + port;
         }
         else {
             this.pupHost = "http://192.168.23.132:3005";
@@ -272,7 +277,7 @@ limit ${(page - 1) * limit},${limit}
                 appId,
                 privateKey
             };
-            if (process.env.NODE_ENV == "development") {
+            if (process_1.default.env.NODE_ENV == "development") {
                 config["gateway"] = "https://openapi-sandbox.alipaydev.com/gateway.do";
             }
             let alipaySdk = new alipay_sdk_1.default(config);

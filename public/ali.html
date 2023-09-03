@@ -56,7 +56,7 @@
     var paylink = null;
     var outtime = false;
     var outtimeSecond = 0;
-    var startD =false
+    var startD = false
     var time = 0;
     var getOS = function () {
       var u = navigator.userAgent
@@ -105,48 +105,48 @@
         let price = orderid.substring(orderid.length - 6, orderid.length);
         price = Number(price.substring(0, 4)) + "." + price.substring(4, price.length);
         document.getElementById("amount").innerHTML = `￥<strong>${price}</strong>`;
-        
+
       });
     }
 
     function GetPayUrl() {
-      $.post("/getpayurl", { action: "getpayurl", orderid: orderid, channel: 1, os }, function (result) {
+      $.post("/api/getpayurl", { action: "getpayurl", orderid: orderid, channel: 1, os }, function (result) {
         if (result.code == 0) {
           paylink = result.url;
           if (result.redirect)
             window.location.href = url;
           //将paylink转化为二维码
           //先清空#qrcode
-          if(result.qrcode){
+          if (result.qrcode) {
             $("#qrcode").empty();
-           $("#qrcode").qrcode(result.qrcode);
+            $("#qrcode").qrcode(result.qrcode);
           }
           outtimeSecond = (result.outTime - new Date().getTime()) / 1000;
-          if(outtimeSecond !=0 && !startD){
-        (function (intDiff) {
-          window.setInterval(function () {
-            var day = 0,
-              hour = 0,
-              minute = 0,
-              second = 0; //时间默认值
-            if (intDiff > 0) {
-              hour = 0;
-              minute = Math.floor(intDiff / 60) - (day * 24 * 60) - (hour * 60);
-              second = Math.floor(intDiff) - (day * 24 * 60 * 60) - (hour * 60 * 60) - (minute * 60);
-            }
-            if (minute == 0 && second == 0) {
-              location.reload();
-            }
-            if (minute <= 9) minute = "0" + minute;
-            if (second <= 9) second = "0" + second;
-            $("#hour_show").html("<s id=\"h\"></s>" + hour + "时");
-            $("#minute_show").html("<s></s>" + minute + "分");
-            $("#second_show").html("<s></s>" + second + "秒");
-            intDiff--;
-          }, 1000);
-        })(parseInt(outtimeSecond));
-        startD=true
-      }
+          if (outtimeSecond != 0 && !startD) {
+            (function (intDiff) {
+              window.setInterval(function () {
+                var day = 0,
+                  hour = 0,
+                  minute = 0,
+                  second = 0; //时间默认值
+                if (intDiff > 0) {
+                  hour = 0;
+                  minute = Math.floor(intDiff / 60) - (day * 24 * 60) - (hour * 60);
+                  second = Math.floor(intDiff) - (day * 24 * 60 * 60) - (hour * 60 * 60) - (minute * 60);
+                }
+                if (minute == 0 && second == 0) {
+                  location.reload();
+                }
+                if (minute <= 9) minute = "0" + minute;
+                if (second <= 9) second = "0" + second;
+                $("#hour_show").html("<s id=\"h\"></s>" + hour + "时");
+                $("#minute_show").html("<s></s>" + minute + "分");
+                $("#second_show").html("<s></s>" + second + "秒");
+                intDiff--;
+              }, 1000);
+            })(parseInt(outtimeSecond));
+            startD = true
+          }
         } else if (result.code == 3) {
           outtime = true;
         }
@@ -180,7 +180,7 @@
 
     function order() {
 
-      $.post("/getpayurl", { action: "checkorder", orderid: orderid, channel: 1 }, function (result) {
+      $.post("/api/getpayurl", { action: "checkorder", orderid: orderid, channel: 1 }, function (result) {
 
         if (result.code == 1) {
           layer.confirm(result.msg, {
