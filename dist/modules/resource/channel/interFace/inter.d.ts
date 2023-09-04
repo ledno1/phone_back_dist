@@ -5,4 +5,5 @@ export declare class GetChannelInfo {
     rate?: number;
     parentId?: number;
     expireTime: number;
+    isUse?: boolean;
 }

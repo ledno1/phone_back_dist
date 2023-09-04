@@ -44,7 +44,6 @@ const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const redis_service_1 = require("../../../shared/services/redis.service");
 const util_service_1 = require("../../../shared/services/util.service");
-const interface_1 = require("../APIInterFace/interface");
 const InerFace_1 = require("./InerFace");
 const top_service_1 = require("../../usersys/top/top.service");
 const proxy_service_1 = require("../../usersys/proxy/proxy.service");
@@ -528,12 +527,15 @@ let XiaoMangProxyChargingHandlerservice = class XiaoMangProxyChargingHandlerserv
             }
         });
     }
-    checkOrder(params) {
+    checkOrder() {
         if (this.model == InerFace_1.ProcessModel.SERVICE)
             return Promise.resolve();
-        console.log(`${process.pid}执行定时查单处理`);
         return new Promise(async (resolve, reject) => {
             try {
+                let info = await this.channelService.getChannelInfo(19);
+                if (!info.isUse)
+                    return Promise.resolve();
+                console.log(`${process.pid}执行小芒定时查单处理`);
                 let orders = await this.redisService.getRedis().smembers(this.redisOrderName);
                 if (orders.length == 0)
                     return;
@@ -728,7 +730,7 @@ let XiaoMangProxyChargingHandlerservice = class XiaoMangProxyChargingHandlerserv
 __decorate([
     (0, schedule_1.Cron)("*/10 * * * * *"),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [interface_1.SysPay]),
+    __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], XiaoMangProxyChargingHandlerservice.prototype, "checkOrder", null);
 XiaoMangProxyChargingHandlerservice = __decorate([

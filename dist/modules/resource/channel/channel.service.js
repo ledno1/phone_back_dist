@@ -235,7 +235,7 @@ let ChannelService = class ChannelService {
             return JSON.parse(cache);
         }
         let qb = await this.channelRepository.createQueryBuilder("channel")
-            .select(["channel.id AS id", "channel.strategy AS strategy", "channel.name AS name", "channel.rate AS rate", "channel.parentId AS parentId", "channel.expireTime AS expireTime"])
+            .select(["channel.id AS id", "channel.strategy AS strategy", "channel.name AS name", "channel.rate AS rate", "channel.parentId AS parentId", "channel.expireTime AS expireTime", "channel.isUse AS isUse"])
             .where("channel.id = :id", { id })
             .getRawOne();
         if (qb) {

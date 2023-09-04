@@ -48,7 +48,7 @@ export declare class XiaoMangProxyChargingHandlerservice implements ServiceHandl
     createOrder(params: SysPay, account: ProxyChargingAndMerchant | null, oid: string): Promise<void>;
     rollback(params: SysPay, resource: PayAccount | ProxyCharging | null, user: HaveAmount | null, oid: string): Promise<void>;
     outTime(params: OrderRedis): Promise<void>;
-    checkOrder(params: SysPay): Promise<void>;
+    checkOrder(): Promise<void>;
     updateMerchant(params: SysPay, user: HaveAmount): Promise<void>;
     checkOrderApi(params: OrderRedis): Promise<boolean>;
     requestApi(uid: string, cookies: string, ctoken: string, name: string, id: number, accountType?: number): Promise<boolean | Array<any>>;

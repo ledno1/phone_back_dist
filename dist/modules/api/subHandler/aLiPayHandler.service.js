@@ -559,6 +559,10 @@ let ALiPayHandlerService = class ALiPayHandlerService {
         if (this.model == InerFace_1.ProcessModel.SERVICE)
             return Promise.resolve();
         return new Promise(async (resolve, reject) => {
+            let info = await this.channelService.getChannelInfo(18);
+            if (!info.isUse)
+                return Promise.resolve();
+            console.log(`${process.pid}执行直达支付定时查单处理`);
             let checkMode = await this.paramConfigService.findValueByKey(InerFace_1.PayMode.aLiPayCheckMode);
             if (checkMode == "1") {
                 let orders = await this.redisService.getRedis().smembers(this.redisOrderName);
