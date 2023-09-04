@@ -14,6 +14,7 @@ import { ChannelService } from "@/modules/resource/channel/channel.service";
 import { AdminWSService } from "@/modules/ws/admin-ws.service";
 import { IAdminUser } from "@/modules/admin/admin.interface";
 import { ProxyCharging } from "@/entities/resource/proxyChargin.entity";
+import { PayCodeService } from "@/modules/payCode/paycode.service";
 export declare class TopOrderRedirect extends TopOrder {
     url: string;
 }
@@ -27,7 +28,8 @@ export declare class XiaoMangProxyChargingHandlerservice implements ServiceHandl
     private channelService;
     private util;
     private adminWSService;
-    constructor(redisService: RedisService, entityManager: EntityManager, topUserService: TopService, proxyUserService: ProxyService, orderQueue: Queue, paramConfigService: SysParamConfigService, channelService: ChannelService, util: UtilService, adminWSService: AdminWSService);
+    private payCodeService;
+    constructor(redisService: RedisService, entityManager: EntityManager, topUserService: TopService, proxyUserService: ProxyService, orderQueue: Queue, paramConfigService: SysParamConfigService, channelService: ChannelService, util: UtilService, adminWSService: AdminWSService, payCodeService: PayCodeService);
     onModuleInit(): Promise<void>;
     model: ProcessModel;
     defaultSystemOutTime: number;

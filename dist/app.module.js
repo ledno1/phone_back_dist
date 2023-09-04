@@ -29,6 +29,7 @@ const resource_module_1 = require("./modules/resource/resource.module");
 const usersys_module_1 = require("./modules/usersys/usersys.module");
 const api_module_1 = require("./modules/api/api.module");
 const schedule_1 = require("@nestjs/schedule");
+const paycode_module_1 = require("./modules/payCode/paycode.module");
 let AppModule = class AppModule {
 };
 AppModule = __decorate([
@@ -84,6 +85,7 @@ AppModule = __decorate([
             resource_module_1.ResourceModule,
             usersys_module_1.UsersysModule,
             api_module_1.ApiModule,
+            paycode_module_1.PayCodeModule,
             serve_static_1.ServeStaticModule.forRoot({
                 rootPath: (0, path_1.join)(__dirname, '..', 'public'),
             }),

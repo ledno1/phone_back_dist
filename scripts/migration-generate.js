@@ -2,7 +2,7 @@ const { exec } = require('child_process');
 const { config } = require('dotenv');
 
 const runMigrationGenerate = async function () {
-  config({ path: '.env.development' });
+  config({ path: '.env.production' });
 
   const npm_package_version = process.env.npm_package_version.replaceAll(
     '.',
