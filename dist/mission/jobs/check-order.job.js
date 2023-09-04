@@ -12,20 +12,16 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CheckOrderJob = void 0;
 const common_1 = require("@nestjs/common");
 const mission_decorator_1 = require("../mission.decorator");
-const orderTop_service_1 = require("../../modules/api/top/orderTop.service");
 let CheckOrderJob = class CheckOrderJob {
-    topOrderService;
-    constructor(topOrderService) {
-        this.topOrderService = topOrderService;
+    constructor() {
     }
     async handle() {
-        await this.topOrderService.checkOrder();
     }
 };
 CheckOrderJob = __decorate([
     (0, common_1.Injectable)(),
     (0, mission_decorator_1.Mission)(),
-    __metadata("design:paramtypes", [orderTop_service_1.OrderTopService])
+    __metadata("design:paramtypes", [])
 ], CheckOrderJob);
 exports.CheckOrderJob = CheckOrderJob;
 //# sourceMappingURL=check-order.job.js.map

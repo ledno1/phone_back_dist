@@ -14,7 +14,6 @@ const log_service_1 = require("../modules/admin/system/log/log.service");
 const http_request_job_1 = require("./jobs/http-request.job");
 const sys_log_clear_job_1 = require("./jobs/sys-log-clear.job");
 const check_order_job_1 = require("./jobs/check-order.job");
-const api_module_1 = require("../modules/api/api.module");
 const providers = [sys_log_clear_job_1.SysLogClearJob, http_request_job_1.HttpRequestJob, check_order_job_1.CheckOrderJob];
 function createAliasProviders() {
     const aliasProviders = [];
@@ -32,7 +31,7 @@ let MissionModule = MissionModule_1 = class MissionModule {
         return {
             global: true,
             module: MissionModule_1,
-            imports: [admin_module_1.AdminModule, api_module_1.ApiModule],
+            imports: [admin_module_1.AdminModule],
             providers: [...providers, ...aliasProviders, log_service_1.SysLogService],
             exports: aliasProviders,
         };
