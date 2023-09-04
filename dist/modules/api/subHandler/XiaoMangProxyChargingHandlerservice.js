@@ -58,7 +58,7 @@ const sys_balance_entity_1 = require("../../../entities/admin/sys-balance.entity
 const schedule_1 = require("@nestjs/schedule");
 const top_temp_entity_1 = require("../../../entities/order/top_temp.entity");
 const proxyChargin_entity_1 = require("../../../entities/resource/proxyChargin.entity");
-const paycode_service_1 = require("../../paycode/paycode.service");
+const paycode_service_1 = require("../../PayCode/paycode.service");
 const REQ = require("request-promise-native");
 class TopOrderRedirect extends top_entity_1.TopOrder {
     url;

@@ -21,7 +21,7 @@ let PayCodeAccountController = class PayCodeAccountController {
     }
 };
 PayCodeAccountController = __decorate([
-    (0, common_1.Controller)('/paycode/account'),
+    (0, common_1.Controller)('/PayCode/account'),
     __metadata("design:paramtypes", [account_service_1.PayCodeAccountService])
 ], PayCodeAccountController);
 exports.PayCodeAccountController = PayCodeAccountController;

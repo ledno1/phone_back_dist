@@ -58,7 +58,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], PayCodeProductController.prototype, "edit", null);
 PayCodeProductController = __decorate([
-    (0, common_1.Controller)('/paycode/product'),
+    (0, common_1.Controller)('/PayCode/product'),
     __metadata("design:paramtypes", [product_service_1.PayCodeProductService])
 ], PayCodeProductController);
 exports.PayCodeProductController = PayCodeProductController;

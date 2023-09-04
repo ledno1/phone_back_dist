@@ -1,5 +1,5 @@
 import { OnModuleInit } from "@nestjs/common";
-import { PayCodeProductService } from "@/modules/paycode/product/product.service";
+import { PayCodeProductService } from "@/modules/PayCode/product/product.service";
 import { IAdminUser } from "@/modules/admin/admin.interface";
 export declare class PayCodeProductController implements OnModuleInit {
     private readonly productService;

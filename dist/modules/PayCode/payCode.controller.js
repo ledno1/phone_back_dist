@@ -21,7 +21,7 @@ let PayCodeController = class PayCodeController {
     }
 };
 PayCodeController = __decorate([
-    (0, common_1.Controller)('paycode'),
+    (0, common_1.Controller)('PayCode'),
     __metadata("design:paramtypes", [paycode_service_1.PayCodeService])
 ], PayCodeController);
 exports.PayCodeController = PayCodeController;

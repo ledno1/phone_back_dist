@@ -38,7 +38,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], PayCodeProxyController.prototype, "payCheck", null);
 PayCodeProxyController = __decorate([
-    (0, common_1.Controller)('/paycode/proxy'),
+    (0, common_1.Controller)('/PayCode/proxy'),
     __metadata("design:paramtypes", [proxy_service_1.PayCodeProxyService])
 ], PayCodeProxyController);
 exports.PayCodeProxyController = PayCodeProxyController;
