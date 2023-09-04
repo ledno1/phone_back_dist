@@ -31,8 +31,8 @@ const aLiPayHandler_service_1 = require("./subHandler/aLiPayHandler.service");
 const handlerTemplate_service_1 = require("./subHandler/handlerTemplate.service");
 const top_temp_entity_1 = require("../../entities/order/top_temp.entity");
 const XiaoMangProxyChargingHandlerservice_1 = require("./subHandler/XiaoMangProxyChargingHandlerservice");
-const paycode_module_1 = require("../payCode/paycode.module");
-const paycode_service_1 = require("../payCode/paycode.service");
+const paycode_module_1 = require("../paycode/paycode.module");
+const paycode_service_1 = require("../paycode/paycode.service");
 let ApiModule = class ApiModule {
 };
 ApiModule = __decorate([

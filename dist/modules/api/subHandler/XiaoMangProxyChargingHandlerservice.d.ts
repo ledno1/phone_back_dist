@@ -13,7 +13,7 @@ import { SysParamConfigService } from "@/modules/admin/system/param-config/param
 import { ChannelService } from "@/modules/resource/channel/channel.service";
 import { IAdminUser } from "@/modules/admin/admin.interface";
 import { ProxyCharging } from "@/entities/resource/proxyChargin.entity";
-import { PayCodeService } from "@/modules/payCode/paycode.service";
+import { PayCodeService } from "@/modules/paycode/paycode.service";
 export declare class TopOrderRedirect extends TopOrder {
     url: string;
 }
