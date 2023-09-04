@@ -19,24 +19,16 @@ const typeorm_2 = require("typeorm");
 const redis_service_1 = require("../../shared/services/redis.service");
 const util_service_1 = require("../../shared/services/util.service");
 const link_entity_1 = require("../../entities/resource/link.entity");
-const channel_service_1 = require("../resource/channel/channel.service");
 let PayCodeService = class PayCodeService {
-    channelService;
     redisService;
     entityManager;
     util;
-    constructor(channelService, redisService, entityManager, util) {
-        this.channelService = channelService;
+    constructor(redisService, entityManager, util) {
         this.redisService = redisService;
         this.entityManager = entityManager;
         this.util = util;
     }
     async onModuleInit() {
-        let subList = [];
-        for (let i = 1; i < 4; i++) {
-            let list = await this.channelService.getSubChannel(i, 0);
-            subList = subList.concat(list);
-        }
     }
     async createPayCodeByChannel(params, orderRedis) {
         let have = await this.entityManager.findOne(link_entity_1.Link, { where: { target: orderRedis.resource.target } });
@@ -44,15 +36,15 @@ let PayCodeService = class PayCodeService {
         }
         else {
         }
+        console.log("createPayCodeByChannel 根据支付通道 产码");
     }
     createPayCodeByProduct() {
     }
 };
 PayCodeService = __decorate([
     (0, common_1.Injectable)(),
-    __param(2, (0, typeorm_1.InjectEntityManager)()),
-    __metadata("design:paramtypes", [channel_service_1.ChannelService,
-        redis_service_1.RedisService,
+    __param(1, (0, typeorm_1.InjectEntityManager)()),
+    __metadata("design:paramtypes", [redis_service_1.RedisService,
         typeorm_2.EntityManager,
         util_service_1.UtilService])
 ], PayCodeService);
