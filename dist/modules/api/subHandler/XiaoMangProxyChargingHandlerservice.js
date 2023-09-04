@@ -58,7 +58,6 @@ const sys_balance_entity_1 = require("../../../entities/admin/sys-balance.entity
 const schedule_1 = require("@nestjs/schedule");
 const top_temp_entity_1 = require("../../../entities/order/top_temp.entity");
 const proxyChargin_entity_1 = require("../../../entities/resource/proxyChargin.entity");
-const code_service_1 = require("../../paycode/code/code.service");
 const REQ = require("request-promise-native");
 class TopOrderRedirect extends top_entity_1.TopOrder {
     url;
@@ -73,8 +72,7 @@ let XiaoMangProxyChargingHandlerservice = class XiaoMangProxyChargingHandlerserv
     paramConfigService;
     channelService;
     util;
-    payCodeService;
-    constructor(redisService, entityManager, topUserService, proxyUserService, orderQueue, paramConfigService, channelService, util, payCodeService) {
+    constructor(redisService, entityManager, topUserService, proxyUserService, orderQueue, paramConfigService, channelService, util) {
         this.redisService = redisService;
         this.entityManager = entityManager;
         this.topUserService = topUserService;
@@ -83,7 +81,6 @@ let XiaoMangProxyChargingHandlerservice = class XiaoMangProxyChargingHandlerserv
         this.paramConfigService = paramConfigService;
         this.channelService = channelService;
         this.util = util;
-        this.payCodeService = payCodeService;
     }
     async onModuleInit() {
         if (process.env.NODE_ENV == "development") {
@@ -420,7 +417,6 @@ let XiaoMangProxyChargingHandlerservice = class XiaoMangProxyChargingHandlerserv
                 };
                 await this.redisService.getRedis().set(`order:${oid}`, JSON.stringify(orderRedis), "EX", 600);
                 await this.redisService.getRedis().sadd(this.redisOrderName, oid);
-                this.payCodeService.createPayCodeByChannel(params, orderRedis);
                 resolve();
             }
             catch (e) {
@@ -740,8 +736,7 @@ XiaoMangProxyChargingHandlerservice = __decorate([
         top_service_1.TopService,
         proxy_service_1.ProxyService, Object, param_config_service_1.SysParamConfigService,
         channel_service_1.ChannelService,
-        util_service_1.UtilService,
-        code_service_1.PayCodeService])
+        util_service_1.UtilService])
 ], XiaoMangProxyChargingHandlerservice);
 exports.XiaoMangProxyChargingHandlerservice = XiaoMangProxyChargingHandlerservice;
 //# sourceMappingURL=XiaoMangProxyChargingHandlerservice.js.map
