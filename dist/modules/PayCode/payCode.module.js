@@ -56,7 +56,8 @@ PayCodeModule = __decorate([
             ws_module_1.WSModule,
         ],
         controllers: [paycode_controller_1.PayCodeController, proxy_controller_1.PayCodeProxyController, account_controller_1.PayCodeAccountController, product_controller_1.PayCodeProductController],
-        providers: [paycode_service_1.PayCodeService, proxy_service_1.PayCodeProxyService, account_service_1.PayCodeAccountService, product_service_1.PayCodeProductService, channel_service_1.ChannelService]
+        providers: [paycode_service_1.PayCodeService, proxy_service_1.PayCodeProxyService, account_service_1.PayCodeAccountService, product_service_1.PayCodeProductService, channel_service_1.ChannelService],
+        exports: [paycode_service_1.PayCodeService],
     })
 ], PayCodeModule);
 exports.PayCodeModule = PayCodeModule;
