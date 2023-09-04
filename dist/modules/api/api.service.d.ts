@@ -100,7 +100,7 @@ export declare class ApiService implements OnModuleInit {
         price: string;
         orderid: string;
         userid: string;
-        createAt: string;
+        createAt: string | Date;
         showOrderid: string;
         status: boolean;
         msg?: undefined;

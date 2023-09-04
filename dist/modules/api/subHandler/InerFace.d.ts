@@ -33,7 +33,7 @@ export declare class PayAccountEx extends PayAccount {
     realAmount?: number;
 }
 export declare class OrderRedis {
-    createAt: string;
+    createAt: string | Date;
     req: SysPay;
     order: TopOrder;
     resource: PayAccountEx | PayAccount | ProxyCharging | null;

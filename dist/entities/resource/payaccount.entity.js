@@ -25,6 +25,7 @@ let PayAccount = class PayAccount extends base_entity_1.BaseEntity {
     mark;
     rechargeLimit;
     lockLimit;
+    pullAt;
     totalRecharge;
     payMode;
     accountType;
@@ -65,6 +66,10 @@ __decorate([
     (0, typeorm_1.Column)({ type: 'int', comment: "当天锁定限额,特定时间归0", default: 0 }),
     __metadata("design:type", Number)
 ], PayAccount.prototype, "lockLimit", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ name: 'pull_at', default: () => "CURRENT_TIMESTAMP" }),
+    __metadata("design:type", Date)
+], PayAccount.prototype, "pullAt", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: 'int', comment: "充值总额", default: 0 }),
     __metadata("design:type", Number)

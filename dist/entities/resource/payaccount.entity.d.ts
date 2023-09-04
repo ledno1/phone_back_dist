@@ -9,6 +9,7 @@ export declare class PayAccount extends BaseEntity {
     mark: string;
     rechargeLimit: number;
     lockLimit: number;
+    pullAt: Date;
     totalRecharge: number;
     payMode: number;
     accountType: number;

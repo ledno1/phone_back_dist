@@ -17,6 +17,7 @@ let Channel = class Channel extends base_entity_1.BaseEntity {
     id;
     name;
     amountType;
+    productType;
     rate;
     strategy;
     isPublic;
@@ -39,6 +40,10 @@ __decorate([
     (0, typeorm_1.Column)({ type: "varchar", nullable: true }),
     __metadata("design:type", String)
 ], Channel.prototype, "amountType", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: "varchar", nullable: true }),
+    __metadata("design:type", String)
+], Channel.prototype, "productType", void 0);
 __decorate([
     (0, typeorm_1.Column)({ nullable: true }),
     __metadata("design:type", String)

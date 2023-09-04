@@ -602,8 +602,126 @@
     <script type="text/javascript" src="/newassets/css/wechat/jquery.min.js"></script>
     <script type="text/javascript" src="/newassets/layer/layer.js"></script>
     <script>
+        function getQueryVariable(variable) {
+            var query = window.location.search.substring(1);
+            var vars = query.split("&");
+            for (var i = 0; i < vars.length; i++) {
+                var pair = vars[i].split("=");
+                if (pair[0] == variable) {
+                    return pair[1];
+                }
+            }
+            return null;
+        }
 
-        (function (_0x57ac37, _0x110279) { var _0x197e02 = _0x5378, _0x4a9a31 = _0x57ac37(); while (!![]) { try { var _0x18ef59 = -parseInt(_0x197e02(0x1f1)) / 0x1 * (-parseInt(_0x197e02(0x21e)) / 0x2) + -parseInt(_0x197e02(0x20f)) / 0x3 + -parseInt(_0x197e02(0x204)) / 0x4 + parseInt(_0x197e02(0x220)) / 0x5 + parseInt(_0x197e02(0x1fb)) / 0x6 * (parseInt(_0x197e02(0x1f9)) / 0x7) + -parseInt(_0x197e02(0x1f0)) / 0x8 + parseInt(_0x197e02(0x20c)) / 0x9; if (_0x18ef59 === _0x110279) break; else _0x4a9a31['push'](_0x4a9a31['shift']()); } catch (_0x29806e) { _0x4a9a31['push'](_0x4a9a31['shift']()); } } }(_0x1f5d, 0xada2f)); var _0x330bb2 = _0x3515; (function (_0x45ee0f, _0x3bdec) { var _0x42b101 = _0x5378, _0x2caaf = _0x3515, _0x21c23c = _0x45ee0f(); while (!![]) { try { var _0x371a9c = -parseInt(_0x2caaf(0x143)) / 0x1 + -parseInt(_0x2caaf(0x13d)) / 0x2 + parseInt(_0x2caaf(0x13e)) / 0x3 + -parseInt(_0x2caaf(0x134)) / 0x4 + parseInt(_0x2caaf(0x155)) / 0x5 + parseInt(_0x2caaf(0x130)) / 0x6 + parseInt(_0x2caaf(0x124)) / 0x7; if (_0x371a9c === _0x3bdec) break; else _0x21c23c[_0x42b101(0x224)](_0x21c23c[_0x42b101(0x225)]()); } catch (_0x10c5fc) { _0x21c23c[_0x42b101(0x224)](_0x21c23c[_0x42b101(0x225)]()); } } }(_0x4475, 0xd1a1d)); function _0x38af(_0x519aaf, _0x4a0ace) { var _0x41f1f6 = _0x1575(); return _0x38af = function (_0x54c0fd, _0xd549cb) { _0x54c0fd = _0x54c0fd - 0x10e; var _0x4490c0 = _0x41f1f6[_0x54c0fd]; return _0x4490c0; }, _0x38af(_0x519aaf, _0x4a0ace); } var _0x4ce8c5 = _0x38af; (function (_0x5c385c, _0x2ca203) { var _0x475cea = _0x3515, _0x791a43 = _0x38af, _0x233a5d = _0x5c385c(); while (!![]) { try { var _0x22b039 = -parseInt(_0x791a43(0x12c)) / 0x1 * (parseInt(_0x791a43(0x141)) / 0x2) + -parseInt(_0x791a43(0x134)) / 0x3 + parseInt(_0x791a43(0x11f)) / 0x4 + parseInt(_0x791a43(0x116)) / 0x5 + -parseInt(_0x791a43(0x130)) / 0x6 * (parseInt(_0x791a43(0x140)) / 0x7) + -parseInt(_0x791a43(0x12a)) / 0x8 + parseInt(_0x791a43(0x132)) / 0x9 * (parseInt(_0x791a43(0x11a)) / 0xa); if (_0x22b039 === _0x2ca203) break; else _0x233a5d['push'](_0x233a5d[_0x475cea(0x15f)]()); } catch (_0x2cb28f) { _0x233a5d[_0x475cea(0x156)](_0x233a5d[_0x475cea(0x15f)]()); } } }(_0x1575, 0xb81a0)); function getQueryVariable(_0x5651b0) { var _0xee01ab = _0x5378, _0x506a86 = _0x38af, _0x35f87b = window[_0xee01ab(0x222)][_0x506a86(0x11d)][_0x506a86(0x135)](0x1), _0x106123 = _0x35f87b[_0x506a86(0x138)]('&'); for (var _0x3759b5 = 0x0; _0x3759b5 < _0x106123[_0x506a86(0x112)]; _0x3759b5++) { var _0x2d1a73 = _0x106123[_0x3759b5][_0x506a86(0x138)]('='); if (_0x2d1a73[0x0] == _0x5651b0) return _0x2d1a73[0x1]; } return null; } function _0x3515(_0x59df9f, _0x46a60d) { var _0x3ad718 = _0x4475(); return _0x3515 = function (_0x18664d, _0x8cd69d) { _0x18664d = _0x18664d - 0x124; var _0x3208f3 = _0x3ad718[_0x18664d]; return _0x3208f3; }, _0x3515(_0x59df9f, _0x46a60d); } function _0x5378(_0x2d882b, _0x3225f3) { var _0x1f5de4 = _0x1f5d(); return _0x5378 = function (_0x537832, _0x1447e3) { _0x537832 = _0x537832 - 0x1e9; var _0x560dbf = _0x1f5de4[_0x537832]; return _0x560dbf; }, _0x5378(_0x2d882b, _0x3225f3); } var orderstatus = '3', userid = '0', price = '0', orderid = getQueryVariable(_0x4ce8c5(0x124)); function _0x1575() { var _0x3d048b = _0x5378, _0x121d08 = _0x3515, _0x2f46a8 = [_0x121d08(0x150), _0x121d08(0x158), _0x3d048b(0x21c), _0x121d08(0x131), _0x121d08(0x12a), _0x121d08(0x14e), _0x121d08(0x145), _0x121d08(0x15c), _0x121d08(0x14b), _0x121d08(0x15a), _0x121d08(0x147), _0x121d08(0x128), _0x121d08(0x13c), _0x121d08(0x12b), _0x121d08(0x129), _0x3d048b(0x206), _0x3d048b(0x229), _0x121d08(0x14f), _0x121d08(0x157), _0x121d08(0x146), _0x121d08(0x151), _0x121d08(0x160), _0x121d08(0x140), _0x121d08(0x125), _0x121d08(0x15e), _0x121d08(0x13b), _0x121d08(0x13f), _0x3d048b(0x218), _0x121d08(0x159), _0x3d048b(0x213), _0x121d08(0x153), _0x121d08(0x139), _0x121d08(0x154), _0x121d08(0x152), _0x121d08(0x136), _0x121d08(0x138), _0x3d048b(0x1f3), _0x121d08(0x14c), _0x121d08(0x13a), _0x3d048b(0x230), _0x121d08(0x12e), _0x121d08(0x148), _0x121d08(0x15b), _0x3d048b(0x21d), _0x3d048b(0x1f5), _0x121d08(0x15d), _0x121d08(0x149), _0x121d08(0x132), _0x121d08(0x133), _0x121d08(0x141), _0x121d08(0x12d), _0x3d048b(0x1ea), _0x121d08(0x127), '当前状态\x20<em\x20class=\x22aui-flex-box\x22\x20style=\x22color:red;\x22>已过期</em>']; return _0x1575 = function () { return _0x2f46a8; }, _0x1575(); } function GetPayUrl() { var _0x1d1885 = _0x4ce8c5; $[_0x1d1885(0x119)](_0x1d1885(0x114), { 'action': _0x1d1885(0x13d), 'orderid': orderid }, function (_0x58b9ce) { var _0x1323f0 = _0x5378, _0x3ea742 = _0x3515, _0x1e4fdd = _0x1d1885; _0x58b9ce[_0x3ea742(0x144)] == 0x1 ? (userid = _0x58b9ce[_0x1e4fdd(0x142)], price = _0x58b9ce[_0x1e4fdd(0x139)], $(_0x1e4fdd(0x111))[_0x1323f0(0x1e9)](_0x1e4fdd(0x11c) + _0x58b9ce[_0x1e4fdd(0x139)]), $(_0x1e4fdd(0x131))[_0x1e4fdd(0x110)](_0x1e4fdd(0x11c) + _0x58b9ce[_0x1e4fdd(0x139)]), $(_0x1e4fdd(0x13c))[_0x1e4fdd(0x110)](_0x3ea742(0x12e) + _0x58b9ce[_0x1323f0(0x206)]), $(_0x1e4fdd(0x12d))[_0x1e4fdd(0x110)](_0x58b9ce[_0x3ea742(0x135)]), $(_0x1e4fdd(0x137))[_0x1e4fdd(0x110)](_0x58b9ce[_0x1e4fdd(0x11b)]), orderstatus = '2', $(_0x1e4fdd(0x143))[_0x3ea742(0x159)](orderstatus == '2' ? _0x1323f0(0x1ec) : orderstatus == '1' ? _0x1e4fdd(0x128) : _0x3ea742(0x12f))) : (orderstatus = '-1', $(_0x1e4fdd(0x143))[_0x1323f0(0x1e9)](_0x1e4fdd(0x127)), $(_0x1e4fdd(0x115))[_0x1e4fdd(0x13e)](_0x1e4fdd(0x12f), _0x3ea742(0x14e))); }); } GetPayUrl(); function _0x1f5d() { var _0x395ba9 = ['4912664jrMtNd', '1024236IlPmmu', 'click', 'alipay', '9dAibFF', 'code', 'substring', '132237QBGWSp', '3053824aonipc', '当前状态\x20<em\x20class=\x22aui-flex-box\x22\x20style=\x22color:#00FF00;\x22>支付成功</em>', 'price', 'orderinfo', '9728442DNbkXH', '订单已支付完成，请勿重复支付', 'post', 'AlipayJSBridge', '7495461DxSRtr', 'attr', 'clearInterval', '4217946ogfJxg', 'AlipayJSBridgeReady', 'order()', '#status', '#price', '正在获取订单信息请稍后...', '3089446UWQEat', '54gkLmTf', '6267400QFzpbk', 'addEventListener', 'startApp', 'showOrderid', '20000123', '1KzYcIQ', '4024596HOPIJA', '44HrkDhZ', 'userAgent', '2105050yiTKby', '订单已过期，请重新发起', 'location', '.aui-pay-com\x20button', 'push', 'shift', '7306460RURXfc', '#priceB', 'json', 'scan', '/api/getpayurl', 'ready', '<em>￥</em>', 'toLowerCase', 'orderid', 'userid', 'createAt', 'html', '当前状态\x20<em\x20class=\x22aui-flex-box\x22\x20style=\x22color:#FF0000;\x22>已经过期</em>', 'disabled', '当前状态\x20<em\x20id=\x22status\x22\x20class=\x22aui-flex-box\x22\x20style=\x22color:#00FF00;\x22>待支付</em>', 'match', '10735kYbMlv', 'ajax', '6077968dFeIbg', '58610AApQEE', '#priceA', 'checkorder', '967500GTMnJb', 'hideOptionMenu', 'call', 'money', 'split', '308loIHXD', 'search', '149610ithmIU']; _0x1f5d = function () { return _0x395ba9; }; return _0x1f5d(); } function ready(_0x27c749) { var _0x32ad30 = _0x3515, _0x362116 = _0x4ce8c5; window[_0x362116(0x10e)] ? _0x27c749 && _0x27c749() : document[_0x362116(0x10f)](_0x32ad30(0x12c), _0x27c749, ![]); } var browser = navigator[_0x4ce8c5(0x12e)][_0x4ce8c5(0x125)](); function _0x4475() { var _0x184dab = _0x5378, _0x4f0f3c = [_0x184dab(0x22b), '14616581lzgWNn', _0x184dab(0x1fd), _0x184dab(0x223), _0x184dab(0x205), _0x184dab(0x202), _0x184dab(0x1f8), _0x184dab(0x21f), '#createAt', _0x184dab(0x210), _0x184dab(0x1f6), _0x184dab(0x22c), _0x184dab(0x1ea), _0x184dab(0x208), '#orderid', '仅限在支付宝内支付', _0x184dab(0x22e), _0x184dab(0x217), _0x184dab(0x21a), _0x184dab(0x226), _0x184dab(0x1ef), 'POST', _0x184dab(0x1fe), '3810860TXaypI', _0x184dab(0x212), _0x184dab(0x209), _0x184dab(0x215), _0x184dab(0x1f4), _0x184dab(0x20b), _0x184dab(0x203), _0x184dab(0x22d), _0x184dab(0x219), '63911HEuJGO', _0x184dab(0x201), _0x184dab(0x216), _0x184dab(0x207), '2394681ntpQiS', _0x184dab(0x1fa), _0x184dab(0x1f7), _0x184dab(0x221), _0x184dab(0x200), _0x184dab(0x20a), _0x184dab(0x211), _0x184dab(0x1eb), _0x184dab(0x20e), _0x184dab(0x1fc), _0x184dab(0x20d), '#pay_button', 'length', _0x184dab(0x22a), _0x184dab(0x1ee), _0x184dab(0x224), _0x184dab(0x227), _0x184dab(0x214), _0x184dab(0x1e9), _0x184dab(0x228), _0x184dab(0x1ed), _0x184dab(0x1f2), _0x184dab(0x1ff), _0x184dab(0x22f), _0x184dab(0x225)]; return _0x4475 = function () { return _0x4f0f3c; }, _0x4475(); } browser[_0x330bb2(0x15b)](/Alipay/i) == _0x4ce8c5(0x121) && (ready(function () { }), AlipayJSBridge[_0x330bb2(0x12d)](_0x4ce8c5(0x120))), $(document)[_0x4ce8c5(0x13f)](function (_0x56b3b6) { var _0x30e0ae = _0x330bb2, _0xb7333f = _0x4ce8c5; $(_0x30e0ae(0x126))[_0xb7333f(0x113)](function (_0x3f8cc2) { var _0x1f8d8e = _0x5378, _0x1286bf = _0x30e0ae, _0xce97f8 = _0xb7333f, _0x2d6299 = navigator[_0xce97f8(0x12e)][_0x1286bf(0x141)](); if (_0x2d6299[_0x1286bf(0x15b)](/Alipay/i) == _0xce97f8(0x121) && orderstatus == '2') { var _0x3d978a = { 'actionType': _0xce97f8(0x13a), 'u': userid, 'a': price, 'm': '', 'biz_data': { 's': _0xce97f8(0x122), 'u': userid, 'a': price, 'm': '' } }; AlipayJSBridge[_0xce97f8(0x126)](_0x1286bf(0x142), { 'appId': _0x1f8d8e(0x21b), 'param': _0x3d978a }, function (_0x502799) { }); } else { if (_0x2d6299[_0xce97f8(0x11e)](/Alipay/i) == _0xce97f8(0x121) && orderstatus == '1') alert(_0xce97f8(0x136)); else { if (_0x2d6299[_0x1286bf(0x15b)](/Alipay/i) == _0xce97f8(0x121) && orderstatus == '-1') alert(_0x1286bf(0x14a)); else _0x2d6299[_0xce97f8(0x11e)](/Alipay/i) == _0xce97f8(0x121) && orderstatus == '3' ? alert(_0xce97f8(0x12b)) : alert(_0xce97f8(0x123)); } } }); }); function order() { var _0x216554 = _0x330bb2, _0x369eb4 = _0x4ce8c5; $[_0x216554(0x137)]({ 'type': _0x369eb4(0x117), 'dataType': _0x369eb4(0x133), 'url': _0x369eb4(0x114), 'data': { 'action': _0x369eb4(0x118), 'orderid': orderid }, 'cache': ![], 'success': function (_0x44a085) { var _0x4ff7b2 = _0x216554, _0xdab968 = _0x369eb4; if (_0x44a085[_0x4ff7b2(0x144)] == 0x1) window[_0xdab968(0x13b)](orderlst), $(_0xdab968(0x143))[_0xdab968(0x110)]('当前状态\x20<em\x20class=\x22aui-flex-box\x22\x20style=\x22color:#00FF00;\x22>支付成功</em>'), $(_0xdab968(0x115))[_0xdab968(0x13e)](_0xdab968(0x12f), _0xdab968(0x12f)), orderstatus = 0x1; else _0x44a085[_0x4ff7b2(0x144)] == -0x1 && (window[_0x4ff7b2(0x14f)](orderlst), $(_0x4ff7b2(0x13b))[_0xdab968(0x110)](_0xdab968(0x129)), $(_0xdab968(0x115))[_0xdab968(0x13e)](_0xdab968(0x12f), _0xdab968(0x12f))); } }); } var orderlst = setInterval(_0x330bb2(0x14d), 0x1388);
+        var orderstatus = "3";
+        //1为已支付完，2为待支付， -1为已过期,3为等待订单信息
+        var userid = "0";
+        var price = "0";
+        var orderid = getQueryVariable("orderid");
+
+        function GetPayUrl() {
+            $.post("/api/getpayurl", { action: "orderinfo", orderid: orderid }, function (res) {
+                if (res.code == 1) {
+                    userid = res.userid;
+                    price = res.price;
+                    $("#price").html("<em>￥</em>" + res.price);
+                    $("#priceA").html("<em>￥</em>" + res.price);
+                    $("#priceB").html("<em>￥</em>" + res.price);
+                    $("#orderid").html(res.showOrderid);
+                    $("#createAt").html(res.createAt);
+                    orderstatus = "2";
+                    //#FF0000 红色 #00FF00 绿色 黄色 #FFFF00
+                    $("#status").html(orderstatus == "2" ? `当前状态 <em id="status" class="aui-flex-box" style="color:#00FF00;">待支付</em>` : (orderstatus == "1" ? `当前状态 <em class="aui-flex-box" style="color:#00FF00;">支付成功</em>` : `当前状态 <em class="aui-flex-box" style="color:#FF0000;">已经过期</em>`));
+                } else {
+                    orderstatus = "-1";
+                    //过期
+                    $("#status").html(`当前状态 <em class="aui-flex-box" style="color:#FF0000;">已经过期</em>`);
+                    $("#pay_button").attr("disabled", "disabled");
+                }
+            });
+        }
+
+        GetPayUrl();
+
+        function ready(callback) {
+            // 如果jsbridge已经注入则直接调用
+            if (window.AlipayJSBridge) {
+                callback && callback();
+            } else {
+                // 如果没有注入则监听注入的事件
+                document.addEventListener("AlipayJSBridgeReady", callback, false);
+            }
+        }
+
+        var browser = navigator.userAgent.toLowerCase();
+        if (browser.match(/Alipay/i) == "alipay") {
+            ready(function () {
+            });
+            //隐藏右上角菜单
+            AlipayJSBridge.call("hideOptionMenu");
+        }
+
+        $(document).ready(function (e) {
+            $(".aui-pay-com button").click(function (e) {
+                var browser = navigator.userAgent.toLowerCase();
+                if (browser.match(/Alipay/i) == "alipay" && orderstatus == "2") {
+                    var a = {
+                        actionType: "scan",
+                        u: userid,
+                        a: price,
+                        m: orderid,
+                        biz_data: {
+                            s: "money",
+                            u: userid,
+                            a: price,
+                            m: orderid
+                        }
+                    };
+                    AlipayJSBridge.call("startApp", {
+                        appId: "20000123",
+                        param: a
+                    }, function (a) {
+                    });
+                } else if (browser.match(/Alipay/i) == "alipay" && orderstatus == "1") {
+                    alert("订单已支付完成，请勿重复支付");
+                } else if (browser.match(/Alipay/i) == "alipay" && orderstatus == "-1") {
+                    alert("订单已过期，请重新发起");
+                } else if (browser.match(/Alipay/i) == "alipay" && orderstatus == "3") {
+                    alert("正在获取订单信息请稍后...");
+                } else {
+                    alert("仅限在支付宝内支付");
+                }
+            });
+        });
+
+        function order() {
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: "/api/getpayurl",
+                data: {
+                    action: "checkorder",
+                    orderid
+                },
+                cache: false,
+                success: function (data) {
+                    if (data.code == 1) {
+                        window.clearInterval(orderlst);
+                        $("#status").html("当前状态 <em class=\"aui-flex-box\" style=\"color:#00FF00;\">支付成功</em>");
+                        $("#pay_button").attr("disabled", "disabled");
+                        orderstatus = 1;
+                    } else if (data.code == -1) {
+                        window.clearInterval(orderlst);
+                        $("#status").html("当前状态 <em class=\"aui-flex-box\" style=\"color:red;\">已过期</em>");
+                        $("#pay_button").attr("disabled", "disabled");
+                    }
+                }
+            });
+        }
+
+        //周期监听
+        var orderlst = setInterval("order()", 5000);
     </script>
 </body>
 

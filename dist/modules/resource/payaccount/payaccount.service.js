@@ -59,17 +59,15 @@ let PayAccountService = class PayAccountService {
         this.util = util;
     }
     async onModuleInit() {
-        if (process_1.default.env.NODE_ENV == "production") {
-            let port = process_1.default.env.PUP_PORT;
-            if (!port) {
-                throw new Error("未设置pup端口 请在.env.prod文件中设置PUP_PORT");
-            }
-            this.pupHost = "http://localhost:" + port;
+        let port = process_1.default.env.PUP_PORT;
+        let host = process_1.default.env.PUP_HOST;
+        if (!port) {
+            throw new Error("未设置pup端口 请在.env.prod文件中设置PUP_PORT");
         }
-        else {
-            this.pupHost = "http://192.168.23.132:3005";
+        if (!host) {
+            throw new Error("未设置pup主机 例：http://xxx.xxx.xxx.xxx 请在.env.prod文件中设置PUP_HOST");
         }
-        console.log(this.pupHost);
+        this.pupHost = host + ":" + port;
     }
     async page(params, user) {
         let { page, limit, zuid, accountNumber, open, username, action } = params;

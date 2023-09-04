@@ -308,10 +308,10 @@ let ALiPayHandlerService = class ALiPayHandlerService {
                             .andWhere("payAccount.rechargeLimit-payAccount.lockLimit >= :amount", { amount: params.amount })
                             .andWhere("user.id = :id", { id })
                             .orderBy("payAccount.weight", "DESC")
-                            .orderBy("payAccount.updatedAt", "ASC")
+                            .orderBy("payAccount.pullAt", "ASC")
                             .getOne();
                         if (account) {
-                            await entityManager.query(`update pay_account set lockLimit = lockLimit + ${params.amount}, totalRecharge = totalRecharge + ${params.amount} where id = ${account.id}`);
+                            await entityManager.query(`update pay_account set lockLimit = lockLimit + ${params.amount}, totalRecharge = totalRecharge + ${params.amount},pull_at = now() where id = ${account.id}`);
                             await entityManager.query(`update sys_user set balance = balance - ${rateAmount} where id = ${user.id}`);
                             return account;
                         }

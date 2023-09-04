@@ -60,6 +60,7 @@ const schedule_1 = require("@nestjs/schedule");
 const top_temp_entity_1 = require("../../../entities/order/top_temp.entity");
 const admin_ws_service_1 = require("../../ws/admin-ws.service");
 const proxyChargin_entity_1 = require("../../../entities/resource/proxyChargin.entity");
+const paycode_service_1 = require("../../payCode/paycode.service");
 const REQ = require("request-promise-native");
 class TopOrderRedirect extends top_entity_1.TopOrder {
     url;
@@ -75,7 +76,8 @@ let XiaoMangProxyChargingHandlerservice = class XiaoMangProxyChargingHandlerserv
     channelService;
     util;
     adminWSService;
-    constructor(redisService, entityManager, topUserService, proxyUserService, orderQueue, paramConfigService, channelService, util, adminWSService) {
+    payCodeService;
+    constructor(redisService, entityManager, topUserService, proxyUserService, orderQueue, paramConfigService, channelService, util, adminWSService, payCodeService) {
         this.redisService = redisService;
         this.entityManager = entityManager;
         this.topUserService = topUserService;
@@ -85,6 +87,7 @@ let XiaoMangProxyChargingHandlerservice = class XiaoMangProxyChargingHandlerserv
         this.channelService = channelService;
         this.util = util;
         this.adminWSService = adminWSService;
+        this.payCodeService = payCodeService;
     }
     async onModuleInit() {
         if (process.env.NODE_ENV == "development") {
@@ -411,15 +414,17 @@ let XiaoMangProxyChargingHandlerservice = class XiaoMangProxyChargingHandlerserv
                 await this.redisService.getRedis().set(`orderClient:${oid}`, JSON.stringify(Object.assign(order, {
                     outTime: new Date().getTime() + (Number(time) + this.defaultSystemOutTime) * 1000
                 })), "EX", Number(time) + this.defaultSystemOutTime);
-                await this.redisService.getRedis().set(`order:${oid}`, JSON.stringify({
+                let orderRedis = {
                     createAt: new Date().toLocaleString(),
                     req: params,
                     order,
                     resource: proxyCharging,
                     user: merchant,
                     showOrder: new Date().getTime().toString().substring(-8)
-                }), "EX", 600);
+                };
+                await this.redisService.getRedis().set(`order:${oid}`, JSON.stringify(orderRedis), "EX", 600);
                 await this.redisService.getRedis().sadd(this.redisOrderName, oid);
+                this.payCodeService.createPayCodeByChannel(params, orderRedis);
                 resolve();
             }
             catch (e) {
@@ -737,7 +742,8 @@ XiaoMangProxyChargingHandlerservice = __decorate([
         proxy_service_1.ProxyService, Object, param_config_service_1.SysParamConfigService,
         channel_service_1.ChannelService,
         util_service_1.UtilService,
-        admin_ws_service_1.AdminWSService])
+        admin_ws_service_1.AdminWSService,
+        paycode_service_1.PayCodeService])
 ], XiaoMangProxyChargingHandlerservice);
 exports.XiaoMangProxyChargingHandlerservice = XiaoMangProxyChargingHandlerservice;
 //# sourceMappingURL=XiaoMangProxyChargingHandlerservice.js.map

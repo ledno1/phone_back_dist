@@ -57,6 +57,7 @@ let ApiController = class ApiController {
             let subChannelList = await this.redis.getRedis().get(`channel:subChannelList:${channel}`);
             if (!subChannelList) {
                 subChannelList = await this.channelService.getSubChannel(Number(channel));
+                await this.redis.getRedis().set(`channel:subChannelList:${channel}`, JSON.stringify(subChannelList), "EX", 60 * 1);
             }
             else {
                 subChannelList = JSON.parse(subChannelList);
@@ -65,7 +66,9 @@ let ApiController = class ApiController {
                 if (item.id === subChannel) {
                     if (item.amountType && item.amountType !== "") {
                         let a = item.amountType.split(",");
-                        if (!a.includes(body.orderAmt)) {
+                        let b = body.orderAmt.includes('.') ? body.orderAmt.split(".")[0] : body.orderAmt;
+                        if (!a.includes(b)) {
+                            console.error(body.orderAmt + "  金额不在范围内");
                             throw new api_exception_1.ApiException(60015);
                         }
                     }

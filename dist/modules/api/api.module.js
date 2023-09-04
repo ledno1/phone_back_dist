@@ -31,14 +31,15 @@ const aLiPayHandler_service_1 = require("./subHandler/aLiPayHandler.service");
 const handlerTemplate_service_1 = require("./subHandler/handlerTemplate.service");
 const top_temp_entity_1 = require("../../entities/order/top_temp.entity");
 const XiaoMangProxyChargingHandlerservice_1 = require("./subHandler/XiaoMangProxyChargingHandlerservice");
+const paycode_service_1 = require("../payCode/paycode.service");
 let ApiModule = class ApiModule {
 };
 ApiModule = __decorate([
     (0, common_1.Module)({
         imports: [
             system_module_1.SystemModule,
-            resource_module_1.ResourceModule,
             usersys_module_1.UsersysModule,
+            resource_module_1.ResourceModule,
             typeorm_1.TypeOrmModule.forFeature([
                 top_entity_1.TopOrder,
                 top_temp_entity_1.TopOrderTemp
@@ -61,7 +62,7 @@ ApiModule = __decorate([
             ws_module_1.WSModule
         ],
         controllers: [orderSell_controller_1.OrderSellController, orderTop_controller_1.OrderTopController, api_controller_1.ApiController],
-        providers: [orderSell_service_1.OrderSellService, orderTop_service_1.OrderTopService, api_service_1.ApiService, orderHandler_service_1.orderConsumer, proxyChargingAPI_service_1.ProxyChargingAPIService, wxChannelAPI_service_1.WxChannelAPIService, aLiPayHandler_service_1.ALiPayHandlerService, handlerTemplate_service_1.HandlerTemplateService, XiaoMangProxyChargingHandlerservice_1.XiaoMangProxyChargingHandlerservice],
+        providers: [orderSell_service_1.OrderSellService, orderTop_service_1.OrderTopService, api_service_1.ApiService, orderHandler_service_1.orderConsumer, proxyChargingAPI_service_1.ProxyChargingAPIService, wxChannelAPI_service_1.WxChannelAPIService, aLiPayHandler_service_1.ALiPayHandlerService, handlerTemplate_service_1.HandlerTemplateService, XiaoMangProxyChargingHandlerservice_1.XiaoMangProxyChargingHandlerservice, paycode_service_1.PayCodeService],
         exports: [orderSell_service_1.OrderSellService, orderTop_service_1.OrderTopService, api_service_1.ApiService]
     })
 ], ApiModule);
