@@ -58,7 +58,7 @@ const sys_balance_entity_1 = require("../../../entities/admin/sys-balance.entity
 const schedule_1 = require("@nestjs/schedule");
 const top_temp_entity_1 = require("../../../entities/order/top_temp.entity");
 const proxyChargin_entity_1 = require("../../../entities/resource/proxyChargin.entity");
-const paycode_service_1 = require("../../PayCode/paycode.service");
+const code_service_1 = require("../../paycode/code/code.service");
 const REQ = require("request-promise-native");
 class TopOrderRedirect extends top_entity_1.TopOrder {
     url;
@@ -741,7 +741,7 @@ XiaoMangProxyChargingHandlerservice = __decorate([
         proxy_service_1.ProxyService, Object, param_config_service_1.SysParamConfigService,
         channel_service_1.ChannelService,
         util_service_1.UtilService,
-        paycode_service_1.PayCodeService])
+        code_service_1.PayCodeService])
 ], XiaoMangProxyChargingHandlerservice);
 exports.XiaoMangProxyChargingHandlerservice = XiaoMangProxyChargingHandlerservice;
 //# sourceMappingURL=XiaoMangProxyChargingHandlerservice.js.map

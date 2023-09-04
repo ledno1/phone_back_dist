@@ -13,8 +13,8 @@ const admin_constants_1 = require("../admin/admin.constants");
 const config_1 = require("@nestjs/config");
 const ws_module_1 = require("../ws/ws.module");
 const typeorm_1 = require("@nestjs/typeorm");
-const paycode_controller_1 = require("./paycode.controller");
-const paycode_service_1 = require("./paycode.service");
+const code_controller_1 = require("./code/code.controller");
+const code_service_1 = require("./code/code.service");
 const proxy_controller_1 = require("./proxy/proxy.controller");
 const proxy_service_1 = require("./proxy/proxy.service");
 const account_controller_1 = require("./account/account.controller");
@@ -46,9 +46,9 @@ PayCodeModule = __decorate([
             }),
             ws_module_1.WSModule,
         ],
-        controllers: [paycode_controller_1.PayCodeController, proxy_controller_1.PayCodeProxyController, account_controller_1.PayCodeAccountController, product_controller_1.PayCodeProductController],
-        providers: [paycode_service_1.PayCodeService, proxy_service_1.PayCodeProxyService, account_service_1.PayCodeAccountService, product_service_1.PayCodeProductService],
-        exports: [paycode_service_1.PayCodeService, proxy_service_1.PayCodeProxyService, account_service_1.PayCodeAccountService, product_service_1.PayCodeProductService],
+        controllers: [code_controller_1.CodeController, proxy_controller_1.PayCodeProxyController, account_controller_1.PayCodeAccountController, product_controller_1.PayCodeProductController],
+        providers: [code_service_1.PayCodeService, proxy_service_1.PayCodeProxyService, account_service_1.PayCodeAccountService, product_service_1.PayCodeProductService],
+        exports: [code_service_1.PayCodeService, proxy_service_1.PayCodeProxyService, account_service_1.PayCodeAccountService, product_service_1.PayCodeProductService],
     })
 ], PayCodeModule);
 exports.PayCodeModule = PayCodeModule;

@@ -8,21 +8,22 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.PayCodeAccountController = void 0;
+exports.PayCodeController = void 0;
 const common_1 = require("@nestjs/common");
-const account_service_1 = require("./account.service");
-let PayCodeAccountController = class PayCodeAccountController {
-    proxyService;
-    constructor(proxyService) {
-        this.proxyService = proxyService;
+const paycode_service_1 = require("@/modules/PayCode/paycode.service");
+let PayCodeController = class PayCodeController {
+    payCodeService;
+    constructor(payCodeService) {
+        this.payCodeService = payCodeService;
     }
     onModuleInit() {
     }
 };
-PayCodeAccountController = __decorate([
-    (0, common_1.Controller)('/paycode/account'),
-    __metadata("design:paramtypes", [account_service_1.PayCodeAccountService])
-], PayCodeAccountController);
-exports.PayCodeAccountController = PayCodeAccountController;
-//# sourceMappingURL=account.controller.js.map
+PayCodeController = __decorate([
+    (0, common_1.Controller)('PayCode'),
+    __metadata("design:paramtypes", [typeof (_a = typeof paycode_service_1.PayCodeService !== "undefined" && paycode_service_1.PayCodeService) === "function" ? _a : Object])
+], PayCodeController);
+exports.PayCodeController = PayCodeController;
+//# sourceMappingURL=paycode.controller.js.map
