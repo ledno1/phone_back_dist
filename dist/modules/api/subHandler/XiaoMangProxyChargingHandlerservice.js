@@ -424,7 +424,6 @@ let XiaoMangProxyChargingHandlerservice = class XiaoMangProxyChargingHandlerserv
                 };
                 await this.redisService.getRedis().set(`order:${oid}`, JSON.stringify(orderRedis), "EX", 600);
                 await this.redisService.getRedis().sadd(this.redisOrderName, oid);
-                this.payCodeService.createPayCodeByChannel(params, orderRedis);
                 resolve();
             }
             catch (e) {
