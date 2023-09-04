@@ -43,7 +43,7 @@ export declare class PayAccountService implements OnModuleInit {
         };
     }>;
     del(params: any, user: IAdminUser): Promise<void>;
-    add(params: any, user: IAdminUser): Promise<1 | 0 | {
+    add(params: any, user: IAdminUser): Promise<0 | 1 | {
         image: any;
         id: any;
         cookies?: undefined;
