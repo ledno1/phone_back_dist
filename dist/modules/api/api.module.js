@@ -22,7 +22,6 @@ const api_service_1 = require("./api.service");
 const system_module_1 = require("../admin/system/system.module");
 const resource_module_1 = require("../resource/resource.module");
 const usersys_module_1 = require("../usersys/usersys.module");
-const path_1 = require("path");
 const top_entity_1 = require("../../entities/order/top.entity");
 const aLiPayHandler_service_1 = require("./subHandler/aLiPayHandler.service");
 const handlerTemplate_service_1 = require("./subHandler/handlerTemplate.service");
@@ -54,7 +53,6 @@ ApiModule = __decorate([
                         db: configService.get("redis.db")
                     },
                     prefix: admin_constants_1.SYS_TASK_QUEUE_PREFIX,
-                    processors: [(0, path_1.join)(__dirname, 'orderHandler.service.js')],
                 }),
                 inject: [config_1.ConfigService]
             }),
