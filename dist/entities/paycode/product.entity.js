@@ -16,13 +16,16 @@ let PayCodeProduct = class PayCodeProduct extends base_entity_1.BaseEntity {
     id;
     name;
     amountType;
-    productType;
     rate;
-    strategy;
     isPublic;
-    isUse;
+    open;
     weight;
     expireTime;
+    maxStock;
+    checkMode;
+    payCallBackMode;
+    proxyChargingCallBackMode;
+    enable;
 };
 __decorate([
     (0, typeorm_1.PrimaryGeneratedColumn)(),
@@ -37,17 +40,9 @@ __decorate([
     __metadata("design:type", String)
 ], PayCodeProduct.prototype, "amountType", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: "varchar", nullable: true }),
-    __metadata("design:type", String)
-], PayCodeProduct.prototype, "productType", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ nullable: true }),
+    (0, typeorm_1.Column)({ nullable: true, comment: "租金费率" }),
     __metadata("design:type", String)
 ], PayCodeProduct.prototype, "rate", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ type: "int", default: 0, comment: "API策略,0队列,1优先级,2随机" }),
-    __metadata("design:type", Number)
-], PayCodeProduct.prototype, "strategy", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: "boolean", default: true, comment: "是否公开" }),
     __metadata("design:type", Boolean)
@@ -55,7 +50,7 @@ __decorate([
 __decorate([
     (0, typeorm_1.Column)({ type: "boolean", default: true, comment: "是否启用" }),
     __metadata("design:type", Boolean)
-], PayCodeProduct.prototype, "isUse", void 0);
+], PayCodeProduct.prototype, "open", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: "int", default: 0, comment: "优先级" }),
     __metadata("design:type", Number)
@@ -64,6 +59,26 @@ __decorate([
     (0, typeorm_1.Column)({ type: "int", default: 60 * 60 * 24, comment: "默认过期时间" }),
     __metadata("design:type", Number)
 ], PayCodeProduct.prototype, "expireTime", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: "int", default: -1, comment: "最大库存,-1则不限制，默认-1" }),
+    __metadata("design:type", Number)
+], PayCodeProduct.prototype, "maxStock", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: "int", default: 0, comment: "查单模式，0 官方查单 1 店铺查单" }),
+    __metadata("design:type", Number)
+], PayCodeProduct.prototype, "checkMode", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: "int", default: 0, comment: "四方商户回调模式，0 付款回调 1 发货回调" }),
+    __metadata("design:type", Number)
+], PayCodeProduct.prototype, "payCallBackMode", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: "int", default: 0, comment: "代充商户回调模式，0 付款回调 1 到账回调" }),
+    __metadata("design:type", Number)
+], PayCodeProduct.prototype, "proxyChargingCallBackMode", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: "boolean", default: false, comment: "是否可编辑" }),
+    __metadata("design:type", Boolean)
+], PayCodeProduct.prototype, "enable", void 0);
 PayCodeProduct = __decorate([
     (0, typeorm_1.Entity)({ name: "product" })
 ], PayCodeProduct);

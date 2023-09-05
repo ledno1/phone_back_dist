@@ -19,6 +19,7 @@ const typeorm_2 = require("typeorm");
 const redis_service_1 = require("../../../shared/services/redis.service");
 const util_service_1 = require("../../../shared/services/util.service");
 const product_entity_1 = require("../../../entities/paycode/product.entity");
+const api_exception_1 = require("../../../common/exceptions/api.exception");
 let PayCodeProductService = class PayCodeProductService {
     redisService;
     entityManager;
@@ -31,10 +32,19 @@ let PayCodeProductService = class PayCodeProductService {
     onModuleInit() {
     }
     async page(params, user) {
-        let { page, limit, action } = params;
+        let { page, limit, action, name, open } = params;
         let qb = null;
+        if (action == 'use') {
+            let qb = await this.entityManager.createQueryBuilder(product_entity_1.PayCodeProduct, "product")
+                .select(['product.id', 'product.name'])
+                .getMany();
+            return qb;
+        }
         qb = await this.entityManager.createQueryBuilder(product_entity_1.PayCodeProduct, "product")
             .select()
+            .where("1 = 1")
+            .andWhere(name ? `product.name like '%${name}%'` : '2=2')
+            .andWhere(open ? `product.open = ${open}` : '3=3')
             .offset((page - 1) * limit)
             .limit(limit);
         const [_, total] = await qb.getManyAndCount();
@@ -48,14 +58,61 @@ let PayCodeProductService = class PayCodeProductService {
             }
         };
     }
-    add(body, user) {
+    add(params, user) {
         return null;
     }
-    edit(body, user) {
+    async edit(params, user) {
+        let { action, data } = params;
+        let p = await this.entityManager.findOne(product_entity_1.PayCodeProduct, { where: { id: data.id } });
+        if (p) {
+            if (!p.enable) {
+                throw new api_exception_1.ApiException(40007);
+            }
+            if (action == 'rate') {
+                p.rate = data.rate;
+            }
+            else if (action == 'open') {
+                p.open = data.open;
+            }
+            else if (action == 'maxStock') {
+                p.maxStock = data.maxStock;
+            }
+            else if (action == 'proxyChargingCallBackMode') {
+                p.proxyChargingCallBackMode = data.proxyChargingCallBackMode;
+            }
+            else if (action == 'payCallBackMode') {
+                p.payCallBackMode = data.payCallBackMode;
+            }
+            else if (action == 'checkMode') {
+                console.log(Number(data.checkMode));
+                p.checkMode = data.checkMode;
+            }
+            else if (action == 'weight') {
+                p.weight = data.weight;
+            }
+            else if (action == 'amountType') {
+                p.amountType = data.amountType;
+            }
+            await this.entityManager.save(product_entity_1.PayCodeProduct, p);
+        }
         return null;
     }
-    delete(body, user) {
+    delete(params, user) {
         return null;
+    }
+    async getProductByIds(ids) {
+        try {
+            let qb = await this.entityManager.createQueryBuilder(product_entity_1.PayCodeProduct, "product")
+                .select()
+                .where("1 = 1")
+                .andWhere("product.id IN (:...ids)", { ids })
+                .orderBy('product.weight', 'DESC')
+                .getMany();
+            return qb;
+        }
+        catch (e) {
+            console.error('根据id获取产品码出错', e);
+        }
     }
 };
 PayCodeProductService = __decorate([

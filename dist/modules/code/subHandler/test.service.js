@@ -5,24 +5,27 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CodeController = void 0;
+exports.TestHandlerService = void 0;
 const common_1 = require("@nestjs/common");
-const code_service_1 = require("./code.service");
-let CodeController = class CodeController {
-    payCodeService;
-    constructor(payCodeService) {
-        this.payCodeService = payCodeService;
-    }
+let TestHandlerService = class TestHandlerService {
     onModuleInit() {
     }
+    result(params, orderRedis) {
+        return new Promise((resolve, reject) => {
+            resolve(true);
+        });
+    }
+    nameKey = 'test';
+    checkOrder(params, orderRedis) {
+        return new Promise((resolve, reject) => {
+            console.log('查单实现');
+            resolve(true);
+        });
+    }
 };
-CodeController = __decorate([
-    (0, common_1.Controller)('/paycode/code'),
-    __metadata("design:paramtypes", [code_service_1.CodeService])
-], CodeController);
-exports.CodeController = CodeController;
-//# sourceMappingURL=code.controller.js.map
+TestHandlerService = __decorate([
+    (0, common_1.Injectable)()
+], TestHandlerService);
+exports.TestHandlerService = TestHandlerService;
+//# sourceMappingURL=test.service.js.map

@@ -25,21 +25,14 @@ const link_service_1 = require("../resource/link/link.service");
 const param_config_service_1 = require("../admin/system/param-config/param-config.service");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
-const sys_user_entity_1 = __importDefault(require("../../entities/admin/sys-user.entity"));
 const zh_service_1 = require("../resource/zh/zh.service");
 const proxy_service_1 = require("../usersys/proxy/proxy.service");
-const channel_entity_1 = require("../../entities/resource/channel.entity");
-const link_entity_1 = require("../../entities/resource/link.entity");
 const top_entity_1 = require("../../entities/order/top.entity");
 const bull_1 = require("@nestjs/bull");
-const zh_entity_1 = require("../../entities/resource/zh.entity");
 const process_1 = __importDefault(require("process"));
 const orderTop_service_1 = require("./top/orderTop.service");
 const channel_service_1 = require("../resource/channel/channel.service");
-const sys_balance_entity_1 = require("../../entities/admin/sys-balance.entity");
-const proxyChargingAPI_service_1 = require("./proxyChargingAPI.service");
 const proxyChargin_service_1 = require("../resource/proxyCharging/proxyChargin.service");
-const wxChannelAPI_service_1 = require("./wxChannelAPI.service");
 const handlerTemplate_service_1 = require("./subHandler/handlerTemplate.service");
 const InerFace_1 = require("./subHandler/InerFace");
 const aLiPayHandler_service_1 = require("./subHandler/aLiPayHandler.service");
@@ -55,9 +48,7 @@ let ApiService = class ApiService {
     zhService;
     paramConfigService;
     channelService;
-    proxyChargingAPI;
     proxyChargingService;
-    wxChannelAPIService;
     aLiPayHandlerService;
     handlerTemplateService;
     xiaoMangHandlerService;
@@ -68,7 +59,7 @@ let ApiService = class ApiService {
     WXPAYCHANNEL;
     ALIAYCHANNEL;
     handlerMap = new Map();
-    constructor(redisService, util, topUserService, proxyUserService, linkService, topOrderService, zhService, paramConfigService, channelService, proxyChargingAPI, proxyChargingService, wxChannelAPIService, aLiPayHandlerService, handlerTemplateService, xiaoMangHandlerService, entityManager, orderQueue) {
+    constructor(redisService, util, topUserService, proxyUserService, linkService, topOrderService, zhService, paramConfigService, channelService, proxyChargingService, aLiPayHandlerService, handlerTemplateService, xiaoMangHandlerService, entityManager, orderQueue) {
         this.redisService = redisService;
         this.util = util;
         this.topUserService = topUserService;
@@ -78,9 +69,7 @@ let ApiService = class ApiService {
         this.zhService = zhService;
         this.paramConfigService = paramConfigService;
         this.channelService = channelService;
-        this.proxyChargingAPI = proxyChargingAPI;
         this.proxyChargingService = proxyChargingService;
-        this.wxChannelAPIService = wxChannelAPIService;
         this.aLiPayHandlerService = aLiPayHandlerService;
         this.handlerTemplateService = handlerTemplateService;
         this.xiaoMangHandlerService = xiaoMangHandlerService;
@@ -199,252 +188,10 @@ let ApiService = class ApiService {
         }
     }
     async payByWX(body) {
-        let subChannelList = await this.channelService.getSubChannel(this.WXPAYCHANNEL);
-        if (!subChannelList || subChannelList.length == 0)
-            throw new api_exception_1.ApiException(60011);
-        let l = await this.wxChannelAPIService.getByStrategy(Object.assign(body, {
-            rootChannel: this.WXPAYCHANNEL,
-            subChannelList: subChannelList
-        }));
-        return { code: 1, payurl: `${this.host}/pay.html?no=${l.oid}`, sysorderno: l.oid, orderno: body.orderId };
+        return { code: 1, payurl: ``, sysorderno: '', orderno: body.orderId };
     }
     async payByQQ(body) {
-        let { merId, orderAmt } = body;
-        let amount = orderAmt;
-        orderAmt = String(Number(orderAmt) * 100);
-        let haveAmount = await this.linkService.getLinkByAmount(body.orderAmt);
-        if (!haveAmount)
-            await this.getInstant();
-        let l = await this.getLinkByStrategy({
-            amount: Number(orderAmt),
-            channel: Number(body.channel),
-            parentChannel: Number(body.channel)
-        });
-        let parentChannel = body.channel.toString().padStart(2, "0");
-        let buAmount = amount.toString().split(".")[0].padStart(4, "0");
-        let oid = "QQ_" + this.util.generateUUID() + parentChannel + buAmount;
-        common_1.Logger.log("系统订单号:" + oid);
-        let order = new top_entity_1.TopOrder();
-        let time = await this.paramConfigService.findValueByKey("orderOutTime");
-        if (isNaN(Number(time)))
-            throw new api_exception_1.ApiException(60010);
-        try {
-            let rate = await this.channelService.getRateByChannelId(l.user.id, l.link.channel, l.user.uuid);
-            order.zh = l.zh;
-            order.SysUser = l.user;
-            order.amount = Number(amount) * 100;
-            order.mid = Number(merId);
-            order.oid = oid;
-            order.mOid = body.orderId;
-            order.mIp = body.ip;
-            order.mNotifyUrl = body.notifyUrl;
-            order.channel = l.link.channel;
-            order.parentChannel = Number(body.channel);
-            order.lOid = l.link.oid;
-            order.lRate = rate;
-            await this.entityManager.save(order);
-            let log = new sys_balance_entity_1.SysBalanceLog();
-            log.amount = order.amount * rate / 10000;
-            log.uuid = l.user.uuid;
-            log.typeEnum = "reduce";
-            log.event = "topOrder";
-            log.actionUuid = merId;
-            log.orderUuid = order.oid;
-            log.balance = l.user.balance - order.amount * rate / 10000;
-            await this.entityManager.save(log);
-            await this.redisService.getRedis().set(`orderClient:${oid}`, JSON.stringify(Object.assign(order, { url: l.link.url })), "EX", time);
-            await this.redisService.getRedis().set(`order:${oid}`, JSON.stringify(Object.assign(order, { url: l.link.url })), "EX", Number(time) + 600);
-            await this.redisService.getRedis().sadd("topOrder", oid);
-        }
-        catch (e) {
-            throw new api_exception_1.ApiException(60005);
-        }
-        finally {
-            await this.orderQueue.add("orderOutTime", order, { delay: (Number(time) + 600) * 1000, removeOnComplete: true });
-        }
-        return { code: 1, payurl: `${this.host}/pay.html?no=${oid}`, sysorderno: oid, orderno: body.orderId };
-    }
-    async getInstant() {
-        let instant = await this.paramConfigService.findValueByKey("instant");
-        if (Boolean(Number(instant))) {
-        }
-        else {
-            throw new api_exception_1.ApiException(60004);
-        }
-    }
-    async getLinkByStrategy(linkObject, t = 0) {
-        switch (t) {
-            default:
-                return await this.defaultStrategy(linkObject);
-        }
-    }
-    async defaultStrategy(linkObject) {
-        let { amount, channel, parentChannel } = linkObject;
-        let payUserQueue = await this.redisService.getRedis().get("pay:user:queue");
-        if (!payUserQueue) {
-            payUserQueue = await this.topUserService.getPayUser(linkObject.amount);
-            await this.redisService.getRedis().set("pay:user:queue", JSON.stringify(payUserQueue), "EX", 10);
-        }
-        else {
-            payUserQueue = JSON.parse(payUserQueue);
-        }
-        if (payUserQueue.length == 0) {
-            common_1.Logger.error(`没有可用的代理支付 父通道:${linkObject.parentChannel} 子通道:${linkObject.channel} 金额:${linkObject.amount / 100}元 订单`);
-            throw new api_exception_1.ApiException(60004);
-        }
-        let lastUuid = await this.redisService.getRedis().get("pay:userqueue:lastUuid");
-        if (!lastUuid) {
-            lastUuid = payUserQueue[0].uuid;
-            await this.redisService.getRedis().set("pay:userqueue:lastUuid", lastUuid, "EX", 60 * 60 * 24 * 365);
-        }
-        let l = [];
-        let index = payUserQueue.findIndex((item) => {
-            return item.uuid == lastUuid;
-        });
-        if (index > -1) {
-            payUserQueue = payUserQueue.slice(index + 1 > payUserQueue.length ? 0 : index + 1).concat(payUserQueue.slice(0, index + 1 > payUserQueue.length ? 0 : index + 1));
-        }
-        let nowUuid = null, startUid = null, link = null;
-        do {
-            nowUuid = payUserQueue.shift();
-            if (!startUid) {
-                startUid = nowUuid.uuid;
-            }
-            else {
-                if (nowUuid.uuid == startUid) {
-                    break;
-                }
-            }
-            payUserQueue.push(nowUuid);
-            let userBalance = await this.proxyUserService.checkBalance(nowUuid.uuid, amount);
-            if (userBalance) {
-                link = await this.queueByUserZh(Object.assign(linkObject, { nowUuid: nowUuid }));
-                if (link)
-                    nowUuid.balance = userBalance.balance;
-            }
-        } while (!link);
-        await this.redisService.getRedis().set("pay:userqueue:lastUuid", nowUuid.uuid, "EX", 60 * 60 * 24 * 365);
-        if (link)
-            return {
-                link: link.link,
-                zh: link.zh,
-                user: nowUuid
-            };
-        throw new api_exception_1.ApiException(60004);
-    }
-    async queueByUserZh(linkObject) {
-        let { nowUuid, amount, parentChannel } = linkObject;
-        let tZhQueue = null;
-        let linkLockTime = await this.paramConfigService.findValueByKey("linkLockTime");
-        if (process_1.default.env.NODE_ENV == "development") {
-            linkLockTime = "0";
-        }
-        let lastZuid = await this.redisService.getRedis().get("pay:zhqueue:lastUuid:" + nowUuid.username);
-        let zhQueue = await this.redisService.getRedis().get("pay:userzh:" + nowUuid.username);
-        if (!zhQueue) {
-            zhQueue = await this.zhService.getZhQueueById(nowUuid.id, amount);
-            tZhQueue = JSON.parse(JSON.stringify(zhQueue));
-            await this.redisService.getRedis().set("pay:userzh:" + nowUuid.username, JSON.stringify(zhQueue), "EX", 60);
-        }
-        else {
-            tZhQueue = JSON.parse(zhQueue);
-            zhQueue = JSON.parse(zhQueue);
-        }
-        if (zhQueue.length == 0) {
-            return false;
-        }
-        zhQueue.sort((a, b) => {
-            return b.weight - a.weight;
-        });
-        if (zhQueue[0].weight == 0) {
-            zhQueue = tZhQueue;
-            let index = zhQueue.findIndex((item) => {
-                return item.zuid == lastZuid;
-            });
-            if (index > -1) {
-                zhQueue = zhQueue.slice(index + 1 > zhQueue.length ? 0 : index + 1).concat(zhQueue.slice(0, index + 1 > zhQueue.length ? 0 : index + 1));
-            }
-        }
-        let nowZuid = null, startUid = null, link = null;
-        do {
-            nowZuid = zhQueue.shift();
-            if (!startUid) {
-                startUid = nowZuid.zuid;
-            }
-            else {
-                if (nowZuid.zuid == startUid) {
-                    break;
-                }
-            }
-            zhQueue.push(nowZuid);
-            link = await this.entityManager.transaction(async (entityManager) => {
-                try {
-                    let l = await entityManager.createQueryBuilder("link", "link")
-                        .leftJoin("link.zh", "zh", `zh.id = ${nowZuid.id}`)
-                        .leftJoin(channel_entity_1.Channel, "channel", "link.channel = channel.id")
-                        .where("link.amount = :amount", { amount: amount })
-                        .andWhere("link.parentChannel = :parentChannel", { parentChannel: parentChannel })
-                        .andWhere("link.paymentStatus = 0")
-                        .andWhere("link.createStatus = 1")
-                        .andWhere("link.lockTime < :lockTime", { lockTime: new Date() })
-                        .andWhere(`UNIX_TIMESTAMP(now()) < round(UNIX_TIMESTAMP(link.created_at)+ channel.expireTime)`)
-                        .andWhere("zh.open = 1")
-                        .andWhere(`zh.rechargeLimit - zh.lockLimit  >= ${amount}`)
-                        .getOne();
-                    if (l) {
-                        let rate = await this.channelService.getRateByChannelId(nowUuid.id, l.channel, nowUuid.uuid);
-                        let r = await entityManager.createQueryBuilder()
-                            .update(link_entity_1.Link)
-                            .set({
-                            paymentStatus: 2,
-                            lockTime: () => {
-                                return `DATE_ADD(now(),INTERVAL ${linkLockTime} SECOND)`;
-                            },
-                            version: () => {
-                                return `version + 1`;
-                            }
-                        })
-                            .where("id = :id", { id: l.id, version: l.version })
-                            .execute();
-                        if (r.affected >= 1) {
-                            await entityManager.createQueryBuilder()
-                                .update(zh_entity_1.ZH)
-                                .set({
-                                lockLimit: () => {
-                                    return `lockLimit + ${amount}`;
-                                }
-                            })
-                                .where("id = :id", { id: nowZuid.id })
-                                .execute();
-                            let rateAmount = amount * rate / 10000;
-                            await entityManager.createQueryBuilder()
-                                .update(sys_user_entity_1.default)
-                                .set({
-                                balance: () => {
-                                    return `balance - ${rateAmount}`;
-                                }
-                            })
-                                .where("id = :id", { id: nowUuid.id })
-                                .execute();
-                            return l;
-                        }
-                    }
-                    return null;
-                }
-                catch (e) {
-                    common_1.Logger.error("事务提取链接失败");
-                    common_1.Logger.error(e.toString());
-                    console.log(e);
-                }
-            });
-        } while (!link);
-        await this.redisService.getRedis().set("pay:zhqueue:lastUuid:" + nowUuid.username, nowZuid.zuid, "EX", 60 * 60 * 24 * 365);
-        if (link)
-            return {
-                link,
-                zh: nowZuid
-            };
-        return false;
+        return { code: 1, payurl: ``, sysorderno: '', orderno: body.orderId };
     }
     async payCheck(body) {
         let { merId, orderId } = body;
@@ -605,8 +352,8 @@ let ApiService = class ApiService {
 };
 ApiService = __decorate([
     (0, common_1.Injectable)(),
-    __param(15, (0, typeorm_1.InjectEntityManager)()),
-    __param(16, (0, bull_1.InjectQueue)("order")),
+    __param(13, (0, typeorm_1.InjectEntityManager)()),
+    __param(14, (0, bull_1.InjectQueue)("order")),
     __metadata("design:paramtypes", [redis_service_1.RedisService,
         util_service_1.UtilService,
         top_service_1.TopService,
@@ -616,12 +363,10 @@ ApiService = __decorate([
         zh_service_1.ZhService,
         param_config_service_1.SysParamConfigService,
         channel_service_1.ChannelService,
-        proxyChargingAPI_service_1.ProxyChargingAPIService,
         proxyChargin_service_1.ProxyChargingService,
-        wxChannelAPI_service_1.WxChannelAPIService,
         aLiPayHandler_service_1.ALiPayHandlerService,
         handlerTemplate_service_1.HandlerTemplateService,
-        XiaoMangProxyChargingHandlerservice_1.XiaoMangProxyChargingHandlerservice,
+        XiaoMangProxyChargingHandlerservice_1.XiaoMangProxyChargingHandlerService,
         typeorm_2.EntityManager, Object])
 ], ApiService);
 exports.ApiService = ApiService;

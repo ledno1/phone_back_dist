@@ -192,7 +192,6 @@ let LinkService = class LinkService {
             .select("link.amount AS amount")
             .where("link.paymentStatus = 0")
             .andWhere("link.createStatus = 1")
-            .andWhere(" UNIX_TIMESTAMP(now()) < round(UNIX_TIMESTAMP(link.created_at)+ channel.expireTime) ")
             .groupBy("link.amount");
         let t = await linkTypeList.getRawMany();
         let amountList = t.map((item) => {

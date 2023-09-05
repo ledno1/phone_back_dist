@@ -1,0 +1,33 @@
+import { BaseEntity } from "@/entities/base.entity";
+import { ZH } from "@/entities/resource/zh.entity";
+import SysUser from "@/entities/admin/sys-user.entity";
+export declare class PayCode extends BaseEntity {
+    id: number;
+    lUid: string;
+    amount: number;
+    target: string;
+    parentChannel: number;
+    payMode: string;
+    useCount: number;
+    payStatus: number;
+    confirmStatus: number;
+    platformExpireTime: Date;
+    placeIp: string;
+    proCode: string;
+    parseIp: string;
+    parseProCode: string;
+    buyerInfo: string;
+    ipInfo: string;
+    mid: number;
+    url: string;
+    paymentStatus: number;
+    oid: string;
+    createStatus: number;
+    gOid: string;
+    lockTime: Date;
+    channel: number;
+    reuse: boolean;
+    version: number;
+    zh: ZH;
+    SysUser: SysUser;
+}

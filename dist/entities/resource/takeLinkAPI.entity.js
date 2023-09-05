@@ -12,7 +12,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.TakeLink = void 0;
 const base_entity_1 = require("../base.entity");
 const typeorm_1 = require("typeorm");
-const channel_entity_1 = require("./channel.entity");
 let TakeLink = class TakeLink extends base_entity_1.BaseEntity {
     id;
     name;
@@ -23,7 +22,6 @@ let TakeLink = class TakeLink extends base_entity_1.BaseEntity {
     token;
     getCount;
     successRate;
-    channel;
 };
 __decorate([
     (0, typeorm_1.PrimaryGeneratedColumn)(),
@@ -61,12 +59,6 @@ __decorate([
     (0, typeorm_1.Column)({ type: "int", comment: "支付成功率", default: 10000 }),
     __metadata("design:type", Number)
 ], TakeLink.prototype, "successRate", void 0);
-__decorate([
-    (0, typeorm_1.ManyToMany)(type => channel_entity_1.Channel, channel => channel.takeLinks, {
-        createForeignKeyConstraints: false,
-    }),
-    __metadata("design:type", channel_entity_1.Channel)
-], TakeLink.prototype, "channel", void 0);
 TakeLink = __decorate([
     (0, typeorm_1.Entity)({ name: "take_link" })
 ], TakeLink);

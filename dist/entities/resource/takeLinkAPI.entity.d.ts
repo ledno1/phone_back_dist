@@ -1,5 +1,4 @@
 import { BaseEntity } from "@/entities/base.entity";
-import { Channel } from "@/entities/resource/channel.entity";
 export declare class TakeLink extends BaseEntity {
     id: number;
     name: string;
@@ -10,5 +9,4 @@ export declare class TakeLink extends BaseEntity {
     token: string;
     getCount: number;
     successRate: number;
-    channel: Channel;
 }

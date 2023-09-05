@@ -12,7 +12,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Channel = void 0;
 const base_entity_1 = require("../base.entity");
 const typeorm_1 = require("typeorm");
-const takeLinkAPI_entity_1 = require("./takeLinkAPI.entity");
 let Channel = class Channel extends base_entity_1.BaseEntity {
     id;
     name;
@@ -23,10 +22,8 @@ let Channel = class Channel extends base_entity_1.BaseEntity {
     isPublic;
     isUse;
     weight;
-    expireTime;
     children;
     parent;
-    takeLinks;
 };
 __decorate([
     (0, typeorm_1.PrimaryGeneratedColumn)(),
@@ -65,10 +62,6 @@ __decorate([
     __metadata("design:type", Number)
 ], Channel.prototype, "weight", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: "int", default: 60 * 60 * 24, comment: "默认过期时间" }),
-    __metadata("design:type", Number)
-], Channel.prototype, "expireTime", void 0);
-__decorate([
     (0, typeorm_1.TreeChildren)(),
     __metadata("design:type", Array)
 ], Channel.prototype, "children", void 0);
@@ -76,13 +69,6 @@ __decorate([
     (0, typeorm_1.TreeParent)(),
     __metadata("design:type", Channel)
 ], Channel.prototype, "parent", void 0);
-__decorate([
-    (0, typeorm_1.ManyToMany)(type => takeLinkAPI_entity_1.TakeLink, takeLink => takeLink.channel, {
-        createForeignKeyConstraints: false
-    }),
-    (0, typeorm_1.JoinTable)(),
-    __metadata("design:type", Array)
-], Channel.prototype, "takeLinks", void 0);
 Channel = __decorate([
     (0, typeorm_1.Entity)({ name: "channel" }),
     (0, typeorm_1.Tree)("closure-table")

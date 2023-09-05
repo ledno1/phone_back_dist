@@ -54,7 +54,6 @@ let ChannelService = class ChannelService {
             if (user.roleLabel == "admin") {
                 qb = await this.channelRepository.createQueryBuilder("channel")
                     .leftJoinAndSelect("channel.children", "children")
-                    .leftJoinAndSelect("children.takeLinks", "takeLinks")
                     .where("channel.parent is null")
                     .offset((page - 1) * limit)
                     .limit(limit);
@@ -115,26 +114,19 @@ let ChannelService = class ChannelService {
         return "ok";
     }
     async edit(params, user) {
-        let { action, name, rate, id, expireTime, data, takeLinks, amountType } = params;
+        let { action, name, rate, id, data, amountType, productType } = params;
+        console.log(params);
         let isPublic = null;
         if (data)
             isPublic = data.isPublic;
         if (action == "edit") {
             let channel = await this.channelRepository.createQueryBuilder("channel")
-                .leftJoinAndSelect("channel.takeLinks", "takeLinks")
                 .where("channel.id = :id", { id })
                 .getOne();
             channel.rate = rate;
             channel.name = name;
-            channel.expireTime = expireTime;
             channel.amountType = amountType;
-            if (takeLinks.length > 0) {
-                let takeLink = await this.takeLinkService.getManyByIds(takeLinks);
-                channel.takeLinks = takeLink;
-            }
-            else {
-                channel.takeLinks = [];
-            }
+            channel.productType = productType && productType != '' ? productType.join(",") : null;
             try {
                 await this.channelRepository.save(channel);
             }
@@ -235,7 +227,7 @@ let ChannelService = class ChannelService {
             return JSON.parse(cache);
         }
         let qb = await this.channelRepository.createQueryBuilder("channel")
-            .select(["channel.id AS id", "channel.strategy AS strategy", "channel.name AS name", "channel.rate AS rate", "channel.parentId AS parentId", "channel.expireTime AS expireTime", "channel.isUse AS isUse"])
+            .select(["channel.id AS id", "channel.strategy AS strategy", "channel.name AS name", "channel.rate AS rate", "channel.parentId AS parentId", "channel.isUse AS isUse", "channel.productType AS productType"])
             .where("channel.id = :id", { id })
             .getRawOne();
         if (qb) {
@@ -254,19 +246,6 @@ let ChannelService = class ChannelService {
             return qb.id;
         }
         return null;
-    }
-    async getTakeLinkByChannelId(id) {
-        try {
-            let qb = await this.channelRepository.createQueryBuilder("channel")
-                .leftJoinAndSelect("channel.takeLinks", "takeLinks")
-                .where("channel.id = :id", { id })
-                .andWhere("takeLinks.isUse = 1")
-                .getOne();
-            return qb.takeLinks;
-        }
-        catch (e) {
-            common_1.Logger.error("getTakeLinkByChannelId", e);
-        }
     }
     async getStrategyByChannelId(id) {
         try {

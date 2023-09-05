@@ -13,10 +13,11 @@ import { SysParamConfigService } from "@/modules/admin/system/param-config/param
 import { ChannelService } from "@/modules/resource/channel/channel.service";
 import { IAdminUser } from "@/modules/admin/admin.interface";
 import { ProxyCharging } from "@/entities/resource/proxyChargin.entity";
+import { CodeService } from "@/modules/code/code/code.service";
 export declare class TopOrderRedirect extends TopOrder {
     url: string;
 }
-export declare class XiaoMangProxyChargingHandlerservice implements ServiceHandler, OnModuleInit {
+export declare class XiaoMangProxyChargingHandlerService implements ServiceHandler, OnModuleInit {
     private redisService;
     private entityManager;
     private topUserService;
@@ -25,7 +26,8 @@ export declare class XiaoMangProxyChargingHandlerservice implements ServiceHandl
     private paramConfigService;
     private channelService;
     private util;
-    constructor(redisService: RedisService, entityManager: EntityManager, topUserService: TopService, proxyUserService: ProxyService, orderQueue: Queue, paramConfigService: SysParamConfigService, channelService: ChannelService, util: UtilService);
+    private codeService;
+    constructor(redisService: RedisService, entityManager: EntityManager, topUserService: TopService, proxyUserService: ProxyService, orderQueue: Queue, paramConfigService: SysParamConfigService, channelService: ChannelService, util: UtilService, codeService: CodeService);
     onModuleInit(): Promise<void>;
     model: ProcessModel;
     defaultSystemOutTime: number;

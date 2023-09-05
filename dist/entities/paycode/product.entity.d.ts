@@ -3,11 +3,14 @@ export declare class PayCodeProduct extends BaseEntity {
     id: number;
     name: string;
     amountType: string;
-    productType: string;
     rate: string;
-    strategy: number;
     isPublic: boolean;
-    isUse: boolean;
+    open: boolean;
     weight: number;
     expireTime: number;
+    maxStock: number;
+    checkMode: number;
+    payCallBackMode: number;
+    proxyChargingCallBackMode: number;
+    enable: boolean;
 }

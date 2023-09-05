@@ -5,7 +5,7 @@ export declare class PayCodeProductController implements OnModuleInit {
     private readonly productService;
     constructor(productService: PayCodeProductService);
     onModuleInit(): void;
-    page(query: any, user: IAdminUser): Promise<{
+    page(query: any, user: IAdminUser): Promise<import("../../../entities/paycode/product.entity").PayCodeProduct[] | {
         list: any;
         pagination: {
             total: any;
@@ -14,5 +14,5 @@ export declare class PayCodeProductController implements OnModuleInit {
         };
     }>;
     add(body: any, user: IAdminUser): any;
-    edit(body: any, user: IAdminUser): any;
+    edit(body: any, user: IAdminUser): Promise<any>;
 }

@@ -153,7 +153,6 @@ let HandlerTemplateService = class HandlerTemplateService {
                 } while (!link);
                 await this.redisService.getRedis().set(this.lastUuidKey, nowUuid.uuid, "EX", 60 * 60 * 24 * 365);
                 if (link) {
-                    await this.orderQueue.add("proxyChargingReset", link, { delay: 30000, removeOnComplete: true });
                     console.log("流程耗时" + (new Date().getTime() - t));
                     resolve(null);
                 }

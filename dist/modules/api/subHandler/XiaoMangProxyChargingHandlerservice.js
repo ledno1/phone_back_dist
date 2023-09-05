@@ -38,7 +38,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.XiaoMangProxyChargingHandlerservice = exports.TopOrderRedirect = void 0;
+exports.XiaoMangProxyChargingHandlerService = exports.TopOrderRedirect = void 0;
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
@@ -58,12 +58,13 @@ const sys_balance_entity_1 = require("../../../entities/admin/sys-balance.entity
 const schedule_1 = require("@nestjs/schedule");
 const top_temp_entity_1 = require("../../../entities/order/top_temp.entity");
 const proxyChargin_entity_1 = require("../../../entities/resource/proxyChargin.entity");
+const code_service_1 = require("../../code/code/code.service");
 const REQ = require("request-promise-native");
 class TopOrderRedirect extends top_entity_1.TopOrder {
     url;
 }
 exports.TopOrderRedirect = TopOrderRedirect;
-let XiaoMangProxyChargingHandlerservice = class XiaoMangProxyChargingHandlerservice {
+let XiaoMangProxyChargingHandlerService = class XiaoMangProxyChargingHandlerService {
     redisService;
     entityManager;
     topUserService;
@@ -72,7 +73,8 @@ let XiaoMangProxyChargingHandlerservice = class XiaoMangProxyChargingHandlerserv
     paramConfigService;
     channelService;
     util;
-    constructor(redisService, entityManager, topUserService, proxyUserService, orderQueue, paramConfigService, channelService, util) {
+    codeService;
+    constructor(redisService, entityManager, topUserService, proxyUserService, orderQueue, paramConfigService, channelService, util, codeService) {
         this.redisService = redisService;
         this.entityManager = entityManager;
         this.topUserService = topUserService;
@@ -81,10 +83,11 @@ let XiaoMangProxyChargingHandlerservice = class XiaoMangProxyChargingHandlerserv
         this.paramConfigService = paramConfigService;
         this.channelService = channelService;
         this.util = util;
+        this.codeService = codeService;
     }
     async onModuleInit() {
         if (process.env.NODE_ENV == "development") {
-            this.defaultSystemOutTime = 20;
+            this.defaultSystemOutTime = 10;
         }
         else {
             this.defaultSystemOutTime = 160;
@@ -112,7 +115,7 @@ let XiaoMangProxyChargingHandlerservice = class XiaoMangProxyChargingHandlerserv
     lastUuidKey = "pay:user:phoneLastUuid";
     redisOrderName = "XiaoMang";
     channelType = InerFace_1.ChannelType.PROXY;
-    nameKey = "小芒话费";
+    nameKey = "小芒话费代充";
     result(params, userinfo) {
         return new Promise(async (resolve, reject) => {
             let account = null, user = null;
@@ -417,6 +420,7 @@ let XiaoMangProxyChargingHandlerservice = class XiaoMangProxyChargingHandlerserv
                 };
                 await this.redisService.getRedis().set(`order:${oid}`, JSON.stringify(orderRedis), "EX", 600);
                 await this.redisService.getRedis().sadd(this.redisOrderName, oid);
+                this.codeService.createPayCodeByChannel(params, orderRedis);
                 resolve();
             }
             catch (e) {
@@ -534,40 +538,6 @@ let XiaoMangProxyChargingHandlerservice = class XiaoMangProxyChargingHandlerserv
                 if (orders.length == 0)
                     return;
                 for (let i = 0; i < orders.length; i++) {
-                    let orderInfo = await this.redisService.getRedis().get(`orderClient:${orders[i]}`);
-                    let obj = await this.redisService.getRedis().get(`order:${orders[i]}`);
-                    let orderRedis = JSON.parse(obj);
-                    if (!orderInfo) {
-                        await this.outTime(orderRedis);
-                        await this.redisService.getRedis().srem(this.redisOrderName, orders[i]);
-                    }
-                    else {
-                        let ishave = await this.checkOrderApi(orderRedis);
-                        console.log(`正在处理订单${orders[i]}是否到账:${ishave ? "是" : "否"}`);
-                        if (ishave) {
-                            let { order, resource, user, req, createAt, realAmount } = orderRedis;
-                            await this.entityManager.update(top_entity_1.TopOrder, { oid: orderRedis.order.oid }, {
-                                status: 1
-                            });
-                            let err;
-                            let body = {
-                                merId: order.mid,
-                                orderId: order.mOid,
-                                sysOrderId: order.oid,
-                                desc: "1",
-                                orderAmt: req.orderAmt,
-                                status: "1",
-                                nonceStr: this.util.generateRandomValue(8),
-                                attch: "1"
-                            };
-                            try {
-                                this.notifyRequest(order.mNotifyUrl, body, req.md5Key);
-                            }
-                            catch (e) {
-                            }
-                            await this.redisService.getRedis().srem(this.redisOrderName, orders[i]);
-                        }
-                    }
                 }
                 resolve();
             }
@@ -726,8 +696,8 @@ __decorate([
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
-], XiaoMangProxyChargingHandlerservice.prototype, "checkOrder", null);
-XiaoMangProxyChargingHandlerservice = __decorate([
+], XiaoMangProxyChargingHandlerService.prototype, "checkOrder", null);
+XiaoMangProxyChargingHandlerService = __decorate([
     (0, common_1.Injectable)(),
     __param(1, (0, typeorm_1.InjectEntityManager)()),
     __param(4, (0, bull_1.InjectQueue)("order")),
@@ -736,7 +706,8 @@ XiaoMangProxyChargingHandlerservice = __decorate([
         top_service_1.TopService,
         proxy_service_1.ProxyService, Object, param_config_service_1.SysParamConfigService,
         channel_service_1.ChannelService,
-        util_service_1.UtilService])
-], XiaoMangProxyChargingHandlerservice);
-exports.XiaoMangProxyChargingHandlerservice = XiaoMangProxyChargingHandlerservice;
+        util_service_1.UtilService,
+        code_service_1.CodeService])
+], XiaoMangProxyChargingHandlerService);
+exports.XiaoMangProxyChargingHandlerService = XiaoMangProxyChargingHandlerService;
 //# sourceMappingURL=XiaoMangProxyChargingHandlerservice.js.map

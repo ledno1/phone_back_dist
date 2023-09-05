@@ -65,11 +65,25 @@ let ApiController = class ApiController {
             subChannelList.forEach((item) => {
                 if (item.id === subChannel) {
                     if (item.amountType && item.amountType !== "") {
-                        let a = item.amountType.split(",");
-                        let b = body.orderAmt.includes('.') ? body.orderAmt.split(".")[0] : body.orderAmt;
-                        if (!a.includes(b)) {
-                            console.error(body.orderAmt + "  金额不在范围内");
-                            throw new api_exception_1.ApiException(60015);
+                        if (item.amountType.includes('-')) {
+                            let a = item.amountType.split("-");
+                            let b = body.orderAmt.includes('.') ? body.orderAmt.split(".")[0] : body.orderAmt;
+                            if (isNaN(Number(b))) {
+                                console.error('订单金额必须是数字');
+                                throw new api_exception_1.ApiException(60015);
+                            }
+                            if (Number(a[0]) > Number(b) || Number(b) > Number(a[1])) {
+                                console.error(`订单金额不在范围内,${body.orderAmt} 不在 ${a[0]} - ${a[1]} 之间`);
+                                throw new api_exception_1.ApiException(60015);
+                            }
+                        }
+                        else {
+                            let a = item.amountType.split(",");
+                            let b = body.orderAmt.includes('.') ? body.orderAmt.split(".")[0] : body.orderAmt;
+                            if (!a.includes(b)) {
+                                console.error(body.orderAmt + "  金额不在范围内");
+                                throw new api_exception_1.ApiException(60015);
+                            }
                         }
                     }
                 }
@@ -121,8 +135,6 @@ let ApiController = class ApiController {
         return await this.apiService.getPayUrl(body, req);
     }
     async alipayNotify(body, query) {
-        console.log(body);
-        console.log(query);
         return await this.apiService.alipayNotify(body, query);
     }
     async startcheck(query) {

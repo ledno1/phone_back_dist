@@ -32,6 +32,5 @@ export declare class ChannelService {
     getRateByChannelId(userId: number, id: number, uuid: string): Promise<number>;
     getChannelInfo(id: number | string): Promise<GetChannelInfo>;
     getChannelIdByName(name: string): Promise<number>;
-    getTakeLinkByChannelId(id: number): Promise<import("../../../entities/resource/takeLinkAPI.entity").TakeLink[]>;
     getStrategyByChannelId(id: number): Promise<number>;
 }

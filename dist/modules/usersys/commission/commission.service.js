@@ -126,7 +126,7 @@ let CommissionService = class CommissionService {
                LEFT JOIN channel ON link.channel = channel.id 
                LEFT JOIN zh ON link.zhId = zh.id
                LEFT JOIN sys_user ON link.sysUserId = sys_user.id
-               WHERE (paymentStatus = 0 OR paymentStatus = 2) AND unix_timestamp(now()) < unix_timestamp(link.created_at) + channel.expireTime
+               WHERE (paymentStatus = 0 OR paymentStatus = 2) 
                AND zh.open = 1 AND zh.rechargeLimit - zh.lockLimit > link.amount
                AND sys_user.selfOpen = 1 AND sys_user.parentOpen = 1 AND sys_user.balance > 100000
                `);

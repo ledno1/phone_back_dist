@@ -129,7 +129,7 @@ let ZhService = class ZhService {
             .leftJoin((qb) => qb.select(["link.id as linkId", "link.amount as linkAmount", "link.zhId", "COUNT (link.id) as linkCount", "SUM(link.amount) as linkSum"])
             .from(link_entity_1.Link, "link")
             .leftJoin("channel", "channel", "channel.id = link.channel")
-            .where("(link.paymentStatus = 0 OR link.paymentStatus = 2) AND unix_timestamp(now()) < unix_timestamp(link.created_at) + channel.expireTime")
+            .where("(link.paymentStatus = 0 OR link.paymentStatus = 2) ")
             .groupBy("link.zhId"), "link", "link.zhId = zh.id")
             .leftJoinAndSelect((qb) => qb
             .select(["top_order.id AS top_orderId", "top_order.amount as top_orderAmount", "top_order.zhId", "top_order.createdAt AS top_orderCreatedAt", "sum(amount) AS totalquota", "top_order.status AS top_orderStatus"])

@@ -6,4 +6,5 @@ export declare class GetChannelInfo {
     parentId?: number;
     expireTime: number;
     isUse?: boolean;
+    productType?: string;
 }
