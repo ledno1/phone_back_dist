@@ -1,5 +1,5 @@
 import { OnModuleInit } from "@nestjs/common";
-import { Response, Request } from 'express';
+import { Request } from 'express';
 import { ApiService } from "@/modules/api/api.service";
 import { SysParamConfigService } from "@/modules/admin/system/param-config/param-config.service";
 import { ChannelService } from "@/modules/resource/channel/channel.service";
@@ -23,7 +23,7 @@ export declare class ApiController implements OnModuleInit {
         orderAmt: string;
         nonceStr: string;
     }>;
-    getpayurl(body: any, response: Response): Promise<({
+    getpayurl(body: any, request: Request): Promise<({
         code: number;
     } & {
         outTime: any;

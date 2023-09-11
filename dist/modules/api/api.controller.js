@@ -137,8 +137,8 @@ let ApiController = class ApiController {
     async payCheck(body) {
         return await this.apiService.payCheck(body);
     }
-    async getpayurl(body, response) {
-        const clientIP = response.header("X-Real-IP");
+    async getpayurl(body, request) {
+        const clientIP = request.headers['x-forwarded-for'] || request.connection.remoteAddress;
         console.log(clientIP);
         return await this.apiService.getPayUrl(body, '1.1.1.1');
     }
@@ -235,7 +235,7 @@ __decorate([
     (0, authorize_decorator_1.Authorize)(),
     (0, common_1.Post)("/getpayurl"),
     __param(0, (0, common_1.Body)()),
-    __param(1, (0, common_1.Res)()),
+    __param(1, (0, common_1.Req)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
