@@ -63,7 +63,7 @@ export declare class ApiService implements OnModuleInit {
         orderAmt: string;
         nonceStr: string;
     }>;
-    getPayUrl(params: any, reqs: any): Promise<({
+    getPayUrl(params: any, ip: string): Promise<({
         code: number;
     } & {
         outTime: any;

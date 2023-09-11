@@ -223,7 +223,7 @@ let ApiService = class ApiService {
         }
         throw new api_exception_1.ApiException(60032);
     }
-    async getPayUrl(params, reqs) {
+    async getPayUrl(params, ip) {
         let { orderid, channel, action, os } = params;
         if (orderid && os && os.length > 0 && os.length <= 32 && (os == "ios" || os == "android" || os == "windows" || os == "macOS")) {
             try {
@@ -275,7 +275,6 @@ let ApiService = class ApiService {
                 }
                 let r = await this.paramConfigService.findValueByKey("devLog");
                 if (r == "1") {
-                    console.dir(reqs.connection.remoteAddress);
                     console.log(`${this.util.dayjs().format("YYYY-MM-DD HH:mm:ss")}==${order.mOid}到支付宝收银台,金额${order.amount / 100}元,通道${order.channel}`);
                 }
                 return {
@@ -337,7 +336,6 @@ let ApiService = class ApiService {
             let o = orderInfo;
             let r = await this.paramConfigService.findValueByKey("devLog");
             if (r == "1") {
-                console.dir(reqs.connection.remoteAddress);
                 console.log(`${this.util.dayjs().format("YYYY-MM-DD HH:mm:ss")}==${params.os}==${o.mOid}到收银台,金额${o.amount / 100}元,通道${o.channel}`);
             }
             let mode = await this.paramConfigService.findValueByKey("aLiPayQrCode");
