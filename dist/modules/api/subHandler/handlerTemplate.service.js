@@ -26,19 +26,22 @@ const redlock_1 = __importDefault(require("redlock"));
 const top_service_1 = require("../../usersys/top/top.service");
 const proxy_service_1 = require("../../usersys/proxy/proxy.service");
 const bull_1 = require("@nestjs/bull");
+const code_service_1 = require("../../code/code/code.service");
 let HandlerTemplateService = class HandlerTemplateService {
     redisService;
     entityManager;
     topUserService;
     proxyUserService;
     orderQueue;
+    codeService;
     util;
-    constructor(redisService, entityManager, topUserService, proxyUserService, orderQueue, util) {
+    constructor(redisService, entityManager, topUserService, proxyUserService, orderQueue, codeService, util) {
         this.redisService = redisService;
         this.entityManager = entityManager;
         this.topUserService = topUserService;
         this.proxyUserService = proxyUserService;
         this.orderQueue = orderQueue;
+        this.codeService = codeService;
         this.util = util;
     }
     host;
@@ -240,7 +243,8 @@ HandlerTemplateService = __decorate([
     __metadata("design:paramtypes", [redis_service_1.RedisService,
         typeorm_2.EntityManager,
         top_service_1.TopService,
-        proxy_service_1.ProxyService, Object, util_service_1.UtilService])
+        proxy_service_1.ProxyService, Object, code_service_1.CodeService,
+        util_service_1.UtilService])
 ], HandlerTemplateService);
 exports.HandlerTemplateService = HandlerTemplateService;
 //# sourceMappingURL=handlerTemplate.service.js.map

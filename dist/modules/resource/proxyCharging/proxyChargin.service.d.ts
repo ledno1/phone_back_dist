@@ -8,6 +8,7 @@ import { SysUserService } from "@/modules/admin/system/user/user.service";
 import { SysParamConfigService } from "@/modules/admin/system/param-config/param-config.service";
 import { ProxyCharging } from "@/entities/resource/proxyChargin.entity";
 import { ChannelService } from "@/modules/resource/channel/channel.service";
+import { DirectBack, DirectPush } from "@/modules/api/APIInterFace/interface";
 export declare class ProxyChargingService implements OnModuleInit {
     private userService;
     private channelRepository;
@@ -36,11 +37,7 @@ export declare class ProxyChargingService implements OnModuleInit {
     add(params: any, user: IAdminUser): Promise<string>;
     isProhibit(name: string, operator: string): Promise<void>;
     edit(params: any, user: IAdminUser): Promise<string>;
-    resetStatusAndLock(data: any): Promise<void>;
-    upDateCreateStatus(id: number): Promise<void>;
-    updateOnOrderCreate(id: number, oid: string, mOid: string): Promise<void>;
-    resetOnOutTime(id: number): Promise<void>;
-    getByAmount(params: any): Promise<string[]>;
     setStatus(id: number, state: number): Promise<void>;
-    getPhoneOrder(params: any): Promise<ProxyCharging> | null;
+    directBack(params: DirectBack): Promise<void>;
+    directPush(params: DirectPush): Promise<void>;
 }

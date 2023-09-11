@@ -46,6 +46,7 @@ class OrderRedis {
     user;
     showOrder;
     realAmount;
+    phoneBalance;
 }
 exports.OrderRedis = OrderRedis;
 //# sourceMappingURL=InerFace.js.map

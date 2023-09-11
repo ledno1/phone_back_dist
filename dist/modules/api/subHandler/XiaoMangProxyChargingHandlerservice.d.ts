@@ -26,7 +26,7 @@ export declare class XiaoMangProxyChargingHandlerService implements ServiceHandl
     private paramConfigService;
     private channelService;
     private util;
-    private codeService;
+    codeService: CodeService;
     constructor(redisService: RedisService, entityManager: EntityManager, topUserService: TopService, proxyUserService: ProxyService, orderQueue: Queue, paramConfigService: SysParamConfigService, channelService: ChannelService, util: UtilService, codeService: CodeService);
     onModuleInit(): Promise<void>;
     model: ProcessModel;

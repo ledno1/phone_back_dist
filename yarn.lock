@@ -832,11 +832,6 @@
     "@jridgewell/resolve-uri" "^3.0.3"
     "@jridgewell/sourcemap-codec" "^1.4.10"
 
-"@msgpackr-extract/msgpackr-extract-win32-x64@2.0.2":
-  "integrity" "sha512-fpnI00dt+yO1cKx9qBXelKhPBdEgvc8ZPav1+0r09j0woYQU2N79w/jcGawSY5UGlgQ3vjaJsFHnGbGvvqdLzg=="
-  "resolved" "https://registry.npmmirror.com/@msgpackr-extract/msgpackr-extract-win32-x64/-/msgpackr-extract-win32-x64-2.0.2.tgz"
-  "version" "2.0.2"
-
 "@nestjs/axios@^1.0.0":
   "integrity" "sha512-DzBIhmBPgPAf/Hf4oHVgNNrcYcmAwV6v1TeZFkEaotO5AtXEfCJ6c07Po4EmylAA0PFp+8+S77PBEcLNEMOCGQ=="
   "resolved" "https://registry.npmmirror.com/@nestjs/axios/-/axios-1.0.0.tgz"
@@ -6972,6 +6967,11 @@
   "integrity" "sha512-M0b3YWQs7R3Z917WRQy1HHA7Ba7D8hvZg6UE5mLykJxQVE2ju0IXbGlaHPPlkY+WN7wFP+wUMXmBFA0aV6vYGQ=="
   "resolved" "https://registry.npmmirror.com/ret/-/ret-0.2.2.tgz"
   "version" "0.2.2"
+
+"retry@^0.13.1":
+  "integrity" "sha512-XQBQ3I8W1Cge0Seh+6gjj03LbmRFWuoszgK9ooCpwYIrhhoO80pfq4cUkU5DkknwfOfFteRwlZ56PYOGYyFWdg=="
+  "resolved" "https://registry.npmjs.org/retry/-/retry-0.13.1.tgz"
+  "version" "0.13.1"
 
 "reusify@^1.0.4":
   "integrity" "sha512-U9nH88a3fc/ekCF1l0/UP1IosiuIjyTh7hBvXVMHYgVcfGvt897Xguj2UOLDeI5BG2m7/uwyaLVT6fbtCwTyzw=="

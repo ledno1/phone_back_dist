@@ -44,7 +44,6 @@ const dayjs_1 = __importDefault(require("dayjs"));
 const otplib_1 = require("otplib");
 const qrcode_1 = __importDefault(require("qrcode"));
 const socks_proxy_agent_1 = __importDefault(require("socks-proxy-agent"));
-const axios = require("axios");
 let UtilService = class UtilService {
     httpService;
     constructor(httpService) {
@@ -148,13 +147,8 @@ let UtilService = class UtilService {
             const httpsAgent = new socks_proxy_agent_1.default.SocksProxyAgent(proxy);
             config = {
                 proxy: {
-                    host: "45.89.230.134",
-                    port: 59394,
-                    protocol: "http",
-                    auth: {
-                        username: "asi",
-                        password: "asihacker"
-                    }
+                    host: "127.0.0.1",
+                    port: 7890
                 },
                 headers,
                 timeout

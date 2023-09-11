@@ -27,6 +27,7 @@ let ProxyCharging = class ProxyCharging extends base_entity_1.BaseEntity {
     createStatus;
     errInfo;
     pUid;
+    notifyUrl;
     oid;
     mOid;
     version;
@@ -36,6 +37,7 @@ let ProxyCharging = class ProxyCharging extends base_entity_1.BaseEntity {
     isClose;
     outTime;
     operator;
+    area;
     callback;
     channel;
     parentChannel;
@@ -79,6 +81,10 @@ __decorate([
     __metadata("design:type", String)
 ], ProxyCharging.prototype, "pUid", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ type: "varchar", length: 256, comment: "充值通知地址" }),
+    __metadata("design:type", String)
+], ProxyCharging.prototype, "notifyUrl", void 0);
+__decorate([
     (0, typeorm_1.Column)({ type: "varchar", length: 64, comment: "自身平台支付订单号,创建时为空", unique: true, nullable: true }),
     __metadata("design:type", String)
 ], ProxyCharging.prototype, "oid", void 0);
@@ -112,9 +118,13 @@ __decorate([
     __metadata("design:type", Date)
 ], ProxyCharging.prototype, "outTime", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: "varchar", comment: "运营商(省,市)" }),
+    (0, typeorm_1.Column)({ type: "varchar", comment: "运营商 DIANXIN LIANTONG YIDONG" }),
     __metadata("design:type", String)
 ], ProxyCharging.prototype, "operator", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: "varchar", comment: "号码所在的归属的省/市" }),
+    __metadata("design:type", String)
+], ProxyCharging.prototype, "area", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: "int", comment: "上游平台回调状态 0等待支付回调  1 回调成功 2 回调失败 3 强制回调 ", default: 0 }),
     __metadata("design:type", Number)

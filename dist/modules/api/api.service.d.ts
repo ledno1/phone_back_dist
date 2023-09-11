@@ -11,11 +11,12 @@ import { Queue } from "bull";
 import { OrderTopService } from "@/modules/api/top/orderTop.service";
 import { ChannelService } from "@/modules/resource/channel/channel.service";
 import { ProxyChargingService } from "@/modules/resource/proxyCharging/proxyChargin.service";
-import { ALiPayNotify, Pay, SysPay } from "@/modules/api/APIInterFace/interface";
+import { ALiPayNotify, DirectBack, DirectPush, Pay, SysPay } from "@/modules/api/APIInterFace/interface";
 import { HandlerTemplateService } from "@/modules/api/subHandler/handlerTemplate.service";
 import { ALiPayHandlerService } from "@/modules/api/subHandler/aLiPayHandler.service";
 import { IAdminUser } from "@/modules/admin/admin.interface";
 import { XiaoMangProxyChargingHandlerService } from "@/modules/api/subHandler/XiaoMangProxyChargingHandlerservice";
+import { CheckModePhoneProxyChargingHandlerService } from "@/modules/api/subHandler/checkModePhoneProxyChargingHandlerservice";
 export declare class ApiService implements OnModuleInit {
     private redisService;
     private util;
@@ -30,6 +31,7 @@ export declare class ApiService implements OnModuleInit {
     private aLiPayHandlerService;
     private handlerTemplateService;
     private xiaoMangHandlerService;
+    private checkModePhoneHandlerService;
     private entityManager;
     private orderQueue;
     private host;
@@ -37,7 +39,7 @@ export declare class ApiService implements OnModuleInit {
     private WXPAYCHANNEL;
     private ALIAYCHANNEL;
     private handlerMap;
-    constructor(redisService: RedisService, util: UtilService, topUserService: TopService, proxyUserService: ProxyService, linkService: LinkService, topOrderService: OrderTopService, zhService: ZhService, paramConfigService: SysParamConfigService, channelService: ChannelService, proxyChargingService: ProxyChargingService, aLiPayHandlerService: ALiPayHandlerService, handlerTemplateService: HandlerTemplateService, xiaoMangHandlerService: XiaoMangProxyChargingHandlerService, entityManager: EntityManager, orderQueue: Queue);
+    constructor(redisService: RedisService, util: UtilService, topUserService: TopService, proxyUserService: ProxyService, linkService: LinkService, topOrderService: OrderTopService, zhService: ZhService, paramConfigService: SysParamConfigService, channelService: ChannelService, proxyChargingService: ProxyChargingService, aLiPayHandlerService: ALiPayHandlerService, handlerTemplateService: HandlerTemplateService, xiaoMangHandlerService: XiaoMangProxyChargingHandlerService, checkModePhoneHandlerService: CheckModePhoneProxyChargingHandlerService, entityManager: EntityManager, orderQueue: Queue);
     onModuleInit(): Promise<void>;
     payMd5(body: Pay, user?: IAdminUser): Promise<string | import("@/modules/api/APIInterFace/interface").PayResponse>;
     payByALI(body: SysPay, user?: IAdminUser): Promise<string | import("@/modules/api/APIInterFace/interface").PayResponse>;
@@ -61,7 +63,11 @@ export declare class ApiService implements OnModuleInit {
         orderAmt: string;
         nonceStr: string;
     }>;
-    getPayUrl(params: any, reqs: any): Promise<{
+    getPayUrl(params: any, reqs: any): Promise<({
+        code: number;
+    } & {
+        outTime: any;
+    }) | {
         code: number;
         price?: undefined;
         orderid?: undefined;
@@ -70,6 +76,7 @@ export declare class ApiService implements OnModuleInit {
         showOrderid?: undefined;
         status?: undefined;
         msg?: undefined;
+        phone?: undefined;
         url?: undefined;
         qrcode?: undefined;
         outTime?: undefined;
@@ -84,6 +91,7 @@ export declare class ApiService implements OnModuleInit {
         showOrderid: string;
         status: boolean;
         msg?: undefined;
+        phone?: undefined;
         url?: undefined;
         qrcode?: undefined;
         outTime?: undefined;
@@ -98,6 +106,22 @@ export declare class ApiService implements OnModuleInit {
         createAt?: undefined;
         showOrderid?: undefined;
         status?: undefined;
+        phone?: undefined;
+        url?: undefined;
+        qrcode?: undefined;
+        outTime?: undefined;
+        mode?: undefined;
+        mOid?: undefined;
+    } | {
+        code: number;
+        phone: string;
+        price?: undefined;
+        orderid?: undefined;
+        userid?: undefined;
+        createAt?: undefined;
+        showOrderid?: undefined;
+        status?: undefined;
+        msg?: undefined;
         url?: undefined;
         qrcode?: undefined;
         outTime?: undefined;
@@ -117,8 +141,12 @@ export declare class ApiService implements OnModuleInit {
         createAt?: undefined;
         showOrderid?: undefined;
         status?: undefined;
+        phone?: undefined;
     }>;
     alipayNotify(params: ALiPayNotify, query: any): Promise<"success" | "fail">;
+    directPush(params: DirectPush): Promise<void>;
+    directBack(params: DirectBack): Promise<void>;
+    isIpWhitelisted(ip: string, merId: string): Promise<boolean>;
     private sid;
     test(params: any): Promise<void>;
 }

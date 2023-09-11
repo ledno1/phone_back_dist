@@ -10,6 +10,7 @@ class GetChannelInfo {
     expireTime;
     isUse;
     productType;
+    amountType;
 }
 exports.GetChannelInfo = GetChannelInfo;
 //# sourceMappingURL=inter.js.map

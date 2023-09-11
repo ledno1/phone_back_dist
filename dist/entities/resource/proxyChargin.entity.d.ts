@@ -10,6 +10,7 @@ export declare class ProxyCharging extends BaseEntity {
     createStatus: boolean;
     errInfo: string;
     pUid: string;
+    notifyUrl: string;
     oid: string;
     mOid: string;
     version: number;
@@ -19,6 +20,7 @@ export declare class ProxyCharging extends BaseEntity {
     isClose: boolean;
     outTime: Date;
     operator: string;
+    area: string;
     callback: number;
     channel: number;
     parentChannel: number;

@@ -47,6 +47,23 @@ export declare class Pay {
     sign: string;
     attch: string;
 }
+export declare class DirectPush {
+    merId: string;
+    orderId: string;
+    orderAmt: string;
+    attch: string;
+    channel: string;
+    rechargeNumber: string;
+    notifyUrl: string;
+    weight: string;
+    sign: string;
+}
+export declare class DirectBack {
+    merId: string;
+    orderId: string;
+    channel: string;
+    sign: string;
+}
 export declare class PayCheck {
     merId: string;
     orderId: string;

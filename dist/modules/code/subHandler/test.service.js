@@ -9,6 +9,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.TestHandlerService = void 0;
 const common_1 = require("@nestjs/common");
 let TestHandlerService = class TestHandlerService {
+    isBlackPhone(orderRedis) {
+        throw new Error("Method not implemented.");
+    }
     onModuleInit() {
     }
     result(params, orderRedis) {
@@ -22,6 +25,9 @@ let TestHandlerService = class TestHandlerService {
             console.log('查单实现');
             resolve(true);
         });
+    }
+    checkBalance(orderRedis) {
+        return Promise.resolve("");
     }
 };
 TestHandlerService = __decorate([

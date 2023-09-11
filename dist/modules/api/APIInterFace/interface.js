@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.PayResponseError = exports.PayResponse = exports.SysPay = exports.ALiPayNotify = exports.PayCheck = exports.Pay = exports.KaKaResponseData = exports.KaKaResponse = exports.KaKaCode = exports.KaKa = void 0;
+exports.PayResponseError = exports.PayResponse = exports.SysPay = exports.ALiPayNotify = exports.PayCheck = exports.DirectBack = exports.DirectPush = exports.Pay = exports.KaKaResponseData = exports.KaKaResponse = exports.KaKaCode = exports.KaKa = void 0;
 const swagger_1 = require("@nestjs/swagger");
 const class_validator_1 = require("class-validator");
 class KaKa {
@@ -139,6 +139,102 @@ __decorate([
     __metadata("design:type", String)
 ], Pay.prototype, "attch", void 0);
 exports.Pay = Pay;
+class DirectPush {
+    merId;
+    orderId;
+    orderAmt;
+    attch;
+    channel;
+    rechargeNumber;
+    notifyUrl;
+    weight;
+    sign;
+}
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: "商户号" }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.Length)(1, 4),
+    __metadata("design:type", String)
+], DirectPush.prototype, "merId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: "请求方系统订单号" }),
+    (0, class_validator_1.Length)(1, 32),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], DirectPush.prototype, "orderId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: "交易金额" }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.Length)(1, 10),
+    __metadata("design:type", String)
+], DirectPush.prototype, "orderAmt", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: "附加信息,暂定空字符串" }),
+    (0, class_validator_1.Length)(0, 4),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], DirectPush.prototype, "attch", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: "通道编码" }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.Length)(1, 2),
+    __metadata("design:type", String)
+], DirectPush.prototype, "channel", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: "充值号码" }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.Length)(8, 32),
+    __metadata("design:type", String)
+], DirectPush.prototype, "rechargeNumber", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: "充值成功或失败的异步回调地址，用于通知代充商户充值结果" }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], DirectPush.prototype, "notifyUrl", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: "权重用于加急,0/100" }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.Length)(1, 3),
+    __metadata("design:type", String)
+], DirectPush.prototype, "weight", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: "签名" }),
+    (0, class_validator_1.Length)(32),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], DirectPush.prototype, "sign", void 0);
+exports.DirectPush = DirectPush;
+class DirectBack {
+    merId;
+    orderId;
+    channel;
+    sign;
+}
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: "商户号" }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.Length)(1, 4),
+    __metadata("design:type", String)
+], DirectBack.prototype, "merId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: "请求方系统订单号" }),
+    (0, class_validator_1.Length)(1, 32),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], DirectBack.prototype, "orderId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: "通道编码" }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.Length)(1, 2),
+    __metadata("design:type", String)
+], DirectBack.prototype, "channel", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: "签名" }),
+    (0, class_validator_1.Length)(32),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], DirectBack.prototype, "sign", void 0);
+exports.DirectBack = DirectBack;
 class PayCheck {
     merId;
     orderId;

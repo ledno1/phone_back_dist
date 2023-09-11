@@ -28,6 +28,7 @@ const system_module_1 = require("../admin/system/system.module");
 const usersys_module_1 = require("../usersys/usersys.module");
 const resource_module_1 = require("../resource/resource.module");
 const channel_entity_1 = require("../../entities/resource/channel.entity");
+const kakaCheckPhone_service_1 = require("./subHandler/kakaCheckPhone.service");
 let CodeModule = class CodeModule {
 };
 CodeModule = __decorate([
@@ -57,7 +58,7 @@ CodeModule = __decorate([
             ws_module_1.WSModule,
         ],
         controllers: [code_controller_1.CodeController, proxy_controller_1.PayCodeProxyController, account_controller_1.PayCodeAccountController, product_controller_1.PayCodeProductController],
-        providers: [code_service_1.CodeService, proxy_service_1.PayCodeProxyService, account_service_1.PayCodeAccountService, product_service_1.PayCodeProductService, product_service_1.PayCodeProductService, test_service_1.TestHandlerService, channel_service_1.ChannelService],
+        providers: [code_service_1.CodeService, proxy_service_1.PayCodeProxyService, account_service_1.PayCodeAccountService, product_service_1.PayCodeProductService, product_service_1.PayCodeProductService, test_service_1.TestHandlerService, channel_service_1.ChannelService, kakaCheckPhone_service_1.KaKaCheckPhoneHandlerService],
         exports: [code_service_1.CodeService, proxy_service_1.PayCodeProxyService, account_service_1.PayCodeAccountService, product_service_1.PayCodeProductService],
     })
 ], CodeModule);

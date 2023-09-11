@@ -3,6 +3,7 @@ import { PayAccount } from "@/entities/resource/payaccount.entity";
 import { ProxyCharging } from "@/entities/resource/proxyChargin.entity";
 import { TopOrder } from "@/entities/order/top.entity";
 import { IAdminUser } from "@/modules/admin/admin.interface";
+import { CodeService } from "@/modules/code/code/code.service";
 export declare enum ChannelType {
     PROXY = "proxy",
     DIRECT = "direct"
@@ -40,8 +41,10 @@ export declare class OrderRedis {
     user: HaveAmount | null;
     showOrder?: string;
     realAmount?: number;
+    phoneBalance?: string;
 }
 export interface ServiceHandler {
+    codeService: CodeService;
     nameKey: string | string[];
     channelType: ChannelType;
     redisOrderName: string;

@@ -9,14 +9,16 @@ import { ProxyService } from "@/modules/usersys/proxy/proxy.service";
 import { Queue } from "bull";
 import { PayAccount } from "@/entities/resource/payaccount.entity";
 import { ProxyCharging } from "@/entities/resource/proxyChargin.entity";
+import { CodeService } from "@/modules/code/code/code.service";
 export declare class HandlerTemplateService implements ServiceHandler, OnModuleInit {
     private redisService;
     private entityManager;
     private topUserService;
     private proxyUserService;
     private orderQueue;
+    codeService: CodeService;
     private util;
-    constructor(redisService: RedisService, entityManager: EntityManager, topUserService: TopService, proxyUserService: ProxyService, orderQueue: Queue, util: UtilService);
+    constructor(redisService: RedisService, entityManager: EntityManager, topUserService: TopService, proxyUserService: ProxyService, orderQueue: Queue, codeService: CodeService, util: UtilService);
     host: string;
     autoCallback(params: ALiPayNotify, p: PayAccount): Promise<void>;
     test(): Promise<void>;

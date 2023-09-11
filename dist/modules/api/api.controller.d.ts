@@ -1,15 +1,18 @@
+import { OnModuleInit } from "@nestjs/common";
+import { Request } from 'express';
 import { ApiService } from "@/modules/api/api.service";
 import { SysParamConfigService } from "@/modules/admin/system/param-config/param-config.service";
 import { ChannelService } from "@/modules/resource/channel/channel.service";
 import { RedisService } from "@/shared/services/redis.service";
-import { Pay, PayCheck, PayResponse } from "@/modules/api/APIInterFace/interface";
+import { DirectBack, DirectPush, Pay, PayCheck, PayResponse } from "@/modules/api/APIInterFace/interface";
 import { IAdminUser } from "@/modules/admin/admin.interface";
-export declare class ApiController {
+export declare class ApiController implements OnModuleInit {
     private readonly apiService;
     private paramConfigService;
     private readonly channelService;
     private redis;
     constructor(apiService: ApiService, paramConfigService: SysParamConfigService, channelService: ChannelService, redis: RedisService);
+    onModuleInit(): Promise<void>;
     pay(body: Pay): Promise<string | 1 | PayResponse>;
     payTest(body: any, user: IAdminUser): Promise<string | 1 | PayResponse>;
     payCheck(body: PayCheck): Promise<{
@@ -20,7 +23,11 @@ export declare class ApiController {
         orderAmt: string;
         nonceStr: string;
     }>;
-    getpayurl(body: any, req: any): Promise<{
+    getpayurl(body: any, req: Request): Promise<({
+        code: number;
+    } & {
+        outTime: any;
+    }) | {
         code: number;
         price?: undefined;
         orderid?: undefined;
@@ -29,6 +36,7 @@ export declare class ApiController {
         showOrderid?: undefined;
         status?: undefined;
         msg?: undefined;
+        phone?: undefined;
         url?: undefined;
         qrcode?: undefined;
         outTime?: undefined;
@@ -43,6 +51,7 @@ export declare class ApiController {
         showOrderid: string;
         status: boolean;
         msg?: undefined;
+        phone?: undefined;
         url?: undefined;
         qrcode?: undefined;
         outTime?: undefined;
@@ -57,6 +66,22 @@ export declare class ApiController {
         createAt?: undefined;
         showOrderid?: undefined;
         status?: undefined;
+        phone?: undefined;
+        url?: undefined;
+        qrcode?: undefined;
+        outTime?: undefined;
+        mode?: undefined;
+        mOid?: undefined;
+    } | {
+        code: number;
+        phone: string;
+        price?: undefined;
+        orderid?: undefined;
+        userid?: undefined;
+        createAt?: undefined;
+        showOrderid?: undefined;
+        status?: undefined;
+        msg?: undefined;
         url?: undefined;
         qrcode?: undefined;
         outTime?: undefined;
@@ -76,7 +101,10 @@ export declare class ApiController {
         createAt?: undefined;
         showOrderid?: undefined;
         status?: undefined;
+        phone?: undefined;
     }>;
     alipayNotify(body: any, query: any): Promise<"success" | "fail">;
     startcheck(query: any): Promise<void>;
+    directPush(body: DirectPush, req: Request): Promise<void>;
+    directBack(body: DirectBack): Promise<void>;
 }

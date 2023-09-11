@@ -35,6 +35,12 @@ let ApiController = class ApiController {
         this.channelService = channelService;
         this.redis = redis;
     }
+    async onModuleInit() {
+        let have = await this.paramConfigService.findValueByKey("proxyCharging_open");
+        if (!have) {
+            throw new Error("推单开关未设置,字段 proxyCharging_open 未设置");
+        }
+    }
     async pay(body) {
         let { channel, merId, sign, attch } = body;
         if (!attch || attch == "")
@@ -132,6 +138,7 @@ let ApiController = class ApiController {
         return await this.apiService.payCheck(body);
     }
     async getpayurl(body, req) {
+        console.log(req.ip);
         return await this.apiService.getPayUrl(body, req);
     }
     async alipayNotify(body, query) {
@@ -141,6 +148,46 @@ let ApiController = class ApiController {
         if (process.env.NODE_ENV == "development") {
             return await this.apiService.test(query);
         }
+    }
+    async directPush(body, req) {
+        let proxyCharging = await this.paramConfigService.findValueByKey("proxyCharging_open");
+        if (Boolean(Number(proxyCharging)) === true) {
+            let c = await this.channelService.getChannelInfo(body.channel);
+            if (!c) {
+                throw new api_exception_1.ApiException(60017);
+            }
+            if (!c.isUse) {
+                throw new api_exception_1.ApiException(60018);
+            }
+            if (c.amountType.includes('-')) {
+                let a = c.amountType.split("-");
+                let b = body.orderAmt.includes('.') ? body.orderAmt.split(".")[0] : body.orderAmt;
+                if (isNaN(Number(b))) {
+                    console.error('订单金额必须是数字');
+                    throw new api_exception_1.ApiException(60015);
+                }
+                if (Number(a[0]) > Number(b) || Number(b) > Number(a[1])) {
+                    console.error(`订单金额不在范围内,${body.orderAmt} 不在 ${a[0]} - ${a[1]} 之间`);
+                    throw new api_exception_1.ApiException(60015);
+                }
+            }
+            else {
+                let a = c.amountType.split(",");
+                let b = body.orderAmt.includes('.') ? body.orderAmt.split(".")[0] : body.orderAmt;
+                if (!a.includes(b)) {
+                    console.error(body.orderAmt + "  金额不在范围内");
+                    throw new api_exception_1.ApiException(60015);
+                }
+            }
+            if (!await this.apiService.isIpWhitelisted(req.ip, body.merId)) {
+                throw new api_exception_1.ApiException(10103);
+            }
+            return await this.apiService.directPush(body);
+        }
+        throw new api_exception_1.ApiException(60016);
+    }
+    async directBack(body) {
+        return await this.apiService.directBack(body);
     }
 };
 __decorate([
@@ -187,7 +234,6 @@ __decorate([
     (0, authorize_decorator_1.Authorize)(),
     (0, common_1.Post)("/getpayurl"),
     __param(0, (0, common_1.Body)()),
-    __param(1, (0, common_1.Req)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
@@ -210,9 +256,27 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], ApiController.prototype, "startcheck", null);
+__decorate([
+    (0, authorize_decorator_1.Authorize)(),
+    (0, common_1.Post)("/order/directPush"),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [interface_1.DirectPush, Object]),
+    __metadata("design:returntype", Promise)
+], ApiController.prototype, "directPush", null);
+__decorate([
+    (0, authorize_decorator_1.Authorize)(),
+    (0, common_1.Post)("/order/directBack"),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [interface_1.DirectBack]),
+    __metadata("design:returntype", Promise)
+], ApiController.prototype, "directBack", null);
 ApiController = __decorate([
     (0, swagger_1.ApiTags)("API模块"),
-    (0, common_1.Controller)({}),
+    (0, common_1.Controller)({
+        path: process.env.NODE_ENV == "development" ? "/api" : '/',
+    }),
     __metadata("design:paramtypes", [api_service_1.ApiService,
         param_config_service_1.SysParamConfigService,
         channel_service_1.ChannelService,

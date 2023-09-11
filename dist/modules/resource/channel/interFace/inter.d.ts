@@ -7,4 +7,5 @@ export declare class GetChannelInfo {
     expireTime: number;
     isUse?: boolean;
     productType?: string;
+    amountType?: string;
 }

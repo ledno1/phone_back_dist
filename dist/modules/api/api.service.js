@@ -38,6 +38,8 @@ const InerFace_1 = require("./subHandler/InerFace");
 const aLiPayHandler_service_1 = require("./subHandler/aLiPayHandler.service");
 const payaccount_entity_1 = require("../../entities/resource/payaccount.entity");
 const XiaoMangProxyChargingHandlerservice_1 = require("./subHandler/XiaoMangProxyChargingHandlerservice");
+const checkModePhoneProxyChargingHandlerservice_1 = require("./subHandler/checkModePhoneProxyChargingHandlerservice");
+const sys_user_entity_1 = __importDefault(require("../../entities/admin/sys-user.entity"));
 let ApiService = class ApiService {
     redisService;
     util;
@@ -52,6 +54,7 @@ let ApiService = class ApiService {
     aLiPayHandlerService;
     handlerTemplateService;
     xiaoMangHandlerService;
+    checkModePhoneHandlerService;
     entityManager;
     orderQueue;
     host = null;
@@ -59,7 +62,7 @@ let ApiService = class ApiService {
     WXPAYCHANNEL;
     ALIAYCHANNEL;
     handlerMap = new Map();
-    constructor(redisService, util, topUserService, proxyUserService, linkService, topOrderService, zhService, paramConfigService, channelService, proxyChargingService, aLiPayHandlerService, handlerTemplateService, xiaoMangHandlerService, entityManager, orderQueue) {
+    constructor(redisService, util, topUserService, proxyUserService, linkService, topOrderService, zhService, paramConfigService, channelService, proxyChargingService, aLiPayHandlerService, handlerTemplateService, xiaoMangHandlerService, checkModePhoneHandlerService, entityManager, orderQueue) {
         this.redisService = redisService;
         this.util = util;
         this.topUserService = topUserService;
@@ -73,11 +76,12 @@ let ApiService = class ApiService {
         this.aLiPayHandlerService = aLiPayHandlerService;
         this.handlerTemplateService = handlerTemplateService;
         this.xiaoMangHandlerService = xiaoMangHandlerService;
+        this.checkModePhoneHandlerService = checkModePhoneHandlerService;
         this.entityManager = entityManager;
         this.orderQueue = orderQueue;
     }
     async onModuleInit() {
-        let tempHandlerList = [this.aLiPayHandlerService, this.handlerTemplateService, this.xiaoMangHandlerService];
+        let tempHandlerList = [this.aLiPayHandlerService, this.handlerTemplateService, this.xiaoMangHandlerService, this.checkModePhoneHandlerService];
         let channelList = await this.channelService.channelRoot();
         channelList.forEach(e => {
             if (e.name.includes("QQ")) {
@@ -221,6 +225,16 @@ let ApiService = class ApiService {
     }
     async getPayUrl(params, reqs) {
         let { orderid, channel, action, os } = params;
+        if (orderid && os && os.length > 0 && os.length <= 32 && (os == "ios" || os == "android" || os == "windows" || os == "macOS")) {
+            try {
+                await this.entityManager.update(top_entity_1.TopOrder, { oid: orderid }, { os });
+            }
+            catch (e) {
+                console.error("收银台更新订单客户端系统类型出错", e);
+                common_1.Logger.error("收银台更新订单客户端系统类型出错");
+                common_1.Logger.error(e.toString());
+            }
+        }
         let orderInfo = await this.redisService.getRedis().get(`orderClient:${orderid}`);
         let code = 0;
         if (action == "checkorder") {
@@ -280,21 +294,47 @@ let ApiService = class ApiService {
                 };
             }
         }
+        else if (action == 'matchOrderInfo') {
+            if (!orderInfo)
+                return { code: 3, msg: "订单超时,请重新拉取" };
+            orderInfo = JSON.parse(orderInfo);
+            let o = orderInfo;
+            if (isNaN(Number(channel)))
+                return { code: 3, msg: "订单超时,请重新拉取" };
+            let handlerService = this.handlerMap.get(Number(channel));
+            if (handlerService) {
+                if (o.lOid != '无符合代充订单') {
+                    try {
+                        let r = await this.redisService.getRedis().incrby(`action:${o.oid}`, 1);
+                        if (r == 1) {
+                            console.log(`执行查询余额,余额查询成功，则发放号码给客户`);
+                            let obj = await this.redisService.getRedis().get(`order:${o.oid}`);
+                            let orderRedis = JSON.parse(obj);
+                            handlerService.codeService.checkPhoneBalanceByProduct(orderRedis, 4);
+                        }
+                        else {
+                            let obj = await this.redisService.getRedis().get(`order:${o.oid}`);
+                            let orderRedis = JSON.parse(obj);
+                            if (orderRedis.phoneBalance) {
+                                console.log(`执行查询余额,余额查询成功，则发放号码给客户`);
+                                return {
+                                    code: 1,
+                                    phone: orderRedis.resource.target
+                                };
+                            }
+                        }
+                    }
+                    catch (e) {
+                    }
+                }
+            }
+            return Object.assign({ code: 0 }, { outTime: orderInfo.outTime });
+        }
         else {
             if (!orderInfo)
                 return { code: 3, msg: "订单超时,请重新拉取" };
             orderInfo = JSON.parse(orderInfo);
             let o = orderInfo;
-            if (os && os.length > 0 && os.length <= 32 && (os == "ios" || os == "android" || os == "windows" || os == "macOS")) {
-                try {
-                    await this.entityManager.update(top_entity_1.TopOrder, { oid: orderInfo.oid }, { os });
-                }
-                catch (e) {
-                    console.error("收银台更新订单客户端系统类型出错", e);
-                    common_1.Logger.error("收银台更新订单客户端系统类型出错");
-                    common_1.Logger.error(e.toString());
-                }
-            }
             let r = await this.paramConfigService.findValueByKey("devLog");
             if (r == "1") {
                 console.dir(reqs.connection.remoteAddress);
@@ -334,6 +374,35 @@ let ApiService = class ApiService {
             return r ? "success" : "fail";
         }
     }
+    async directPush(params) {
+        let { merId, orderId } = params;
+        if (merId) {
+            let md5Key = await this.topUserService.getMd5Key(Number(merId));
+            let sign = process_1.default.env.NODE_ENV == "development" ? true : this.util.checkSign(params, md5Key);
+            if (sign) {
+                return await this.proxyChargingService.directPush(params);
+            }
+            throw new api_exception_1.ApiException(60003);
+        }
+    }
+    async directBack(params) {
+        let { merId, orderId } = params;
+        if (merId) {
+            let md5Key = await this.topUserService.getMd5Key(Number(merId));
+            let sign = process_1.default.env.NODE_ENV == "development" ? true : this.util.checkSign(params, md5Key);
+            if (sign) {
+                return await this.proxyChargingService.directBack(params);
+            }
+            throw new api_exception_1.ApiException(60003);
+        }
+    }
+    async isIpWhitelisted(ip, merId) {
+        let u = await this.entityManager.findOne(sys_user_entity_1.default, { where: { id: Number(merId) } });
+        if (u) {
+            return u.whiteIP.includes(`0.0.0.0`) ? true : u.whiteIP.split(',').includes(ip);
+        }
+        return false;
+    }
     sid;
     async test(params) {
         let { action } = params;
@@ -352,8 +421,8 @@ let ApiService = class ApiService {
 };
 ApiService = __decorate([
     (0, common_1.Injectable)(),
-    __param(13, (0, typeorm_1.InjectEntityManager)()),
-    __param(14, (0, bull_1.InjectQueue)("order")),
+    __param(14, (0, typeorm_1.InjectEntityManager)()),
+    __param(15, (0, bull_1.InjectQueue)("order")),
     __metadata("design:paramtypes", [redis_service_1.RedisService,
         util_service_1.UtilService,
         top_service_1.TopService,
@@ -367,6 +436,7 @@ ApiService = __decorate([
         aLiPayHandler_service_1.ALiPayHandlerService,
         handlerTemplate_service_1.HandlerTemplateService,
         XiaoMangProxyChargingHandlerservice_1.XiaoMangProxyChargingHandlerService,
+        checkModePhoneProxyChargingHandlerservice_1.CheckModePhoneProxyChargingHandlerService,
         typeorm_2.EntityManager, Object])
 ], ApiService);
 exports.ApiService = ApiService;

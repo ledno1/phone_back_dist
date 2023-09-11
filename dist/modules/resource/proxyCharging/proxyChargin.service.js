@@ -11,9 +11,6 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ProxyChargingService = void 0;
 const common_1 = require("@nestjs/common");
@@ -28,8 +25,6 @@ const proxyChargin_entity_1 = require("../../../entities/resource/proxyChargin.e
 const lodash_1 = require("lodash");
 const api_exception_1 = require("../../../common/exceptions/api.exception");
 const channel_service_1 = require("../channel/channel.service");
-const sys_user_entity_1 = __importDefault(require("../../../entities/admin/sys-user.entity"));
-const sys_balance_entity_1 = require("../../../entities/admin/sys-balance.entity");
 let ProxyChargingService = class ProxyChargingService {
     userService;
     channelRepository;
@@ -225,53 +220,6 @@ let ProxyChargingService = class ProxyChargingService {
         }
         return "ok";
     }
-    async resetStatusAndLock(data) {
-        try {
-            await this.proxyChargingRepository.update({ id: data.id, createStatus: false }, { status: 0, locking: false });
-        }
-        catch (e) {
-            console.error("话单恢复可提取失败");
-        }
-    }
-    async upDateCreateStatus(id) {
-        try {
-            await this.proxyChargingRepository.update({ id }, { createStatus: true });
-        }
-        catch (e) {
-            console.error("话单支付链接创建状态更新失败");
-        }
-    }
-    async updateOnOrderCreate(id, oid, mOid) {
-        try {
-            await this.proxyChargingRepository.update({ id }, { oid, mOid });
-        }
-        catch (e) {
-            console.error("订单创建成功,更新话单状态失败", e);
-        }
-    }
-    async resetOnOutTime(id) {
-        try {
-            await this.proxyChargingRepository.update({ id }, {
-                status: 0,
-                locking: false,
-                oid: null,
-                mOid: null,
-                createStatus: false
-            });
-        }
-        catch (e) {
-            console.error("话单过期,重置状态失败", e);
-        }
-    }
-    async getByAmount(params) {
-        let ls = await this.paramsConfig.findValueByKey("proxyChargingType");
-        if (ls) {
-            return ls.split(",");
-        }
-        else {
-            throw new api_exception_1.ApiException(70001);
-        }
-    }
     async setStatus(id, state) {
         try {
             await this.proxyChargingRepository.createQueryBuilder("proxyCharging")
@@ -283,66 +231,24 @@ let ProxyChargingService = class ProxyChargingService {
         catch (e) {
         }
     }
-    async getPhoneOrder(params) {
-        let that = this;
-        let { id, amount, uuid, merId, oid } = params;
-        let ydls = await this.paramsConfig.findValueByKey("yidong_shield");
-        let dxls = await this.paramsConfig.findValueByKey("dianxin_shield");
-        let ltls = await this.paramsConfig.findValueByKey("liantong_shield");
-        let proxyChargingInfo = this.entityManager.transaction(async (entityManager) => {
-            let proxyChargingInfo = await entityManager
-                .createQueryBuilder(proxyChargin_entity_1.ProxyCharging, "proxyCharging")
-                .where(`proxyCharging.amount = :amount`, { amount })
-                .andWhere("proxyCharging.status = 0")
-                .andWhere("proxyCharging.isClose = 0")
-                .andWhere("proxyCharging.lock = 0")
-                .andWhere("proxyCharging.pid = :id", { id })
-                .andWhere("proxyCharging.outTime > :outTime", { outTime: new Date() })
-                .andWhere(dxls == "," || dxls == "" ? "1=1" : `proxyCharging.id not in
-          (select proxyCharging.id from proxy_charging as proxyCharging where proxyCharging.channel = ${that.DIANXINCHANNEL} and proxyCharging.operator in (${dxls.split(",").map(n => `"${n}"`).join(",")}))`)
-                .andWhere(ydls == "," || ydls == "" ? "3=3" : `proxyCharging.id not in
-           (select proxyCharging.id from proxy_charging as proxyCharging where proxyCharging.channel = ${that.YIDONGCHANNEL} and proxyCharging.operator in (${ydls.split(",").map(n => `"${n}"`).join(",")}))`)
-                .andWhere(ltls == "," || ltls == "" ? "2=2" : `proxyCharging.id not in
-           (select proxyCharging.id from proxy_charging as proxyCharging where proxyCharging.channel = ${that.LIANTONGCHANNEL} and proxyCharging.operator in (${ltls.split(",").map(n => `"${n}"`).join(",")}))`)
-                .orderBy("proxyCharging.weight", "DESC")
-                .getOne();
-            if (proxyChargingInfo) {
-                let rate = await this.channelService.getRateByChannelId(id, proxyChargingInfo.channel, uuid);
-                let isChange = await entityManager.createQueryBuilder(proxyChargin_entity_1.ProxyCharging, "pc")
-                    .update()
-                    .set({ locking: true, status: 2, version: () => "version + 1" })
-                    .where("id = :id", { id: proxyChargingInfo.id })
-                    .andWhere("version = :version", { version: proxyChargingInfo.version })
-                    .execute();
-                console.log("isChange", isChange);
-                if (isChange.affected >= 1) {
-                    console.log("更新用户金额");
-                    let l = await entityManager.findOne(sys_user_entity_1.default, { where: { id: id } });
-                    let rateAmount = amount * rate / 10000;
-                    await entityManager.createQueryBuilder()
-                        .update(sys_user_entity_1.default)
-                        .set({
-                        balance: () => {
-                            return `balance - ${rateAmount}`;
-                        }
-                    })
-                        .where("id = :id", { id: id })
-                        .execute();
-                    let log = new sys_balance_entity_1.SysBalanceLog();
-                    log.amount = amount * rate / 10000;
-                    log.uuid = uuid;
-                    log.typeEnum = "reduce";
-                    log.event = "topOrder";
-                    log.actionUuid = merId;
-                    log.orderUuid = oid;
-                    log.balance = l.balance - amount * rate / 10000;
-                    await this.entityManager.save(log);
-                    return proxyChargingInfo;
-                }
-            }
-            return null;
-        });
-        return proxyChargingInfo;
+    async directBack(params) {
+    }
+    async directPush(params) {
+        let { merId, orderId, channel, orderAmt, rechargeNumber, notifyUrl, weight } = params;
+        try {
+            let proxyCharging = new proxyChargin_entity_1.ProxyCharging();
+            proxyCharging.channel = Number(channel);
+            proxyCharging.target = rechargeNumber;
+            proxyCharging.amount = Number(orderAmt) * 100;
+            proxyCharging.mOid = orderId;
+            proxyCharging.status = 0;
+            proxyCharging.notifyUrl = notifyUrl;
+            proxyCharging.pUid = this.util.generateUUID();
+            proxyCharging.weight = Number(weight);
+            await this.proxyChargingRepository.save(proxyCharging);
+        }
+        catch (e) {
+        }
     }
 };
 ProxyChargingService = __decorate([

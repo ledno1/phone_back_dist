@@ -29,6 +29,7 @@ export declare const ErrorCodeMap: {
     readonly 10021: "参数配置键值对已存在";
     readonly 10101: "不安全的任务，确保执行的加入@Mission注解";
     readonly 10102: "所执行的任务不存在";
+    readonly 10103: "该ip不在白名单";
     readonly 11101: "谷歌验证码过期";
     readonly 11102: "谷歌验证码错误";
     readonly 11103: "密码错误";
@@ -79,6 +80,9 @@ export declare const ErrorCodeMap: {
     readonly 60013: "无法提取符合条件的支付连接";
     readonly 60014: "无符合话单";
     readonly 60015: "不支持该订单金额";
+    readonly 60016: "系统维护中，禁止推单";
+    readonly 60017: "该通道不存在";
+    readonly 60018: "该通道暂不可用";
     readonly 70001: "没有配置订单金额限定";
     readonly 70002: "该运营商禁止入单";
     readonly 80001: "保存失败";

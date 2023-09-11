@@ -65,7 +65,7 @@ __decorate([
     __metadata("design:type", String)
 ], TopOrder.prototype, "os", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: "varchar", length: 64, comment: "订单出错事件", nullable: true }),
+    (0, typeorm_1.Column)({ type: "varchar", length: 512, comment: "订单出错事件", default: "" }),
     __metadata("design:type", String)
 ], TopOrder.prototype, "errInfo", void 0);
 __decorate([
