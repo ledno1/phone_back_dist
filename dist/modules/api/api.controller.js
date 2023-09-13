@@ -138,9 +138,8 @@ let ApiController = class ApiController {
         return await this.apiService.payCheck(body);
     }
     async getpayurl(body, request) {
-        const clientIP = request.headers['x-forwarded-for'] || request.connection.remoteAddress;
-        console.log(clientIP);
-        return await this.apiService.getPayUrl(body, '1.1.1.1');
+        const clientIP = request.headers['x-forwarded-for'] || '127.0.0.1';
+        return await this.apiService.getPayUrl(body, clientIP.toString().split(",")[0]);
     }
     async alipayNotify(body, query) {
         return await this.apiService.alipayNotify(body, query);
@@ -150,7 +149,12 @@ let ApiController = class ApiController {
             return await this.apiService.test(query);
         }
     }
-    async directPush(body, req) {
+    async callback() {
+        if (process.env.NODE_ENV == "development") {
+            return 'success';
+        }
+    }
+    async directPush(body, request) {
         let proxyCharging = await this.paramConfigService.findValueByKey("proxyCharging_open");
         if (Boolean(Number(proxyCharging)) === true) {
             let c = await this.channelService.getChannelInfo(body.channel);
@@ -180,14 +184,21 @@ let ApiController = class ApiController {
                     throw new api_exception_1.ApiException(60015);
                 }
             }
-            if (!await this.apiService.isIpWhitelisted(req.ip, body.merId)) {
+            const clientIP = request.headers['x-forwarded-for'] || '127.0.0.1';
+            console.log(clientIP);
+            if (!await this.apiService.isIpWhitelisted(clientIP.toString().split(',')[0], body.merId)) {
                 throw new api_exception_1.ApiException(10103);
             }
             return await this.apiService.directPush(body);
         }
         throw new api_exception_1.ApiException(60016);
     }
-    async directBack(body) {
+    async directBack(body, request) {
+        const clientIP = request.headers['x-forwarded-for'] || '127.0.0.1';
+        console.log(clientIP);
+        if (!await this.apiService.isIpWhitelisted(clientIP.toString().split(',')[0], body.merId)) {
+            throw new api_exception_1.ApiException(10103);
+        }
         return await this.apiService.directBack(body);
     }
 };
@@ -260,18 +271,30 @@ __decorate([
 ], ApiController.prototype, "startcheck", null);
 __decorate([
     (0, authorize_decorator_1.Authorize)(),
+    (0, common_1.Post)("/test/callback"),
+    (0, keep_decorator_1.Keep)(),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], ApiController.prototype, "callback", null);
+__decorate([
+    (0, keep_decorator_1.Keep)(),
+    (0, authorize_decorator_1.Authorize)(),
     (0, common_1.Post)("/order/directPush"),
     __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Req)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [interface_1.DirectPush, Object]),
     __metadata("design:returntype", Promise)
 ], ApiController.prototype, "directPush", null);
 __decorate([
     (0, authorize_decorator_1.Authorize)(),
+    (0, keep_decorator_1.Keep)(),
     (0, common_1.Post)("/order/directBack"),
     __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [interface_1.DirectBack]),
+    __metadata("design:paramtypes", [interface_1.DirectBack, Object]),
     __metadata("design:returntype", Promise)
 ], ApiController.prototype, "directBack", null);
 ApiController = __decorate([

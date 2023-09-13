@@ -180,6 +180,10 @@ let SysUserService = class SysUserService {
         });
     }
     async findUserIdByNameOrId(nameOrId) {
+        let userinfo = await this.redisService.getRedis().get(`admin:info:${nameOrId}`);
+        if (userinfo) {
+            return JSON.parse(userinfo);
+        }
         const user = await this.userRepository.findOne({
             where: [
                 { id: Number(nameOrId) ? Number(nameOrId) : null },
@@ -190,6 +194,7 @@ let SysUserService = class SysUserService {
         if ((0, lodash_1.isEmpty)(user)) {
             throw new api_exception_1.ApiException(10017);
         }
+        await this.redisService.getRedis().set(`admin:info:${nameOrId}`, JSON.stringify(user));
         return user;
     }
     async info(id) {

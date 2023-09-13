@@ -20,7 +20,8 @@ export declare class ProxyCharging extends BaseEntity {
     isClose: boolean;
     outTime: Date;
     operator: string;
-    area: string;
+    city: string;
+    province: string;
     callback: number;
     channel: number;
     parentChannel: number;

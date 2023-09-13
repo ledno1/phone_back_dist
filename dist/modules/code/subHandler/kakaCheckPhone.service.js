@@ -1,9 +1,32 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
 };
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
@@ -16,10 +39,15 @@ exports.PhoneBalanceData = exports.BlackType = exports.PhoneBalance = exports.Bl
 const common_1 = require("@nestjs/common");
 const util_service_1 = require("../../../shared/services/util.service");
 const param_config_service_1 = require("../../admin/system/param-config/param-config.service");
+const proxyChargin_entity_1 = require("../../../entities/resource/proxyChargin.entity");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const top_entity_1 = require("../../../entities/order/top.entity");
 const redis_service_1 = require("../../../shared/services/redis.service");
+const param_config_dto_1 = require("../../admin/system/param-config/param-config.dto");
+const backphone_entity_1 = require("../../../entities/resource/backphone.entity");
+const checklog_entity_1 = require("../../../entities/resource/checklog.entity");
+const redlock_1 = __importStar(require("redlock"));
 const retry = require('retry');
 let KaKaCheckPhoneHandlerService = class KaKaCheckPhoneHandlerService {
     paramConfigService;
@@ -34,6 +62,15 @@ let KaKaCheckPhoneHandlerService = class KaKaCheckPhoneHandlerService {
     }
     user_id;
     timeout;
+    retryCount;
+    retryOptions = {
+        factor: 1,
+        minTimeout: 3000,
+        maxTimeout: 3000,
+        randomize: false,
+    };
+    PhoneBlackListJoin;
+    redlock;
     async onModuleInit() {
         this.user_id = await this.paramConfigService.findValueByKey('KaKaUser_id');
         if (!this.user_id) {
@@ -44,6 +81,43 @@ let KaKaCheckPhoneHandlerService = class KaKaCheckPhoneHandlerService {
             throw new Error('KaKaRequestTimeout 配置表中未设置');
         }
         this.timeout = Number(t);
+        let r = await this.paramConfigService.findValueByKey(`KaKaRetryCount`);
+        if (!r) {
+            throw new Error('KaKaRetryCount 配置表中未设置');
+        }
+        this.retryCount = Number(r);
+        let d = await this.paramConfigService.findValueByKey(`KaKaRetryDelay`);
+        if (!d) {
+            throw new Error('KaKaRetryDelay 配置表中未设置');
+        }
+        this.retryOptions.maxTimeout = Number(d);
+        this.retryOptions.minTimeout = Number(d);
+        let b = await this.paramConfigService.findValueByKey(`PhoneBlackListJoin`);
+        if (!b) {
+            let t = new param_config_dto_1.CreateParamConfigDto();
+            t.name = "无法查询余额的号码是否加入黑名单";
+            t.key = "PhoneBlackListJoin";
+            t.value = '1';
+            t.remark = "无法查询余额的号码是否加入黑名单";
+            await this.paramConfigService.add(t);
+            this.PhoneBlackListJoin = true;
+        }
+        else {
+            this.PhoneBlackListJoin = b == '1' ? true : false;
+        }
+        this.redlock = new redlock_1.default([this.redis.getRedis()], {
+            driftFactor: 0.01,
+            retryCount: -1,
+            retryDelay: 200,
+            retryJitter: 200,
+            automaticExtensionThreshold: 500
+        });
+        this.redlock.on("error", (error) => {
+            if (error instanceof redlock_1.ResourceLockedError) {
+                return;
+            }
+            common_1.Logger.error(error);
+        });
     }
     result(params, orderRedis) {
         return new Promise(async (resolve, reject) => {
@@ -51,7 +125,12 @@ let KaKaCheckPhoneHandlerService = class KaKaCheckPhoneHandlerService {
                 let res = await this.checkBalance(orderRedis);
                 if (res.is) {
                     console.log("执行缓存更新");
+                    this.entityManager.insert(checklog_entity_1.CheckLog, {
+                        phone: orderRedis.resource.target,
+                        balance: res.balance.toString(),
+                    });
                     orderRedis.phoneBalance = res.balance.toString();
+                    orderRedis.firstCheckTime = new Date().getTime();
                     await this.redis.getRedis().set(`order:${orderRedis.order.oid}`, JSON.stringify(orderRedis));
                     resolve(res.balance.toString());
                     return;
@@ -61,7 +140,7 @@ let KaKaCheckPhoneHandlerService = class KaKaCheckPhoneHandlerService {
                 console.log(e);
                 let firstErr = e;
                 console.error(`${orderRedis.resource.target}查询余额失败,最后一次原因:${e[e.length - 1].msg}`);
-                if (e[e.length - 1].msg.includes(`SYSERROR`) || e[e.length - 1].msg.includes(`AxiosError: timeout of`)) {
+                if (e[e.length - 1].msg.includes(`SYSERROR`) || e[e.length - 1].msg.includes(`OTHER`) || e[e.length - 1].msg.includes(`AxiosError: timeout of`)) {
                     let a = {
                         "YIDONG": false,
                         "LIANTONG": false,
@@ -70,13 +149,19 @@ let KaKaCheckPhoneHandlerService = class KaKaCheckPhoneHandlerService {
                     a[orderRedis.resource.operator] = true;
                     let arr = Object.keys(a);
                     for (let i = 0; i < arr.length; i++) {
+                        console.log(`尝试${arr[i]}运营商查询余额,查询状态:${a[arr[i]]}`);
                         if (!a[arr[i]]) {
                             orderRedis.resource.operator = arr[i];
                             try {
                                 let res = await this.checkBalance(orderRedis);
                                 if (res.is) {
                                     console.log("执行缓存更新");
+                                    this.entityManager.insert(checklog_entity_1.CheckLog, {
+                                        phone: orderRedis.resource.target,
+                                        balance: res.balance.toString(),
+                                    });
                                     orderRedis.phoneBalance = res.balance.toString();
+                                    orderRedis.firstCheckTime = new Date().getTime();
                                     await this.redis.getRedis().set(`order:${orderRedis.order.oid}`, JSON.stringify(orderRedis));
                                     resolve(res.balance.toString());
                                     return;
@@ -85,12 +170,34 @@ let KaKaCheckPhoneHandlerService = class KaKaCheckPhoneHandlerService {
                             catch (e) {
                                 firstErr = firstErr.concat(e);
                                 a[arr[i]] = true;
+                                console.log("重试出错");
+                                console.log(e);
                             }
                         }
                     }
-                    console.log(`尝试全部运营商余额均无法查询到,请加入黑名单`);
+                    if (this.PhoneBlackListJoin) {
+                        console.log(`尝试全部运营商余额均无法查询到,请加入黑名单`);
+                        this.entityManager.insert(backphone_entity_1.BackPhone, {
+                            phone: orderRedis.resource.target,
+                            reason: `尝试全部运营商余额均无法查询到,请加入黑名单`
+                        });
+                    }
                 }
-                this.entityManager.update(top_entity_1.TopOrder, { oid: orderRedis.order.oid }, { errInfo: JSON.stringify(e) });
+                this.entityManager.update(top_entity_1.TopOrder, { oid: orderRedis.order.oid }, { errInfo: JSON.stringify(firstErr) });
+                console.log(JSON.stringify(e) + "尝试重新取号匹配");
+                let lock = await this.redlock.acquire("lock", 5000);
+                try {
+                }
+                catch (e) {
+                }
+                finally {
+                    try {
+                        await lock.release();
+                    }
+                    catch (e) {
+                        console.error("释放锁失败");
+                    }
+                }
             }
             resolve("Failed");
         });
@@ -107,10 +214,9 @@ let KaKaCheckPhoneHandlerService = class KaKaCheckPhoneHandlerService {
             }
         });
     }
-    checkBalanceBase(orderRedis) {
+    checkBalanceBase(pc) {
         return new Promise(async (resolve, reject) => {
             try {
-                let pc = orderRedis.resource;
                 let proxy = process.env.NODE_ENV == 'production' ? false : `socks5://127.0.0.1:7890`;
                 let res = await this.util.requestPost('http://pdapi.panda763.com:1338/api/order/create', {
                     user_id: this.user_id,
@@ -148,6 +254,14 @@ let KaKaCheckPhoneHandlerService = class KaKaCheckPhoneHandlerService {
                         errDate: this.util.dayjsFormat(new Date())
                     });
                 }
+                else {
+                    reject({
+                        is: false,
+                        balance: 0,
+                        msg: "OTHER:" + JSON.stringify(result),
+                        errDate: this.util.dayjsFormat(new Date())
+                    });
+                }
             }
             catch (e) {
                 console.error('查询余额请求出错');
@@ -163,22 +277,15 @@ let KaKaCheckPhoneHandlerService = class KaKaCheckPhoneHandlerService {
     }
     checkBalance(orderRedis) {
         return new Promise((resolve, reject) => {
-            const maxRetries = 3;
-            const retryOptions = {
-                factor: 1,
-                minTimeout: 1000,
-                maxTimeout: 1000,
-                randomize: false,
-            };
             const operation = retry.operation({
-                retries: maxRetries,
-                ...retryOptions,
+                retries: this.retryCount,
+                ...this.retryOptions,
             });
             let resultArray = [];
             operation.attempt(async (currentAttempt) => {
-                console.log(`第${currentAttempt}次查询余额`);
+                console.log(`第${currentAttempt}次查询余额,${this.util.dayjsFormat(new Date())}`);
                 try {
-                    const result = await this.checkBalanceBase(orderRedis);
+                    const result = await this.checkBalanceBase(orderRedis.resource);
                     console.log(`查询余额成功${result.balance}`);
                     resolve(result);
                     return;
@@ -224,16 +331,9 @@ let KaKaCheckPhoneHandlerService = class KaKaCheckPhoneHandlerService {
     }
     isBlackPhone(orderRedis) {
         return new Promise((resolve, reject) => {
-            const maxRetries = 3;
-            const retryOptions = {
-                factor: 1,
-                minTimeout: 500,
-                maxTimeout: 500,
-                randomize: false,
-            };
             const operation = retry.operation({
-                retries: maxRetries,
-                ...retryOptions,
+                retries: this.retryCount,
+                ...this.retryOptions,
             });
             operation.attempt(async (currentAttempt) => {
                 try {
@@ -247,6 +347,20 @@ let KaKaCheckPhoneHandlerService = class KaKaCheckPhoneHandlerService {
                     reject(err);
                 }
             });
+        });
+    }
+    checkBalanceByPhoneAndOperator(phone, operator) {
+        return new Promise(async (resolve, reject) => {
+            let t = new proxyChargin_entity_1.ProxyCharging();
+            t.target = phone;
+            t.operator = operator;
+            try {
+                let res = await this.checkBalanceBase(t);
+                resolve(res);
+            }
+            catch (e) {
+                resolve(e);
+            }
         });
     }
 };

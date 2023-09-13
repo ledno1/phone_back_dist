@@ -52,6 +52,12 @@ export declare class CommissionService {
             totalSuccessCount: any;
             totalCount: any;
         };
+        DIANXIN: boolean;
+        YIDONG: boolean;
+        LIANTONG: boolean;
+        DIANXINLIST: string;
+        YIDONGLIST: string;
+        LIANTONGLIST: string;
     }>;
     edit(params: any, user: IAdminUser): Promise<string | 1>;
     statistics2(params: any, user?: IAdminUser): Promise<{

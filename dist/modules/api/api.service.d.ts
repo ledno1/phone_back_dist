@@ -30,8 +30,8 @@ export declare class ApiService implements OnModuleInit {
     private proxyChargingService;
     private aLiPayHandlerService;
     private handlerTemplateService;
-    private xiaoMangHandlerService;
-    private checkModePhoneHandlerService;
+    xiaoMangHandlerService: XiaoMangProxyChargingHandlerService;
+    checkModePhoneHandlerService: CheckModePhoneProxyChargingHandlerService;
     private entityManager;
     private orderQueue;
     private host;
@@ -144,8 +144,14 @@ export declare class ApiService implements OnModuleInit {
         phone?: undefined;
     }>;
     alipayNotify(params: ALiPayNotify, query: any): Promise<"success" | "fail">;
-    directPush(params: DirectPush): Promise<void>;
-    directBack(params: DirectBack): Promise<void>;
+    directPush(params: DirectPush): Promise<{
+        code: number;
+        message: string;
+    }>;
+    directBack(params: DirectBack): Promise<{
+        code: number;
+        message: string;
+    }>;
     isIpWhitelisted(ip: string, merId: string): Promise<boolean>;
     private sid;
     test(params: any): Promise<void>;

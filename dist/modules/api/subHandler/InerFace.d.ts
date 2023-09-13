@@ -42,6 +42,7 @@ export declare class OrderRedis {
     showOrder?: string;
     realAmount?: number;
     phoneBalance?: string;
+    firstCheckTime?: number;
 }
 export interface ServiceHandler {
     codeService: CodeService;

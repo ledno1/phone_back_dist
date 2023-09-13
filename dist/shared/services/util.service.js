@@ -44,6 +44,7 @@ const dayjs_1 = __importDefault(require("dayjs"));
 const otplib_1 = require("otplib");
 const qrcode_1 = __importDefault(require("qrcode"));
 const socks_proxy_agent_1 = __importDefault(require("socks-proxy-agent"));
+const retry = require('retry');
 let UtilService = class UtilService {
     httpService;
     constructor(httpService) {

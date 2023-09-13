@@ -26,6 +26,9 @@ export declare class CheckModePhoneProxyChargingHandlerService implements Servic
     private util;
     codeService: CodeService;
     constructor(redisService: RedisService, entityManager: EntityManager, topUserService: TopService, proxyUserService: ProxyService, paramConfigService: SysParamConfigService, channelService: ChannelService, util: UtilService, codeService: CodeService);
+    private DIANXINAndLIANTONGCheck;
+    private YIDONGCheck;
+    private CheckModePhoneProxyChargingMaxCount;
     onModuleInit(): Promise<void>;
     model: ProcessModel;
     defaultSystemOutTime: number;

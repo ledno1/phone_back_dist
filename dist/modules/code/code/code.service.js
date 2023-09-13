@@ -95,10 +95,40 @@ let CodeService = class CodeService {
         }
     }
     async checkOrderByProduct(params, orderRedis, productId) {
-        return [];
+        if (process.env.NODE_ENV == 'production') {
+            let handler = this.handlerMap.get(Number(productId));
+            if (handler) {
+                return await handler.checkOrder(params, orderRedis);
+            }
+        }
+        else {
+            let r = Math.floor(Math.random() * 100);
+            let t = new kakaCheckPhone_service_1.KaKaCheckResult();
+            if (r >= 50) {
+                t.balance = Number(orderRedis.phoneBalance + orderRedis.order.amount / 100);
+                return t;
+            }
+            else if (r < 50 && r >= 20) {
+                t.balance = Number(orderRedis.phoneBalance);
+                return t;
+            }
+            else if (r < 20 && r > 5) {
+                let r2 = Math.floor(Math.random() * 10);
+                t.balance = Number(orderRedis.phoneBalance) - r2;
+                return t;
+            }
+            else {
+                return [];
+            }
+        }
+    }
+    async checkPhoneBalanceByProductOnly(phone, productId) {
         let handler = this.handlerMap.get(Number(productId));
         if (handler) {
-            return await handler.checkOrder(params, orderRedis);
+            return await handler.checkBalanceByPhoneAndOperator(phone.target, phone.operator);
+        }
+        else {
+            console.error(`产品码${productId}未绑定处理服务`);
         }
     }
     async checkPhoneBalanceByChannel(orderRedis) {

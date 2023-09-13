@@ -12,7 +12,7 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ProxyChargingService = void 0;
+exports.PhoneInfo = exports.ProxyChargingService = void 0;
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
@@ -25,6 +25,11 @@ const proxyChargin_entity_1 = require("../../../entities/resource/proxyChargin.e
 const lodash_1 = require("lodash");
 const api_exception_1 = require("../../../common/exceptions/api.exception");
 const channel_service_1 = require("../channel/channel.service");
+const param_config_dto_1 = require("../../admin/system/param-config/param-config.dto");
+const checklog_entity_1 = require("../../../entities/resource/checklog.entity");
+const code_service_1 = require("../../code/code/code.service");
+const backphone_entity_1 = require("../../../entities/resource/backphone.entity");
+const phoneQuery = require('query-mobile-phone-area');
 let ProxyChargingService = class ProxyChargingService {
     userService;
     channelRepository;
@@ -33,11 +38,12 @@ let ProxyChargingService = class ProxyChargingService {
     redisService;
     paramsConfig;
     channelService;
+    codeService;
     util;
     DIANXINCHANNEL;
     LIANTONGCHANNEL;
     YIDONGCHANNEL;
-    constructor(userService, channelRepository, entityManager, proxyChargingRepository, redisService, paramsConfig, channelService, util) {
+    constructor(userService, channelRepository, entityManager, proxyChargingRepository, redisService, paramsConfig, channelService, codeService, util) {
         this.userService = userService;
         this.channelRepository = channelRepository;
         this.entityManager = entityManager;
@@ -45,12 +51,67 @@ let ProxyChargingService = class ProxyChargingService {
         this.redisService = redisService;
         this.paramsConfig = paramsConfig;
         this.channelService = channelService;
+        this.codeService = codeService;
         this.util = util;
     }
     async onModuleInit() {
         this.LIANTONGCHANNEL = await this.channelService.getChannelIdByName("联通");
         this.YIDONGCHANNEL = await this.channelService.getChannelIdByName("移动");
         this.DIANXINCHANNEL = await this.channelService.getChannelIdByName("电信");
+        let dIs = await this.paramsConfig.findValueByKey('DIANXIN');
+        if (!dIs) {
+            let t = new param_config_dto_1.CreateParamConfigDto();
+            t.name = "电信入单开关";
+            t.key = "DIANXIN";
+            t.value = '1';
+            t.remark = "电信入单开关,话费充值运营商开关";
+            await this.paramsConfig.add(t);
+        }
+        let lIs = await this.paramsConfig.findValueByKey('LIANTONG');
+        if (!lIs) {
+            let t = new param_config_dto_1.CreateParamConfigDto();
+            t.name = "联通入单开关";
+            t.key = "LIANTONG";
+            t.value = '1';
+            t.remark = "联通入单开关,话费充值运营商开关";
+            await this.paramsConfig.add(t);
+        }
+        let yIs = await this.paramsConfig.findValueByKey('YIDONG');
+        if (!yIs) {
+            let t = new param_config_dto_1.CreateParamConfigDto();
+            t.name = "移动入单开关";
+            t.key = "YIDONG";
+            t.value = '1';
+            t.remark = "移动入单开关,话费充值运营商开关";
+            await this.paramsConfig.add(t);
+        }
+        let yIsList = await this.paramsConfig.findValueByKey('YIDONG_LIST');
+        if (!yIsList && yIsList != '') {
+            let t = new param_config_dto_1.CreateParamConfigDto();
+            t.name = "移动禁止入单省份";
+            t.key = "YIDONG_LIST";
+            t.value = '';
+            t.remark = "移动禁止入单省份";
+            await this.paramsConfig.add(t);
+        }
+        let lIsList = await this.paramsConfig.findValueByKey('LIANTONG_LIST');
+        if (!lIsList && lIsList != '') {
+            let t = new param_config_dto_1.CreateParamConfigDto();
+            t.name = "联通禁止入单省份";
+            t.key = "LIANTONG_LIST";
+            t.value = '';
+            t.remark = "联通禁止入单省份";
+            await this.paramsConfig.add(t);
+        }
+        let dIsList = await this.paramsConfig.findValueByKey('DIANXIN_LIST');
+        if (!dIsList && dIsList != '') {
+            let t = new param_config_dto_1.CreateParamConfigDto();
+            t.name = "电信禁止入单省份";
+            t.key = "DIANXIN_LIST";
+            t.value = '';
+            t.remark = "电信禁止入单省份";
+            await this.paramsConfig.add(t);
+        }
     }
     async page(params, user) {
         let { page, limit, oid, lOid, accountNumber, amount, createdAt, channelName, callback, status, action } = params;
@@ -72,7 +133,8 @@ let ProxyChargingService = class ProxyChargingService {
             .select([
             "proxyCharging.id AS id", "proxyCharging.target AS target", "proxyCharging.pid AS pid", "proxyCharging.mOid AS mOid", "proxyCharging.oid AS oid", "proxyCharging.amount AS amount",
             "proxyCharging.status AS status", "proxyCharging.callback AS callback", "proxyCharging.created_at AS createdAt", "proxyCharging.outTime AS outTime", "proxyCharging.pUid AS pUid",
-            "proxyCharging.operator AS operator", "proxyCharging.weight AS weight", "proxyCharging.locking AS locking", "proxyCharging.isClose AS isClose"
+            "proxyCharging.operator AS operator", "proxyCharging.weight AS weight", "proxyCharging.locking AS locking", "proxyCharging.isClose AS isClose", "proxyCharging.errInfo AS errInfo",
+            "proxyCharging.count AS count"
         ])
             .addSelect("user.username AS pidName")
             .addSelect([
@@ -104,57 +166,7 @@ let ProxyChargingService = class ProxyChargingService {
     }
     async add(params, user) {
         let { phone, amount, channel, operator } = params;
-        if (params.link) {
-        }
-        else {
-            let channelInfo = await this.channelService.getChannelInfo(channel);
-            await this.isProhibit(channelInfo.name, operator);
-            let c = new proxyChargin_entity_1.ProxyCharging();
-            c.parentChannel = channelInfo.parentId;
-            c.pid = user.id;
-            c.amount = Math.floor(Number(amount) * 100);
-            c.channel = channel;
-            c.target = phone;
-            c.lRate = channelInfo.rate;
-            c.outTime = this.util.dayjsFormat(new Date().getTime() + channelInfo.expireTime * 1000);
-            c.SysUser = user;
-            c.operator = operator;
-            await this.proxyChargingRepository.save(c);
-        }
         return "ok";
-    }
-    async isProhibit(name, operator) {
-        let ls, redisKey, dbKey;
-        if (name.includes("电信")) {
-            redisKey = "huadan:prohibit:dianxin";
-            dbKey = "dianxin_prohibit";
-        }
-        else if (name.includes("联通")) {
-            redisKey = "huadan:prohibit:liantong";
-            dbKey = "liantong_prohibit";
-        }
-        else if (name.includes("移动")) {
-            redisKey = "huadan:prohibit:yidong";
-            dbKey = "yidong_prohibit";
-        }
-        ls = await this.redisService.getRedis().get(redisKey);
-        if (ls) {
-            if (ls.indexOf(operator) > -1) {
-                throw new api_exception_1.ApiException(70002);
-            }
-        }
-        else {
-            let ls2 = await this.paramsConfig.findValueByKey(dbKey);
-            if (ls2) {
-                await this.redisService.getRedis().set(redisKey, ls2, "EX", 60);
-                if (ls2.indexOf(operator) > -1) {
-                    throw new api_exception_1.ApiException(70002);
-                }
-            }
-            else {
-                throw new api_exception_1.ApiException(70001);
-            }
-        }
     }
     async edit(params, user) {
         let { action, ids, pUid } = params;
@@ -182,6 +194,50 @@ let ProxyChargingService = class ProxyChargingService {
                         await this.proxyChargingRepository.delete(obj);
                     }
                     return "ok";
+                case "checkLog":
+                    let l = await this.entityManager.createQueryBuilder(checklog_entity_1.CheckLog, "checkLog")
+                        .select()
+                        .where(`checkLog.phone = :phone`, { phone: proxyChargingInfo.target })
+                        .orderBy("checkLog.createdAt", "DESC")
+                        .limit(4)
+                        .getMany();
+                    return l.sort((n1, n2) => new Date(n1.createdAt).getTime() - new Date(n2.createdAt).getTime());
+                    break;
+                case "nowBalance":
+                    let isBackPhone = await this.entityManager.findOne(backphone_entity_1.BackPhone, {
+                        where: {
+                            phone: proxyChargingInfo.target
+                        }
+                    });
+                    if (isBackPhone) {
+                        throw new api_exception_1.ApiException(40008);
+                    }
+                    let l2 = await this.entityManager.createQueryBuilder(checklog_entity_1.CheckLog, "checkLog")
+                        .select()
+                        .where(`checkLog.phone = :phone`, { phone: proxyChargingInfo.target })
+                        .orderBy("checkLog.createdAt", "DESC")
+                        .limit(4)
+                        .getMany();
+                    try {
+                        let res = await this.codeService.checkPhoneBalanceByProductOnly(proxyChargingInfo, 4);
+                        console.log(res);
+                        if (res.is) {
+                            let t = new checklog_entity_1.CheckLog();
+                            t.createdAt = new Date();
+                            t.phone = proxyChargingInfo.target;
+                            t.balance = res.balance;
+                            await this.entityManager.save(t);
+                            l2.push(t);
+                            return l2.sort((n1, n2) => new Date(n1.createdAt).getTime() - new Date(n2.createdAt).getTime());
+                        }
+                        else {
+                            return "查询失败";
+                        }
+                    }
+                    catch (e) {
+                        return "查询失败";
+                    }
+                    break;
             }
             await this.proxyChargingRepository.save(proxyChargingInfo);
         }
@@ -232,11 +288,83 @@ let ProxyChargingService = class ProxyChargingService {
         }
     }
     async directBack(params) {
+        try {
+            let { merId, orderId, channel } = params;
+            let qb = await this.entityManager.transaction(async (entityManager) => {
+                let proxyCharging = await entityManager.findOne(proxyChargin_entity_1.ProxyCharging, {
+                    where: {
+                        mOid: orderId,
+                        pid: Number(merId),
+                        status: 0,
+                        channel: Number(channel)
+                    }
+                });
+                if (proxyCharging) {
+                    proxyCharging.status = 3;
+                    await entityManager.save(proxyCharging);
+                    return 1;
+                }
+                else {
+                    let pc = await entityManager.findOne(proxyChargin_entity_1.ProxyCharging, {
+                        where: {
+                            mOid: orderId,
+                            pid: Number(merId),
+                            status: 3,
+                            channel: Number(channel)
+                        }
+                    });
+                    if (pc.status == 3) {
+                        return 3;
+                    }
+                }
+                return 0;
+            });
+            if (qb == 1) {
+                return {
+                    code: 70000,
+                    message: "退单成功"
+                };
+            }
+            else if (qb == 3) {
+                return {
+                    code: 61201,
+                    message: "该订单已经退单成功"
+                };
+            }
+            return {
+                code: 61400,
+                message: "退单失败,不存在该订单或该订单正处于充值中,无法退单"
+            };
+        }
+        catch (e) {
+            console.error(e);
+            return {
+                code: 60010,
+                message: "系统配置错误,请联系管理员"
+            };
+        }
     }
     async directPush(params) {
         let { merId, orderId, channel, orderAmt, rechargeNumber, notifyUrl, weight } = params;
+        let phoneInfo;
+        phoneInfo = phoneQuery(rechargeNumber);
+        let operator = await this.operatorType(phoneInfo.type);
+        let r = await this.provinceType(operator, phoneInfo.province);
+        if (!r) {
+            return {
+                code: 70003,
+                message: `不允许${phoneInfo.type}的${phoneInfo.province}省份的推单号码`
+            };
+        }
+        let w = Number(weight);
+        if (w != 0 && w != 100) {
+            throw new api_exception_1.ApiException(70004);
+        }
         try {
+            let u = await this.userService.findUserIdByNameOrId(merId);
+            let rate = await this.channelService.getRateByChannelId(Number(merId), Number(channel), u.uuid);
             let proxyCharging = new proxyChargin_entity_1.ProxyCharging();
+            proxyCharging.pid = Number(merId);
             proxyCharging.channel = Number(channel);
             proxyCharging.target = rechargeNumber;
             proxyCharging.amount = Number(orderAmt) * 100;
@@ -244,11 +372,54 @@ let ProxyChargingService = class ProxyChargingService {
             proxyCharging.status = 0;
             proxyCharging.notifyUrl = notifyUrl;
             proxyCharging.pUid = this.util.generateUUID();
-            proxyCharging.weight = Number(weight);
+            proxyCharging.weight = w;
+            proxyCharging.operator = operator;
+            proxyCharging.parentChannel = 3;
+            proxyCharging.province = phoneInfo.province;
+            proxyCharging.city = phoneInfo.city;
+            proxyCharging.lRate = rate;
+            proxyCharging.SysUser = u;
+            proxyCharging.outTime = w == 0 ? this.util.dayjs().add(3, "day").toDate() : this.util.dayjs().add(10, "minute").toDate();
             await this.proxyChargingRepository.save(proxyCharging);
+            return {
+                code: 70000,
+                message: "success"
+            };
         }
         catch (e) {
+            if (e.code == 'ER_DUP_ENTRY') {
+                throw new api_exception_1.ApiException(60019);
+            }
+            throw new api_exception_1.ApiException(60010);
         }
+    }
+    async operatorType(type) {
+        if (type.includes("电信")) {
+            let is = await this.paramsConfig.findValueByKey("DIANXIN");
+            if (is == '1') {
+                return "DIANXIN";
+            }
+        }
+        else if (type.includes("移动")) {
+            let is = await this.paramsConfig.findValueByKey("YIDONG");
+            if (is == '1') {
+                return "YIDONG";
+            }
+        }
+        else if (type.includes("联通")) {
+            let is = await this.paramsConfig.findValueByKey("LIANTONG");
+            if (is == '1') {
+                return "LIANTONG";
+            }
+        }
+        throw new api_exception_1.ApiException(70002);
+    }
+    async provinceType(type, province) {
+        let l = await this.paramsConfig.findValueByKey(type + '_LIST');
+        if (l.includes(province)) {
+            return false;
+        }
+        return true;
     }
 };
 ProxyChargingService = __decorate([
@@ -263,7 +434,14 @@ ProxyChargingService = __decorate([
         redis_service_1.RedisService,
         param_config_service_1.SysParamConfigService,
         channel_service_1.ChannelService,
+        code_service_1.CodeService,
         util_service_1.UtilService])
 ], ProxyChargingService);
 exports.ProxyChargingService = ProxyChargingService;
+class PhoneInfo {
+    province;
+    city;
+    type;
+}
+exports.PhoneInfo = PhoneInfo;
 //# sourceMappingURL=proxyChargin.service.js.map

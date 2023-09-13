@@ -101,7 +101,6 @@ let ApiService = class ApiService {
         else {
             let isLocal = host.startsWith("https://127.0") || host.startsWith("https://192.168") || host.startsWith("http://192.168") || host.startsWith("10.0") || host.startsWith("http://127.0");
             if (isLocal && process_1.default.env.NODE_ENV != "development") {
-                throw new Error("收银台域名不能是局域网ip");
             }
         }
         this.host = host;
@@ -275,7 +274,7 @@ let ApiService = class ApiService {
                 }
                 let r = await this.paramConfigService.findValueByKey("devLog");
                 if (r == "1") {
-                    console.log(`${this.util.dayjs().format("YYYY-MM-DD HH:mm:ss")}==${order.mOid}到支付宝收银台,金额${order.amount / 100}元,通道${order.channel}`);
+                    console.log(`${ip}==${this.util.dayjs().format("YYYY-MM-DD HH:mm:ss")}==${order.mOid}到支付宝收银台,金额${order.amount / 100}元,通道${order.channel}`);
                 }
                 return {
                     code: 1,
@@ -306,7 +305,6 @@ let ApiService = class ApiService {
                     try {
                         let r = await this.redisService.getRedis().incrby(`action:${o.oid}`, 1);
                         if (r == 1) {
-                            console.log(`执行查询余额,余额查询成功，则发放号码给客户`);
                             let obj = await this.redisService.getRedis().get(`order:${o.oid}`);
                             let orderRedis = JSON.parse(obj);
                             handlerService.codeService.checkPhoneBalanceByProduct(orderRedis, 4);
@@ -315,7 +313,6 @@ let ApiService = class ApiService {
                             let obj = await this.redisService.getRedis().get(`order:${o.oid}`);
                             let orderRedis = JSON.parse(obj);
                             if (orderRedis.phoneBalance) {
-                                console.log(`执行查询余额,余额查询成功，则发放号码给客户`);
                                 return {
                                     code: 1,
                                     phone: orderRedis.resource.target
@@ -336,7 +333,7 @@ let ApiService = class ApiService {
             let o = orderInfo;
             let r = await this.paramConfigService.findValueByKey("devLog");
             if (r == "1") {
-                console.log(`${this.util.dayjs().format("YYYY-MM-DD HH:mm:ss")}==${params.os}==${o.mOid}到收银台,金额${o.amount / 100}元,通道${o.channel}`);
+                console.log(`${ip}==${this.util.dayjs().format("YYYY-MM-DD HH:mm:ss")}==${params.os}==${o.mOid}到收银台,金额${o.amount / 100}元,通道${o.channel}`);
             }
             let mode = await this.paramConfigService.findValueByKey("aLiPayQrCode");
             return {
@@ -376,6 +373,9 @@ let ApiService = class ApiService {
         let { merId, orderId } = params;
         if (merId) {
             let md5Key = await this.topUserService.getMd5Key(Number(merId));
+            if (!md5Key) {
+                throw new api_exception_1.ApiException(10017);
+            }
             let sign = process_1.default.env.NODE_ENV == "development" ? true : this.util.checkSign(params, md5Key);
             if (sign) {
                 return await this.proxyChargingService.directPush(params);
@@ -387,6 +387,9 @@ let ApiService = class ApiService {
         let { merId, orderId } = params;
         if (merId) {
             let md5Key = await this.topUserService.getMd5Key(Number(merId));
+            if (!md5Key) {
+                throw new api_exception_1.ApiException(10017);
+            }
             let sign = process_1.default.env.NODE_ENV == "development" ? true : this.util.checkSign(params, md5Key);
             if (sign) {
                 return await this.proxyChargingService.directBack(params);

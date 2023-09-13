@@ -38,6 +38,12 @@ export declare class CommissionController {
             totalSuccessCount: any;
             totalCount: any;
         };
+        DIANXIN: boolean;
+        YIDONG: boolean;
+        LIANTONG: boolean;
+        DIANXINLIST: string;
+        YIDONGLIST: string;
+        LIANTONGLIST: string;
     }>;
     edit(body: any, user: IAdminUser): Promise<string | 1>;
 }

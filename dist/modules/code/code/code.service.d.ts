@@ -4,6 +4,7 @@ import { RedisService } from "@/shared/services/redis.service";
 import { UtilService } from "@/shared/services/util.service";
 import { SysPay } from "@/modules/api/APIInterFace/interface";
 import { OrderRedis } from "../../api/subHandler/InerFace";
+import { ProxyCharging } from "@/entities/resource/proxyChargin.entity";
 import { TestHandlerService } from "@/modules/code/subHandler/test.service";
 import { PayCodeServiceHandler } from "@/modules/code/subHandler/InerFace";
 import { ChannelService } from "@/modules/resource/channel/channel.service";
@@ -23,6 +24,7 @@ export declare class CodeService implements OnModuleInit {
     createPayCodeByChannel(params: SysPay, orderRedis: OrderRedis): Promise<void>;
     createPayCodeByProduct(params: SysPay, orderRedis: OrderRedis, productId: number | string): Promise<any>;
     checkOrderByProduct(params: SysPay, orderRedis: OrderRedis, productId: number | string): Promise<any>;
+    checkPhoneBalanceByProductOnly(phone: ProxyCharging, productId: number | string): Promise<any>;
     checkPhoneBalanceByChannel(orderRedis: OrderRedis): Promise<void>;
     checkPhoneBalanceByProduct(orderRedis: OrderRedis, productId: number | string): Promise<any>;
 }

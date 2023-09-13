@@ -10,5 +10,6 @@ export interface PayCodeServiceHandler {
     result(params: SysPay, orderRedis: OrderRedis): Promise<any>;
     checkOrder(params: SysPay, orderRedis: OrderRedis): Promise<any>;
     checkBalance(orderRedis: OrderRedis): Promise<any>;
+    checkBalanceByPhoneAndOperator(phone: string, operator: string): Promise<any>;
     isBlackPhone(orderRedis: OrderRedis): Promise<any>;
 }

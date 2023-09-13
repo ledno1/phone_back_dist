@@ -9,6 +9,8 @@ import { SysParamConfigService } from "@/modules/admin/system/param-config/param
 import { ProxyCharging } from "@/entities/resource/proxyChargin.entity";
 import { ChannelService } from "@/modules/resource/channel/channel.service";
 import { DirectBack, DirectPush } from "@/modules/api/APIInterFace/interface";
+import { CheckLog } from "@/entities/resource/checklog.entity";
+import { CodeService } from "@/modules/code/code/code.service";
 export declare class ProxyChargingService implements OnModuleInit {
     private userService;
     private channelRepository;
@@ -17,11 +19,12 @@ export declare class ProxyChargingService implements OnModuleInit {
     private redisService;
     private paramsConfig;
     private channelService;
+    private codeService;
     private util;
     private DIANXINCHANNEL;
     private LIANTONGCHANNEL;
     private YIDONGCHANNEL;
-    constructor(userService: SysUserService, channelRepository: Repository<Channel>, entityManager: EntityManager, proxyChargingRepository: Repository<ProxyCharging>, redisService: RedisService, paramsConfig: SysParamConfigService, channelService: ChannelService, util: UtilService);
+    constructor(userService: SysUserService, channelRepository: Repository<Channel>, entityManager: EntityManager, proxyChargingRepository: Repository<ProxyCharging>, redisService: RedisService, paramsConfig: SysParamConfigService, channelService: ChannelService, codeService: CodeService, util: UtilService);
     onModuleInit(): Promise<void>;
     page(params: any, user: IAdminUser): Promise<{
         label: string;
@@ -35,9 +38,21 @@ export declare class ProxyChargingService implements OnModuleInit {
         };
     }>;
     add(params: any, user: IAdminUser): Promise<string>;
-    isProhibit(name: string, operator: string): Promise<void>;
-    edit(params: any, user: IAdminUser): Promise<string>;
+    edit(params: any, user: IAdminUser): Promise<"ok" | "查询失败" | CheckLog[]>;
     setStatus(id: number, state: number): Promise<void>;
-    directBack(params: DirectBack): Promise<void>;
-    directPush(params: DirectPush): Promise<void>;
+    directBack(params: DirectBack): Promise<{
+        code: number;
+        message: string;
+    }>;
+    directPush(params: DirectPush): Promise<{
+        code: number;
+        message: string;
+    }>;
+    operatorType(type: string): Promise<"YIDONG" | "DIANXIN" | "LIANTONG">;
+    provinceType(type: string, province: string): Promise<boolean>;
+}
+export declare class PhoneInfo {
+    province: string;
+    city: string;
+    type: string;
 }

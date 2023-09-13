@@ -112,6 +112,12 @@ let CommissionService = class CommissionService {
     }
     async statistics(params, user) {
         let isBind = await this.entityManager.query(`SELECT googleSecret FROM sys_user WHERE uuid = '${user.uuid}'`);
+        let DIANXIN = await this.paramConfigService.findValueByKey("DIANXIN");
+        let YIDONG = await this.paramConfigService.findValueByKey("YIDONG");
+        let LIANTONG = await this.paramConfigService.findValueByKey("LIANTONG");
+        let DIANXINLIST = await this.paramConfigService.findValueByKey("DIANXIN_LIST");
+        let YIDONGLIST = await this.paramConfigService.findValueByKey("YIDONG_LIST");
+        let LIANTONGLIST = await this.paramConfigService.findValueByKey("LIANTONG_LIST");
         if (user.roleLabel == "admin") {
             let date;
             let createdAt = [this.util.dayjsFormat(this.util.dayjs().startOf("day").valueOf()), this.util.dayjsFormat(this.util.dayjs().endOf("day").valueOf())];
@@ -145,7 +151,13 @@ let CommissionService = class CommissionService {
                 channelList,
                 aLiPayModel: aLiPayModel == "1" ? true : false,
                 yesterdayStatics,
-                todayStatics
+                todayStatics,
+                DIANXIN: DIANXIN == '1' ? true : false,
+                YIDONG: YIDONG == '1' ? true : false,
+                LIANTONG: LIANTONG == '1' ? true : false,
+                DIANXINLIST,
+                YIDONGLIST,
+                LIANTONGLIST
             };
         }
         else if (user.roleLabel == "top") {
@@ -182,19 +194,27 @@ let CommissionService = class CommissionService {
                 let linkList = await entity.query(`SELECT link.amount AS amount,link.paymentStatus,link.created_at AS createdAt FROM link 
                                                   LEFT JOIN channel ON link.channel = channel.id  
                                                   LEFT JOIN zh ON link.zhId = zh.id
-                                                  WHERE (link.paymentStatus = 0 OR link.paymentStatus = 2) AND unix_timestamp(now()) < unix_timestamp(link.created_at) + channel.expireTime 
-                                                  AND zh.open = 1 AND zh.rechargeLimit - zh.lockLimit > link.amount
+                                                  WHERE zh.open = 1 AND zh.rechargeLimit - zh.lockLimit > link.amount
                                                   AND link.sysUserId = ${user.id}
                                                   `);
                 userData["link"] = linkList;
-                let userinfo = await entity.query(`SELECT balance,selfOpen FROM sys_user WHERE uuid = '${user.uuid}'`);
+                let userinfo = await entity.query(`SELECT balance,selfOpen,whiteIp FROM sys_user WHERE uuid = '${user.uuid}'`);
                 userData["balance"] = userinfo[0].balance;
                 userData["selfOpen"] = Boolean(userinfo[0].selfOpen);
                 let zhList = await entity.query(`SELECT id FROM zh WHERE sysUserId = ${user.id}`);
                 userData["zh"] = zhList;
+                userData["whiteIp"] = userinfo[0].whiteIp;
                 return userData;
             });
-            return Object.assign({ googleCodeBind: isBind[0].googleSecret ? true : false }, qb);
+            return Object.assign({
+                googleCodeBind: isBind[0].googleSecret ? true : false,
+                DIANXIN: DIANXIN == '1' ? true : false,
+                YIDONG: YIDONG == '1' ? true : false,
+                LIANTONG: LIANTONG == '1' ? true : false,
+                DIANXINLIST,
+                YIDONGLIST,
+                LIANTONGLIST
+            }, qb);
         }
         else if (user.roleLabel == "ma") {
             let qb = await this.entityManager.transaction(async (entity) => {
@@ -210,7 +230,7 @@ let CommissionService = class CommissionService {
         }
     }
     async edit(params, user) {
-        let { action, open } = params;
+        let { action, open, phoneType } = params;
         let userInfo = await this.userRepository.findOne({ where: { uuid: user.uuid } });
         switch (action) {
             case "open":
@@ -325,6 +345,21 @@ let CommissionService = class CommissionService {
                 if (user.roleLabel == "admin" || user.roleLabel == "top") {
                     let { test } = params;
                     return "修改成功";
+                }
+                return 1;
+                break;
+            case "phoneOpen":
+                let { phoneOpen } = params;
+                if (user.roleLabel == "admin") {
+                    let t = phoneOpen ? "1" : "0";
+                    await this.paramConfigService.updateValueByKey(phoneType, t);
+                }
+                return 1;
+                break;
+            case "comeIn":
+                let { data } = params;
+                if (user.roleLabel == "admin") {
+                    await this.paramConfigService.updateValueByKey(phoneType + '_LIST', data);
                 }
                 return 1;
                 break;

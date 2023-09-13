@@ -105,6 +105,13 @@ export declare class ApiController implements OnModuleInit {
     }>;
     alipayNotify(body: any, query: any): Promise<"success" | "fail">;
     startcheck(query: any): Promise<void>;
-    directPush(body: DirectPush, req: Request): Promise<void>;
-    directBack(body: DirectBack): Promise<void>;
+    callback(): Promise<string>;
+    directPush(body: DirectPush, request: Request): Promise<{
+        code: number;
+        message: string;
+    }>;
+    directBack(body: DirectBack, request: Request): Promise<{
+        code: number;
+        message: string;
+    }>;
 }

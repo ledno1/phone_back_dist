@@ -36,6 +36,12 @@ const takeLinkAPI_entity_1 = require("../../entities/resource/takeLinkAPI.entity
 const payaccount_service_1 = require("./payaccount/payaccount.service");
 const payaccount_controller_1 = require("./payaccount/payaccount.controller");
 const payaccount_entity_1 = require("../../entities/resource/payaccount.entity");
+const backphone_entity_1 = require("../../entities/resource/backphone.entity");
+const checklog_entity_1 = require("../../entities/resource/checklog.entity");
+const code_service_1 = require("../code/code/code.service");
+const test_service_1 = require("../code/subHandler/test.service");
+const product_service_1 = require("../code/product/product.service");
+const kakaCheckPhone_service_1 = require("../code/subHandler/kakaCheckPhone.service");
 let ResourceModule = class ResourceModule {
 };
 ResourceModule = __decorate([
@@ -51,7 +57,9 @@ ResourceModule = __decorate([
                 top_entity_1.TopOrder,
                 proxyChargin_entity_1.ProxyCharging,
                 takeLinkAPI_entity_1.TakeLink,
-                payaccount_entity_1.PayAccount
+                payaccount_entity_1.PayAccount,
+                checklog_entity_1.CheckLog,
+                backphone_entity_1.BackPhone
             ]),
             bull_1.BullModule.registerQueueAsync({
                 name: admin_constants_1.SYS_TASK_QUEUE_NAME,
@@ -69,7 +77,7 @@ ResourceModule = __decorate([
             })
         ],
         controllers: [zh_controller_1.ZhController, link_controller_1.LinkController, channel_controller_1.ChannelController, group_controller_1.GroupController, proxyChargincontroller_1.ProxyChargingController, takeLink_controller_1.TakeLinkController, payaccount_controller_1.PayAccountController],
-        providers: [zh_service_1.ZhService, link_service_1.LinkService, channel_service_1.ChannelService, group_service_1.GroupService, proxyChargin_service_1.ProxyChargingService, takeLink_service_1.TakeLinkService, payaccount_service_1.PayAccountService],
+        providers: [zh_service_1.ZhService, link_service_1.LinkService, channel_service_1.ChannelService, group_service_1.GroupService, proxyChargin_service_1.ProxyChargingService, takeLink_service_1.TakeLinkService, payaccount_service_1.PayAccountService, code_service_1.CodeService, test_service_1.TestHandlerService, product_service_1.PayCodeProductService, kakaCheckPhone_service_1.KaKaCheckPhoneHandlerService],
         exports: [zh_service_1.ZhService, link_service_1.LinkService, channel_service_1.ChannelService, group_service_1.GroupService, proxyChargin_service_1.ProxyChargingService, takeLink_service_1.TakeLinkService, payaccount_service_1.PayAccountService]
     })
 ], ResourceModule);

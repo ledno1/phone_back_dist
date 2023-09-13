@@ -15,5 +15,5 @@ export declare class ProxyChargingController {
         };
     }>;
     add(body: any, user: IAdminUser): Promise<string>;
-    edit(body: any, user: IAdminUser): Promise<string>;
+    edit(body: any, user: IAdminUser): Promise<"ok" | "查询失败" | import("../../../entities/resource/checklog.entity").CheckLog[]>;
 }

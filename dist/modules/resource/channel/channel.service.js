@@ -55,6 +55,7 @@ let ChannelService = class ChannelService {
                 qb = await this.channelRepository.createQueryBuilder("channel")
                     .leftJoinAndSelect("channel.children", "children")
                     .where("channel.parent is null")
+                    .andWhere("children.isPublic = 1")
                     .offset((page - 1) * limit)
                     .limit(limit);
             }
@@ -76,6 +77,7 @@ let ChannelService = class ChannelService {
                 qb = await this.channelRepository.createQueryBuilder("channel")
                     .leftJoinAndSelect("channel.children", "children")
                     .where("channel.parent is null")
+                    .andWhere("children.isPublic = 1")
                     .offset((page - 1) * limit)
                     .limit(limit);
             }
@@ -115,7 +117,6 @@ let ChannelService = class ChannelService {
     }
     async edit(params, user) {
         let { action, name, rate, id, data, amountType, productType } = params;
-        console.log(params);
         let isPublic = null;
         if (data)
             isPublic = data.isPublic;
@@ -140,6 +141,7 @@ let ChannelService = class ChannelService {
             await this.redisService.getRedis().del(`channel:${id}`);
         }
         else if (action == "public") {
+            return;
             await this.channelRepository.update(data.id, { isPublic });
         }
         else if (action == "isUse") {

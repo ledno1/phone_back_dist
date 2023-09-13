@@ -37,7 +37,8 @@ let ProxyCharging = class ProxyCharging extends base_entity_1.BaseEntity {
     isClose;
     outTime;
     operator;
-    area;
+    city;
+    province;
     callback;
     channel;
     parentChannel;
@@ -61,7 +62,7 @@ __decorate([
     __metadata("design:type", Number)
 ], ProxyCharging.prototype, "pid", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: "int", comment: "支付状态:-1支付超时,0未支付,1支付成功,2执行中 ", default: 0 }),
+    (0, typeorm_1.Column)({ type: "int", comment: "支付状态:-1支付超时,0未支付,1支付成功,2执行中,3已退单", default: 0 }),
     __metadata("design:type", Number)
 ], ProxyCharging.prototype, "status", void 0);
 __decorate([
@@ -122,9 +123,13 @@ __decorate([
     __metadata("design:type", String)
 ], ProxyCharging.prototype, "operator", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: "varchar", comment: "号码所在的归属的省/市" }),
+    (0, typeorm_1.Column)({ type: "varchar", comment: "号码所在的归属的市", nullable: true }),
     __metadata("design:type", String)
-], ProxyCharging.prototype, "area", void 0);
+], ProxyCharging.prototype, "city", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: "varchar", comment: "号码所在的归属的省", nullable: true }),
+    __metadata("design:type", String)
+], ProxyCharging.prototype, "province", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: "int", comment: "上游平台回调状态 0等待支付回调  1 回调成功 2 回调失败 3 强制回调 ", default: 0 }),
     __metadata("design:type", Number)

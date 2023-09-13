@@ -51,6 +51,8 @@ export declare const ErrorCodeMap: {
     readonly 40003: "该账号不存在";
     readonly 40004: "该通道不存在";
     readonly 40006: "支付宝账户接入失败";
+    readonly 40008: "该号码是黑名单,无法查询余额";
+    readonly 40009: "查询失败";
     readonly 40005: "链接支付中,请勿操作";
     readonly 40007: "该产品不允许更改";
     readonly 50001: "请选中要添加的账号";
@@ -83,8 +85,15 @@ export declare const ErrorCodeMap: {
     readonly 60016: "系统维护中，禁止推单";
     readonly 60017: "该通道不存在";
     readonly 60018: "该通道暂不可用";
+    readonly 60019: "平台已存在相同库存单号的订单";
+    readonly 60200: "推单成功";
+    readonly 61200: "退单成功";
+    readonly 61201: "该订单已经退单成功";
+    readonly 61400: "退单失败,不存在该订单或该订单正处于充值中,无法退单";
     readonly 70001: "没有配置订单金额限定";
     readonly 70002: "该运营商禁止入单";
+    readonly 70003: "该运营商的该省份禁止入单";
+    readonly 70004: "产品权重只能0或100";
     readonly 80001: "保存失败";
     readonly 80002: "通道保持拉取API关联失败";
 };
