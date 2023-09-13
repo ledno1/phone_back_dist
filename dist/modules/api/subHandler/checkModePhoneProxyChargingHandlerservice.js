@@ -650,11 +650,10 @@ let CheckModePhoneProxyChargingHandlerService = class CheckModePhoneProxyChargin
                                         console.log(`充值成功,执行回调,订单状态改变`);
                                         let { order, resource, user, req, createAt, realAmount } = orderRedis;
                                         await this.entityManager.update(top_entity_1.TopOrder, { oid: orderRedis.order.oid }, {
-                                            oid: orderRedis.order.oid,
                                             status: 1,
-                                            callback: 1
                                         });
                                         await this.entityManager.update(proxyChargin_entity_1.ProxyCharging, { id: resource.id }, {
+                                            oid: orderRedis.order.oid,
                                             status: 1
                                         });
                                         let err;

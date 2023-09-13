@@ -233,6 +233,12 @@ let KaKaCheckPhoneHandlerService = class KaKaCheckPhoneHandlerService {
         return new Promise(async (resolve, reject) => {
             try {
                 let res = await this.checkBalance(orderRedis);
+                if (res.is) {
+                    this.entityManager.insert(checklog_entity_1.CheckLog, {
+                        phone: orderRedis.resource.target,
+                        balance: res.balance.toString(),
+                    });
+                }
                 resolve(res);
             }
             catch (e) {

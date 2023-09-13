@@ -150,9 +150,7 @@ let ApiController = class ApiController {
         }
     }
     async callback() {
-        if (process.env.NODE_ENV == "development") {
-            return 'success';
-        }
+        return 'success';
     }
     async directPush(body, request) {
         let proxyCharging = await this.paramConfigService.findValueByKey("proxyCharging_open");
