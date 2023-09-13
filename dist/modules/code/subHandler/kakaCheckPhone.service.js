@@ -107,7 +107,7 @@ let KaKaCheckPhoneHandlerService = class KaKaCheckPhoneHandlerService {
         if (!d) {
             let t = new param_config_dto_1.CreateParamConfigDto();
             t.name = "KaKa请求重试等待时间";
-            t.key = "KaKaRetryCount";
+            t.key = "KaKaRetryDelay";
             t.value = '2000';
             t.remark = "KaKa请求重试等待时间,默认2000毫秒";
             await this.paramConfigService.add(t);
