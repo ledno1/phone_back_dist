@@ -78,20 +78,46 @@ let KaKaCheckPhoneHandlerService = class KaKaCheckPhoneHandlerService {
         }
         let t = await this.paramConfigService.findValueByKey('KaKaRequestTimeout');
         if (!t) {
-            throw new Error('KaKaRequestTimeout 配置表中未设置');
+            let tt = new param_config_dto_1.CreateParamConfigDto();
+            tt.name = "KaKa请求超时时间";
+            tt.key = "KaKaRequestTimeout";
+            tt.value = '30000';
+            tt.remark = "KaKa请求超时时间,默认30秒";
+            await this.paramConfigService.add(tt);
+            this.timeout = 30000;
+        }
+        else {
+            this.timeout = Number(t);
         }
         this.timeout = Number(t);
         let r = await this.paramConfigService.findValueByKey(`KaKaRetryCount`);
         if (!r) {
-            throw new Error('KaKaRetryCount 配置表中未设置');
+            let t = new param_config_dto_1.CreateParamConfigDto();
+            t.name = "KaKa请求重试次数";
+            t.key = "KaKaRetryCount";
+            t.value = '2';
+            t.remark = "KaKa请求重试次数,默认2次";
+            await this.paramConfigService.add(t);
+            this.retryCount = 2;
         }
-        this.retryCount = Number(r);
+        else {
+            this.retryCount = Number(r);
+        }
         let d = await this.paramConfigService.findValueByKey(`KaKaRetryDelay`);
         if (!d) {
-            throw new Error('KaKaRetryDelay 配置表中未设置');
+            let t = new param_config_dto_1.CreateParamConfigDto();
+            t.name = "KaKa请求重试等待时间";
+            t.key = "KaKaRetryCount";
+            t.value = '2000';
+            t.remark = "KaKa请求重试等待时间,默认2000毫秒";
+            await this.paramConfigService.add(t);
+            this.retryOptions.minTimeout = 2000;
+            this.retryOptions.maxTimeout = 2000;
         }
-        this.retryOptions.maxTimeout = Number(d);
-        this.retryOptions.minTimeout = Number(d);
+        else {
+            this.retryOptions.maxTimeout = Number(d);
+            this.retryOptions.minTimeout = Number(d);
+        }
         let b = await this.paramConfigService.findValueByKey(`PhoneBlackListJoin`);
         if (!b) {
             let t = new param_config_dto_1.CreateParamConfigDto();
