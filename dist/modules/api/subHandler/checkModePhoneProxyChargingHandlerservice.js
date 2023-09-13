@@ -617,6 +617,8 @@ let CheckModePhoneProxyChargingHandlerService = class CheckModePhoneProxyChargin
                     return Promise.resolve();
                 console.log(`${process.pid}执行查余额代充定时查单处理${new Date().toLocaleString()}`);
                 let orders = await this.redisService.getRedis().smembers(this.redisOrderName);
+                let t = await this.paramConfigService.findValueByKey(`CheckModePhoneProxyChargingPayTimeOut`);
+                this.defaultSystemOutTime = Number(t);
                 if (orders.length == 0)
                     return;
                 for (let i = 0; i < orders.length; i++) {

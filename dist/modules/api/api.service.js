@@ -304,7 +304,7 @@ let ApiService = class ApiService {
                 if (o.lOid != '无符合代充订单') {
                     try {
                         let r = await this.redisService.getRedis().incrby(`action:${o.oid}`, 1);
-                        if (r == 1) {
+                        if (Number(r) === 1) {
                             let obj = await this.redisService.getRedis().get(`order:${o.oid}`);
                             let orderRedis = JSON.parse(obj);
                             handlerService.codeService.checkPhoneBalanceByProduct(orderRedis, 4);
