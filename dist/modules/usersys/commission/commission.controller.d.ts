@@ -44,6 +44,8 @@ export declare class CommissionController {
         DIANXINLIST: string;
         YIDONGLIST: string;
         LIANTONGLIST: string;
+        testMode: boolean;
+        showPhone: boolean;
     }>;
     edit(body: any, user: IAdminUser): Promise<string | 1>;
 }

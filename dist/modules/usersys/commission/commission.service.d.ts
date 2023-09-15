@@ -58,6 +58,8 @@ export declare class CommissionService {
         DIANXINLIST: string;
         YIDONGLIST: string;
         LIANTONGLIST: string;
+        testMode: boolean;
+        showPhone: boolean;
     }>;
     edit(params: any, user: IAdminUser): Promise<string | 1>;
     statistics2(params: any, user?: IAdminUser): Promise<{

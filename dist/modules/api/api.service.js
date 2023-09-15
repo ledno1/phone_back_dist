@@ -92,6 +92,15 @@ let ApiService = class ApiService {
             t.remark = "允许拉起测试";
             await this.paramConfigService.add(t);
         }
+        let showPhone = await this.paramConfigService.findValueByKey('showPhone');
+        if (!showPhone) {
+            let t = new param_config_dto_1.CreateParamConfigDto();
+            t.name = "话单模块显示";
+            t.key = `showPhone`;
+            t.value = '0';
+            t.remark = "话单模块显示";
+            await this.paramConfigService.add(t);
+        }
         this.appHost = await this.paramConfigService.findValueByKey(`appHost`);
         let tempHandlerList = [this.aLiPayHandlerService, this.handlerTemplateService, this.xiaoMangHandlerService, this.checkModePhoneHandlerService];
         let channelList = await this.channelService.channelRoot();

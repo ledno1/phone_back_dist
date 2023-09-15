@@ -118,6 +118,8 @@ let CommissionService = class CommissionService {
         let DIANXINLIST = await this.paramConfigService.findValueByKey("DIANXIN_LIST");
         let YIDONGLIST = await this.paramConfigService.findValueByKey("YIDONG_LIST");
         let LIANTONGLIST = await this.paramConfigService.findValueByKey("LIANTONG_LIST");
+        let testMode = await this.paramConfigService.findValueByKey("TestOpen");
+        let showPhone = await this.paramConfigService.findValueByKey(`showPhone`);
         if (user.roleLabel == "admin") {
             let date;
             let createdAt = [this.util.dayjsFormat(this.util.dayjs().startOf("day").valueOf()), this.util.dayjsFormat(this.util.dayjs().endOf("day").valueOf())];
@@ -157,7 +159,9 @@ let CommissionService = class CommissionService {
                 LIANTONG: LIANTONG == '1' ? true : false,
                 DIANXINLIST,
                 YIDONGLIST,
-                LIANTONGLIST
+                LIANTONGLIST,
+                testMode: testMode == '66666' ? true : false,
+                showPhone: showPhone == '66666' ? true : false
             };
         }
         else if (user.roleLabel == "top") {
@@ -213,7 +217,8 @@ let CommissionService = class CommissionService {
                 LIANTONG: LIANTONG == '1' ? true : false,
                 DIANXINLIST,
                 YIDONGLIST,
-                LIANTONGLIST
+                LIANTONGLIST,
+                testMode: testMode == '66666' ? true : false
             }, qb);
         }
         else if (user.roleLabel == "ma") {
