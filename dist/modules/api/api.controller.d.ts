@@ -37,9 +37,9 @@ export declare class ApiController implements OnModuleInit {
         status?: undefined;
         msg?: undefined;
         phone?: undefined;
+        outTime?: undefined;
         url?: undefined;
         qrcode?: undefined;
-        outTime?: undefined;
         mode?: undefined;
         mOid?: undefined;
     } | {
@@ -52,9 +52,9 @@ export declare class ApiController implements OnModuleInit {
         status: boolean;
         msg?: undefined;
         phone?: undefined;
+        outTime?: undefined;
         url?: undefined;
         qrcode?: undefined;
-        outTime?: undefined;
         mode?: undefined;
         mOid?: undefined;
     } | {
@@ -67,14 +67,15 @@ export declare class ApiController implements OnModuleInit {
         showOrderid?: undefined;
         status?: undefined;
         phone?: undefined;
+        outTime?: undefined;
         url?: undefined;
         qrcode?: undefined;
-        outTime?: undefined;
         mode?: undefined;
         mOid?: undefined;
     } | {
         code: number;
         phone: string;
+        outTime: any;
         price?: undefined;
         orderid?: undefined;
         userid?: undefined;
@@ -84,7 +85,6 @@ export declare class ApiController implements OnModuleInit {
         msg?: undefined;
         url?: undefined;
         qrcode?: undefined;
-        outTime?: undefined;
         mode?: undefined;
         mOid?: undefined;
     } | {

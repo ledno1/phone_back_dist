@@ -84,9 +84,11 @@ let CheckModePhoneProxyChargingHandlerService = class CheckModePhoneProxyChargin
         this.util = util;
         this.codeService = codeService;
     }
-    DIANXINAndLIANTONGCheck = `CheckModePhoneProxyChargingDIANXINAndLIANTONGCheck`;
-    YIDONGCheck = `CheckModePhoneProxyChargingYIDONGCheck`;
+    DIANXINAndLIANTONGCheck = `CheckModeProxyChargingDIANXINAndLIANTONGStartCheck`;
+    YIDONGCheck = `CheckModeProxyChargingYIDONGStartCheck`;
     CheckModePhoneProxyChargingMaxCount;
+    matchTime;
+    checkInterval;
     async onModuleInit() {
         if (process.env.NODE_ENV == "development") {
             this.defaultSystemOutTime = 160;
@@ -106,6 +108,19 @@ let CheckModePhoneProxyChargingHandlerService = class CheckModePhoneProxyChargin
                 this.defaultSystemOutTime = Number(timeOut);
             }
         }
+        let matchTime = await this.paramConfigService.findValueByKey('CheckModePhoneProxyChargingMatchTime');
+        if (!matchTime) {
+            let t = new param_config_dto_1.CreateParamConfigDto();
+            t.name = "CheckModePhoneProxyChargingMatchTime";
+            t.key = "CheckModePhoneProxyChargingMatchTime";
+            t.value = '180';
+            t.remark = "CheckModePhoneProxyCharging订单匹配时间限定设定";
+            await this.paramConfigService.add(t);
+            this.matchTime = 180;
+        }
+        else {
+            this.matchTime = Number(matchTime);
+        }
         let CheckModePhoneProxyChargingMaxCount = await this.paramConfigService.findValueByKey('CheckModePhoneProxyChargingMaxCount');
         if (!CheckModePhoneProxyChargingMaxCount) {
             let t = new param_config_dto_1.CreateParamConfigDto();
@@ -117,23 +132,36 @@ let CheckModePhoneProxyChargingHandlerService = class CheckModePhoneProxyChargin
             this.CheckModePhoneProxyChargingMaxCount = 5;
         }
         this.CheckModePhoneProxyChargingMaxCount = Number(CheckModePhoneProxyChargingMaxCount);
-        let DIANXINAndLIANTONGCheck = await this.paramConfigService.findValueByKey('CheckModePhoneProxyChargingDIANXINAndLIANTONGCheck');
+        let DIANXINAndLIANTONGCheck = await this.paramConfigService.findValueByKey(this.DIANXINAndLIANTONGCheck);
         if (!DIANXINAndLIANTONGCheck) {
             let t = new param_config_dto_1.CreateParamConfigDto();
-            t.name = "电信和联通查单间隔";
-            t.key = "CheckModePhoneProxyChargingDIANXINAndLIANTONGCheck";
+            t.name = "电信和联通最低开始查单时间";
+            t.key = this.DIANXINAndLIANTONGCheck;
             t.value = '70';
             t.remark = "电信和联通在发放充值号码后每多少秒开始查单默认70";
             await this.paramConfigService.add(t);
         }
-        let YIDONGCheck = await this.paramConfigService.findValueByKey('CheckModePhoneProxyChargingYIDONGCheck');
+        let YIDONGCheck = await this.paramConfigService.findValueByKey(this.YIDONGCheck);
         if (!YIDONGCheck) {
             let t = new param_config_dto_1.CreateParamConfigDto();
-            t.name = "移动查单间隔";
-            t.key = "CheckModePhoneProxyChargingYIDONGCheck";
+            t.name = "移动最低开始查单时间";
+            t.key = this.YIDONGCheck;
             t.value = '300';
-            t.remark = "移动在发放充值号码后每多少秒开始查单默认70";
+            t.remark = "移动在发放充值号码后每多少秒开始查单默认300";
             await this.paramConfigService.add(t);
+        }
+        let checkInterval = await this.paramConfigService.findValueByKey('CheckModeProxyChargingCheckInterval');
+        if (!checkInterval) {
+            let t = new param_config_dto_1.CreateParamConfigDto();
+            t.name = "查单间隔";
+            t.key = "CheckModeProxyChargingCheckInterval";
+            t.value = '60';
+            t.remark = "查单间隔默认60秒";
+            await this.paramConfigService.add(t);
+            this.checkInterval = 60;
+        }
+        else {
+            this.checkInterval = Number(checkInterval);
         }
         let host = await this.paramConfigService.findValueByKey('CheckModePhoneProxyChargingPayHost');
         if (!host) {
@@ -175,19 +203,15 @@ let CheckModePhoneProxyChargingHandlerService = class CheckModePhoneProxyChargin
                 let t = Date.now();
                 console.log(`${process.pid} 处理 => 代充支付,请求方${params.merId}订单号:${params.orderId},金额:${params.amount}}`);
                 let res = null;
-                if (nonceStr === "test" && desc != "0") {
+                let h = await this.haveAmount(params);
+                console.log(h);
+                account = await this.findMerchant(params, h, oid);
+                if (account) {
+                    account = account;
+                    console.log("匹配订单", account?.proxyCharging?.target, "id", account?.proxyCharging?.id, `实际收到金额${(account?.proxyCharging?.amount / 100).toFixed(2)}`);
                 }
                 else {
-                    let h = await this.haveAmount(params);
-                    console.log(h);
-                    account = await this.findMerchant(params, h, oid);
-                    if (account) {
-                        account = account;
-                        console.log("匹配订单", account?.proxyCharging?.target, "id", account?.proxyCharging?.id, `实际收到金额${(account?.proxyCharging?.amount / 100).toFixed(2)}`);
-                    }
-                    else {
-                        console.log("无匹配订单");
-                    }
+                    console.log("无匹配订单");
                 }
                 await this.createOrder(params, account, oid);
                 console.log("支付派生类模板耗时" + (Date.now() - t));
@@ -213,7 +237,7 @@ let CheckModePhoneProxyChargingHandlerService = class CheckModePhoneProxyChargin
                         tempOrder.mNotifyUrl = params.notifyUrl;
                         tempOrder.channel = params.subChannel;
                         tempOrder.parentChannel = Number(params.channel);
-                        tempOrder.lOid = "zfb_DIRECT_无匹配支付宝账户";
+                        tempOrder.lOid = "无匹配账户";
                         tempOrder.lRate = 0;
                         tempOrder.pid = 0;
                         tempOrder.status = -1;
@@ -244,14 +268,13 @@ let CheckModePhoneProxyChargingHandlerService = class CheckModePhoneProxyChargin
                     .andWhere("proxyCharging.parentChannel = :parentChannel", { parentChannel: params.channel })
                     .andWhere("proxyCharging.channel = :channel", { channel: params.subChannel })
                     .andWhere("proxyCharging.outTime-now() > :outTime", { outTime: this.defaultSystemOutTime })
-                    .groupBy("user.id");
-                console.log(qb.getSql());
-                let qb2 = await qb.getRawMany();
-                if (qb2.length === 0) {
+                    .groupBy("user.id")
+                    .getRawMany();
+                if (qb.length === 0) {
                     resolve([]);
                 }
                 else {
-                    resolve(qb2.sort((a, b) => a.id - b.id));
+                    resolve(qb.sort((a, b) => a.id - b.id));
                 }
             }
             catch (e) {
@@ -396,7 +419,6 @@ let CheckModePhoneProxyChargingHandlerService = class CheckModePhoneProxyChargin
     }
     createOrder(params, account, oid) {
         return new Promise(async (resolve, reject) => {
-            let time = await this.paramConfigService.findValueByKey("orderOutTime");
             let order = new top_entity_1.TopOrder();
             let { amount, merId, channel, subChannel, orderId, ip, notifyUrl, orderAmt } = params;
             if (!account) {
@@ -440,18 +462,14 @@ let CheckModePhoneProxyChargingHandlerService = class CheckModePhoneProxyChargin
                     }
                 }
                 await this.redisService.getRedis().set(`orderClient:${oid}`, JSON.stringify(Object.assign(order, {
-                    outTime: new Date().getTime() + (Number(time) + this.defaultSystemOutTime) * 1000
-                })), "EX", Number(time) + this.defaultSystemOutTime);
+                    outTime: new Date().getTime() + (this.matchTime + this.defaultSystemOutTime) * 1000
+                })), "EX", this.matchTime + this.defaultSystemOutTime);
                 resolve();
                 return;
             }
             let { merchant, proxyCharging } = account;
             let rate = await this.channelService.getRateByChannelId(merchant.id, subChannel, merchant.uuid);
             try {
-                if ((0, lodash_1.isNaN)(Number(time))) {
-                    reject(61103);
-                    return;
-                }
                 order.SysUser = merchant;
                 order.amount = amount;
                 order.mid = Number(merId);
@@ -490,8 +508,10 @@ let CheckModePhoneProxyChargingHandlerService = class CheckModePhoneProxyChargin
                     }
                 }
                 await this.redisService.getRedis().set(`orderClient:${oid}`, JSON.stringify(Object.assign(order, {
-                    outTime: new Date().getTime() + (Number(time) + this.defaultSystemOutTime) * 1000
-                })), "EX", Number(time) + this.defaultSystemOutTime);
+                    outTime: new Date().getTime() + (this.matchTime + this.defaultSystemOutTime) * 1000,
+                    matchOutTime: new Date().getTime() + this.matchTime * 1000,
+                    payTime: this.defaultSystemOutTime
+                })), "EX", this.matchTime + this.defaultSystemOutTime);
                 let orderRedis = {
                     createAt: new Date().toLocaleString(),
                     req: params,
@@ -615,89 +635,43 @@ let CheckModePhoneProxyChargingHandlerService = class CheckModePhoneProxyChargin
                 let info = await this.channelService.getChannelInfo(20);
                 if (!info.isUse)
                     return Promise.resolve();
-                console.log(`${process.pid}执行查余额代充定时查单处理${new Date().toLocaleString()}`);
                 let orders = await this.redisService.getRedis().smembers(this.redisOrderName);
+                console.log(`${process.pid}执行查余额代充定时查单处理${new Date().toLocaleString()},当前处理订单${orders.length}`);
                 let t = await this.paramConfigService.findValueByKey(`CheckModePhoneProxyChargingPayTimeOut`);
                 this.defaultSystemOutTime = Number(t);
+                this.checkInterval = Number(await this.paramConfigService.findValueByKey(`CheckModeProxyChargingCheckInterval`));
                 if (orders.length == 0)
                     return;
-                for (let i = 0; i < orders.length; i++) {
-                    let orderInfo = await this.redisService.getRedis().get(`orderClient:${orders[i]}`);
-                    let obj = await this.redisService.getRedis().get(`order:${orders[i]}`);
-                    let orderRedis = JSON.parse(obj);
-                    if (!orderInfo) {
-                        await this.outTime(orderRedis);
-                        await this.redisService.getRedis().srem(this.redisOrderName, orders[i]);
-                    }
-                    else {
-                        if (orderRedis.phoneBalance) {
-                            let now = new Date().getTime();
-                            let t1 = await this.paramConfigService.findValueByKey(this.DIANXINAndLIANTONGCheck);
-                            let t2 = await this.paramConfigService.findValueByKey(this.YIDONGCheck);
-                            let r = orderRedis.resource;
-                            let t = r.operator == "YIDONG" ? t2 : t1;
-                            if (now - orderRedis.firstCheckTime > (Number(t)) * 1000) {
-                                console.log("checkModePhoneProxyChargingHandlerService 足70秒执行二次查询");
-                                orderRedis.firstCheckTime = new Date().getTime();
-                                await this.redisService.getRedis().set(`order:${orderRedis.order.oid}`, JSON.stringify(orderRedis));
-                                let res = await this.codeService.checkOrderByProduct(new interface_1.SysPay(), orderRedis, 4);
-                                if ((0, lodash_1.isArray)(res)) {
-                                    console.log(`出错了`);
-                                }
-                                else {
-                                    let r = res;
-                                    if (r.balance > Number(orderRedis.phoneBalance)) {
-                                        console.log(`充值成功,执行回调,订单状态改变`);
-                                        let { order, resource, user, req, createAt, realAmount } = orderRedis;
-                                        await this.entityManager.update(top_entity_1.TopOrder, { oid: orderRedis.order.oid }, {
-                                            status: 1,
-                                        });
-                                        await this.entityManager.update(proxyChargin_entity_1.ProxyCharging, { id: resource.id }, {
-                                            oid: orderRedis.order.oid,
-                                            status: 1
-                                        });
-                                        let err;
-                                        let body = {
-                                            merId: order.mid,
-                                            orderId: order.mOid,
-                                            sysOrderId: order.oid,
-                                            desc: "1",
-                                            orderAmt: req.orderAmt,
-                                            status: "1",
-                                            nonceStr: this.util.generateRandomValue(8),
-                                            attch: "1"
-                                        };
-                                        try {
-                                            this.notifyRequest(order.mNotifyUrl, body, req.md5Key);
-                                        }
-                                        catch (e) {
-                                        }
-                                        console.log(`执行推单回调`);
-                                        await this.redisService.getRedis().srem(this.redisOrderName, orders[i]);
-                                    }
-                                    else if (r.balance < Number(orderRedis.phoneBalance)) {
-                                        console.log(`金额减少了,疑似被充值被扣费，订单当作充值成功，但不回调`);
-                                        let { order, resource, user, req, createAt, realAmount } = orderRedis;
-                                        await this.entityManager.update(top_entity_1.TopOrder, { oid: orderRedis.order.oid }, {
-                                            status: 1
-                                        });
-                                        await this.entityManager.update(proxyChargin_entity_1.ProxyCharging, { id: resource.id }, {
-                                            status: 1,
-                                            oid: orderRedis.order.oid,
-                                            errInfo: `二次查询金额减少了${Number(orderRedis.phoneBalance) - r.balance}`
-                                        });
-                                        await this.redisService.getRedis().srem(this.redisOrderName, orders[i]);
-                                    }
-                                }
+                try {
+                    let t1 = Number(await this.paramConfigService.findValueByKey(this.DIANXINAndLIANTONGCheck));
+                    let t2 = Number(await this.paramConfigService.findValueByKey(this.YIDONGCheck));
+                    let wc = 1;
+                    for (let i = 0; i < orders.length; i++) {
+                        let orderInfo = await this.redisService.getRedis().get(`orderClient:${orders[i]}`);
+                        let obj = await this.redisService.getRedis().get(`order:${orders[i]}`);
+                        let orderRedis = JSON.parse(obj);
+                        if (!orderInfo) {
+                            console.log(`订单超时${orders[i]}`);
+                            if (obj) {
+                                await this.outTime(orderRedis);
                             }
-                            else {
-                                console.log("checkModePhoneProxyChargingHandlerService 未足70秒 ，不执行二次查询");
-                            }
+                            await this.redisService.getRedis().srem(this.redisOrderName, orders[i]);
                         }
                         else {
-                            console.log("checkModePhoneProxyChargingHandlerService 尚未查询到第一次余额 ，不执行改变后的查询");
+                            if (!obj)
+                                continue;
+                            if (orderRedis.phoneBalance) {
+                                console.log(`订单处理${orders[i]}`);
+                                this.handlerOrder(orderRedis, t1, t2, wc, orders[i]);
+                            }
+                            else {
+                                console.log("checkModePhoneProxyChargingHandlerService 尚未查询到第一次余额 ，不执行改变后的查询");
+                            }
                         }
                     }
+                }
+                catch (e) {
+                    console.log(e);
                 }
                 resolve();
             }
@@ -705,6 +679,72 @@ let CheckModePhoneProxyChargingHandlerService = class CheckModePhoneProxyChargin
                 reject(e);
             }
         });
+    }
+    async handlerOrder(orderRedis, t1, t2, wc, oid) {
+        let r = orderRedis.resource;
+        let t3 = r.operator == "YIDONG" ? t2 : t1;
+        console.log((Date.now() - orderRedis.firstCheckTime) / 1000);
+        if ((Date.now() - orderRedis.firstCheckTime) / 1000 > t3) {
+            console.log("checkModePhoneProxyChargingHandlerService 足秒执行二次查询" + (Math.floor((Date.now() - orderRedis.firstCheckTime) / 10000) * 10 % this.checkInterval));
+            let is = (Math.floor((Date.now() - orderRedis.firstCheckTime) / 10000) * 10 - t3) % this.checkInterval == 0;
+            if (!is) {
+                console.log(`当前距离首次查询时间${(Math.floor((Date.now() - orderRedis.firstCheckTime) / 10000) * 10 - t3)},间隔${this.checkInterval}`);
+                return;
+            }
+            let res = await this.codeService.checkOrderByProduct(new interface_1.SysPay(), orderRedis, 4);
+            let r = res;
+            console.log(`查询结果,余额${r.balance}`);
+            if ((0, lodash_1.isArray)(res)) {
+                console.log(`出错了`);
+            }
+            else {
+                if (r.balance - Number(orderRedis.phoneBalance) >= (orderRedis.order.amount / 100 - wc)) {
+                    console.log(`充值成功,执行回调,订单状态改变`);
+                    let { order, resource, user, req, createAt, realAmount } = orderRedis;
+                    await this.entityManager.update(top_entity_1.TopOrder, { oid: orderRedis.order.oid }, {
+                        status: 1,
+                    });
+                    await this.entityManager.update(proxyChargin_entity_1.ProxyCharging, { id: resource.id }, {
+                        oid: orderRedis.order.oid,
+                        status: 1
+                    });
+                    let err;
+                    let body = {
+                        merId: order.mid,
+                        orderId: order.mOid,
+                        sysOrderId: order.oid,
+                        desc: "1",
+                        orderAmt: req.orderAmt,
+                        status: "1",
+                        nonceStr: this.util.generateRandomValue(8),
+                        attch: "1"
+                    };
+                    try {
+                        this.notifyRequest(order.mNotifyUrl, body, req.md5Key);
+                    }
+                    catch (e) {
+                    }
+                    console.log(`执行推单回调`);
+                    await this.redisService.getRedis().srem(this.redisOrderName, oid);
+                }
+                else if (r.balance < Number(orderRedis.phoneBalance)) {
+                    console.log(`金额减少了,疑似被充值被扣费，订单当作充值成功，但不回调`);
+                    let { order, resource, user, req, createAt, realAmount } = orderRedis;
+                    await this.entityManager.update(top_entity_1.TopOrder, { oid: orderRedis.order.oid }, {
+                        status: 1
+                    });
+                    await this.entityManager.update(proxyChargin_entity_1.ProxyCharging, { id: resource.id }, {
+                        status: 1,
+                        oid: orderRedis.order.oid,
+                        errInfo: `二次查询金额减少了${Number(orderRedis.phoneBalance) - r.balance}`
+                    });
+                    await this.redisService.getRedis().srem(this.redisOrderName, oid);
+                }
+            }
+        }
+        else {
+            console.log("checkModePhoneProxyChargingHandlerService 未足70秒 ，不执行二次查询");
+        }
     }
     updateMerchant(params, user) {
         return new Promise(async (resolve, reject) => {

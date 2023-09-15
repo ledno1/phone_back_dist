@@ -29,6 +29,8 @@ export declare class CheckModePhoneProxyChargingHandlerService implements Servic
     private DIANXINAndLIANTONGCheck;
     private YIDONGCheck;
     private CheckModePhoneProxyChargingMaxCount;
+    private matchTime;
+    private checkInterval;
     onModuleInit(): Promise<void>;
     model: ProcessModel;
     defaultSystemOutTime: number;
@@ -48,6 +50,7 @@ export declare class CheckModePhoneProxyChargingHandlerService implements Servic
     rollback(params: SysPay, resource: PayAccount | ProxyCharging | null, user: HaveAmount | null, oid: string): Promise<void>;
     outTime(params: OrderRedis): Promise<void>;
     checkOrder(): Promise<void>;
+    handlerOrder(orderRedis: OrderRedis, t1: any, t2: any, wc: any, oid: any): Promise<void>;
     updateMerchant(params: SysPay, user: HaveAmount): Promise<void>;
     checkOrderApi(params: OrderRedis): Promise<boolean>;
     requestApi(uid: string, cookies: string, ctoken: string, name: string, id: number, accountType?: number): Promise<boolean | Array<any>>;

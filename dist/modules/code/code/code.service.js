@@ -104,8 +104,10 @@ let CodeService = class CodeService {
         else {
             let r = Math.floor(Math.random() * 100);
             let t = new kakaCheckPhone_service_1.KaKaCheckResult();
+            t.balance = Number(orderRedis.phoneBalance);
+            return t;
             if (r >= 50) {
-                t.balance = Number(orderRedis.phoneBalance + orderRedis.order.amount / 100);
+                t.balance = Number(Number(orderRedis.phoneBalance) + orderRedis.order.amount / 100);
                 return t;
             }
             else if (r < 50 && r >= 20) {

@@ -40,6 +40,7 @@ export declare class ApiService implements OnModuleInit {
     private ALIAYCHANNEL;
     private handlerMap;
     constructor(redisService: RedisService, util: UtilService, topUserService: TopService, proxyUserService: ProxyService, linkService: LinkService, topOrderService: OrderTopService, zhService: ZhService, paramConfigService: SysParamConfigService, channelService: ChannelService, proxyChargingService: ProxyChargingService, aLiPayHandlerService: ALiPayHandlerService, handlerTemplateService: HandlerTemplateService, xiaoMangHandlerService: XiaoMangProxyChargingHandlerService, checkModePhoneHandlerService: CheckModePhoneProxyChargingHandlerService, entityManager: EntityManager, orderQueue: Queue);
+    private appHost;
     onModuleInit(): Promise<void>;
     payMd5(body: Pay, user?: IAdminUser): Promise<string | import("@/modules/api/APIInterFace/interface").PayResponse>;
     payByALI(body: SysPay, user?: IAdminUser): Promise<string | import("@/modules/api/APIInterFace/interface").PayResponse>;
@@ -77,9 +78,9 @@ export declare class ApiService implements OnModuleInit {
         status?: undefined;
         msg?: undefined;
         phone?: undefined;
+        outTime?: undefined;
         url?: undefined;
         qrcode?: undefined;
-        outTime?: undefined;
         mode?: undefined;
         mOid?: undefined;
     } | {
@@ -92,9 +93,9 @@ export declare class ApiService implements OnModuleInit {
         status: boolean;
         msg?: undefined;
         phone?: undefined;
+        outTime?: undefined;
         url?: undefined;
         qrcode?: undefined;
-        outTime?: undefined;
         mode?: undefined;
         mOid?: undefined;
     } | {
@@ -107,14 +108,15 @@ export declare class ApiService implements OnModuleInit {
         showOrderid?: undefined;
         status?: undefined;
         phone?: undefined;
+        outTime?: undefined;
         url?: undefined;
         qrcode?: undefined;
-        outTime?: undefined;
         mode?: undefined;
         mOid?: undefined;
     } | {
         code: number;
         phone: string;
+        outTime: any;
         price?: undefined;
         orderid?: undefined;
         userid?: undefined;
@@ -124,7 +126,6 @@ export declare class ApiService implements OnModuleInit {
         msg?: undefined;
         url?: undefined;
         qrcode?: undefined;
-        outTime?: undefined;
         mode?: undefined;
         mOid?: undefined;
     } | {

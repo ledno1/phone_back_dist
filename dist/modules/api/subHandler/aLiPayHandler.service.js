@@ -62,6 +62,7 @@ const dayjs_1 = __importDefault(require("dayjs"));
 const top_temp_entity_1 = require("../../../entities/order/top_temp.entity");
 const admin_ws_service_1 = require("../../ws/admin-ws.service");
 const code_service_1 = require("../../code/code/code.service");
+const param_config_dto_1 = require("../../admin/system/param-config/param-config.dto");
 const REQ = require("request-promise-native");
 class TopOrderRedirect extends top_entity_1.TopOrder {
     url;
@@ -112,6 +113,24 @@ let ALiPayHandlerService = class ALiPayHandlerService {
             common_1.Logger.error(error);
         });
         this.model = process.env.MODEL ? process.env.MODEL : InerFace_1.ProcessModel.CHECK;
+        let aLiPayQrCodeVersion = await this.paramConfigService.findValueByKey(`aLiPayQrCodeVersion`);
+        if (!aLiPayQrCodeVersion) {
+            let t = new param_config_dto_1.CreateParamConfigDto();
+            t.name = "支付码版本";
+            t.key = "aLiPayQrCodeVersion";
+            t.value = '2';
+            t.remark = "支付码版本 1 随机金额区间 2 固定金额通过char打招呼转账 ";
+            await this.paramConfigService.add(t);
+        }
+        let aLiPayCheckModeVersion = await this.paramConfigService.findValueByKey(`aLiPayCheckModeVersion`);
+        if (!aLiPayCheckModeVersion) {
+            let t = new param_config_dto_1.CreateParamConfigDto();
+            t.name = "支付宝cookies查单版本";
+            t.key = "aLiPayCheckModeVersion";
+            t.value = '2';
+            t.remark = "支付宝cookies查单版本 1 随机金额区间 2 备注的订单号 ";
+            await this.paramConfigService.add(t);
+        }
     }
     model;
     defaultSystemOutTime;
@@ -325,37 +344,38 @@ let ALiPayHandlerService = class ALiPayHandlerService {
                 }
                 if (qb) {
                     let isOk = await this.redisService.getRedis().get(`cache:status:${qb.uid}`);
+                    let aLiPayQrCodeVersion = await this.paramConfigService.findValueByKey('aLiPayQrCodeVersion');
                     if (checkMode == "1" || (isOk && isOk == "1")) {
                         let random = 1;
-                        let realAmount;
+                        let realAmount = amount;
                         let is;
                         let i = 1;
-                        do {
-                            realAmount = amount - i;
-                            is = await this.redisService.getRedis().get(`realAmount:${qb.uid}:${realAmount.toString()}`);
-                            i++;
+                        if (aLiPayQrCodeVersion == '1') {
+                            do {
+                                realAmount = amount - i;
+                                is = await this.redisService.getRedis().get(`realAmount:${qb.uid}:${realAmount.toString()}`);
+                                i++;
+                                if (i > 50) {
+                                    break;
+                                }
+                            } while (is);
                             if (i > 50) {
-                                break;
+                                resolve(null);
+                                return;
                             }
-                        } while (is);
-                        if (i > 50) {
-                            resolve(null);
-                            return;
-                        }
-                        else {
-                            let log = new sys_balance_entity_1.SysBalanceLog();
-                            log.amount = rateAmount;
-                            log.uuid = uuid;
-                            log.typeEnum = "reduce";
-                            log.event = "topOrder";
-                            log.actionUuid = "1";
-                            log.orderUuid = oid;
-                            log.balance = l.balance - rateAmount;
-                            await this.entityManager.save(log);
                             await this.redisService.getRedis().set(`realAmount:${qb.uid}:${realAmount}`, "1", "EX", "360");
-                            resolve(Object.assign(qb, { realAmount: realAmount }));
-                            return;
                         }
+                        let log = new sys_balance_entity_1.SysBalanceLog();
+                        log.amount = rateAmount;
+                        log.uuid = uuid;
+                        log.typeEnum = "reduce";
+                        log.event = "topOrder";
+                        log.actionUuid = "1";
+                        log.orderUuid = oid;
+                        log.balance = l.balance - rateAmount;
+                        await this.entityManager.save(log);
+                        resolve(Object.assign(qb, { realAmount: realAmount }));
+                        return;
                     }
                     else {
                         this.adminWSService.noticeUserToLogout(id, qb.name);
@@ -408,15 +428,18 @@ let ALiPayHandlerService = class ALiPayHandlerService {
                 await this.entityManager.save(order);
                 let appUrl, urlFinal;
                 let qrCodeMode = await this.paramConfigService.findValueByKey("aLiPayQrCode");
+                let aLiPayQrCodeVersion = await this.paramConfigService.findValueByKey(`aLiPayQrCodeVersion`);
                 if (qrCodeMode == "0") {
                     appUrl = payAccount.payMode == 1 ? `${this.host}/alipayu1.html?orderid=${oid}` : `${this.host}/alipayu.html?orderid=${oid}`;
                     let qrcodeURL = encodeURIComponent(appUrl);
-                    let schemeURL = encodeURIComponent(`alipays://platformapi/startapp?saId=10000007&clientVersion=3.7.0.0718&qrcode=${qrcodeURL}`);
+                    let chatHeaderUrl = encodeURIComponent(`http://tfs.alipayobjects.com/images/partner/TB1OD00cMSJDuNj_160X160`);
+                    let qrURL = `https://www.alipay.com/?appId=20000116&actionType=toAccount&sourceId=contactStage&chatUserId=${payAccount.uid}&displayName=TK&chatUserName=TK&chatLoginId=186******71&chatHeaderUrl=http://tfs.alipayobjects.com/images/partner/TB1OD00cMSJDuNj_160X160&chatUserType=1&skipAuth=true&amount=${order.amount / 100}&memo=${order.mOid}`;
+                    let schemeURL = encodeURIComponent(`alipays://platformapi/startapp?saId=10000007&clientVersion=3.7.0.0718&qrcode=${aLiPayQrCodeVersion == '1' ? qrcodeURL : qrURL}`);
                     let url = encodeURIComponent(`https://d.alipay.com/i/index.htm?pageSkin=skin-h5cashier&scheme=${schemeURL}`);
                     urlFinal = `alipays://platformapi/startapp?appId=20000691&url=${url}`;
                     await this.redisService.getRedis().set(`orderClient:${oid}`, JSON.stringify(Object.assign(order, {
                         url: urlFinal,
-                        qrcode: appUrl,
+                        qrcode: aLiPayQrCodeVersion == '1' ? qrcodeURL : qrURL,
                         outTime: new Date().getTime() + (Number(time) + this.defaultSystemOutTime) * 1000
                     })), "EX", Number(time) + this.defaultSystemOutTime);
                 }
@@ -641,17 +664,28 @@ let ALiPayHandlerService = class ALiPayHandlerService {
             resource = resource;
             try {
                 let resultList = await this.redisService.getRedis().get(`order:result:${resource.uid}`);
+                let aLiPayQrCodeVersion = await this.paramConfigService.findValueByKey('aLiPayQrCodeVersion');
                 if (resultList) {
                     resultList = JSON.parse(resultList);
                     let ishave = false;
                     if (resultList.length > 0) {
                         let qrCodeMode = await this.paramConfigService.findValueByKey("aLiPayQrCode");
                         if (qrCodeMode == "0") {
-                            let real = realAmount / 100;
-                            for (let i = 0; i < resultList.length; i++) {
-                                if (resultList[i].tradeAmount == real.toFixed(2)) {
-                                    ishave = true;
-                                    break;
+                            if (aLiPayQrCodeVersion == '1') {
+                                let real = realAmount / 100;
+                                for (let i = 0; i < resultList.length; i++) {
+                                    if (resultList[i].tradeAmount == real.toFixed(2)) {
+                                        ishave = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            else if (aLiPayQrCodeVersion == '2') {
+                                for (let i = 0; i < resultList.length; i++) {
+                                    if (order.mOid == resultList[i].transMemo) {
+                                        ishave = true;
+                                        break;
+                                    }
                                 }
                             }
                         }
@@ -681,11 +715,21 @@ let ALiPayHandlerService = class ALiPayHandlerService {
                     if (list.length > 0) {
                         let qrCodeMode = await this.paramConfigService.findValueByKey("aLiPayQrCode");
                         if (qrCodeMode == "0") {
-                            let real = realAmount / 100;
-                            for (let i = 0; i < list.length; i++) {
-                                if (list[i].tradeAmount == real.toFixed(2)) {
-                                    ishaves = true;
-                                    break;
+                            if (aLiPayQrCodeVersion == '1') {
+                                let real = realAmount / 100;
+                                for (let i = 0; i < list.length; i++) {
+                                    if (list[i].tradeAmount == real.toFixed(2)) {
+                                        ishaves = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            else if (aLiPayQrCodeVersion == '2') {
+                                for (let i = 0; i < list.length; i++) {
+                                    if (order.mOid == list[i].transMemo) {
+                                        ishaves = true;
+                                        break;
+                                    }
                                 }
                             }
                         }

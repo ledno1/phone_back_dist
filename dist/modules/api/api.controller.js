@@ -106,31 +106,68 @@ let ApiController = class ApiController {
     }
     async payTest(body, user) {
         let { channel, merId, sign, attch, orderAmt } = body;
-        body.orderAmt = Number(orderAmt) * 100 > 100 ? "0.1" : orderAmt;
         let p = body;
         p.amount = Number(body.orderAmt) * 100;
         p.sign = "test00001111";
         attch && attch != "" && !isNaN(Number(attch)) ? p.subChannel = Number(attch) : null;
         if (!attch || attch == "")
             throw new api_exception_1.ApiException(60102);
-        let channelList = await this.redis.getRedis().get("channel:list");
-        if (!channelList) {
-            channelList = await this.channelService.channelRoot();
-            channelList = channelList.map((item) => item.id);
-            await this.redis.getRedis().set("channel:list", JSON.stringify(channelList), "EX", 60 * 1);
-        }
-        else {
-            channelList = JSON.parse(channelList);
-        }
-        if (!channelList.includes(Number(channel))) {
-            throw new api_exception_1.ApiException(60002);
-        }
-        if (sign?.toString().length > 32) {
-            throw new api_exception_1.ApiException(60003);
-            return 1;
-        }
-        else {
-            return await this.apiService.payMd5(p, user);
+        let subChannel = Number(attch);
+        let pay = await this.paramConfigService.findValueByKey("pay_open");
+        if (Boolean(Number(pay)) === true) {
+            let channelList = await this.redis.getRedis().get("channel:list");
+            if (!channelList) {
+                channelList = await this.channelService.channelRoot();
+                channelList = channelList.map((item) => item.id);
+                await this.redis.getRedis().set("channel:list", JSON.stringify(channelList), "EX", 60 * 1);
+            }
+            else {
+                channelList = JSON.parse(channelList);
+            }
+            if (!channelList.includes(Number(channel))) {
+                throw new api_exception_1.ApiException(60002);
+            }
+            let subChannelList = await this.redis.getRedis().get(`channel:subChannelList:${channel}`);
+            if (!subChannelList) {
+                subChannelList = await this.channelService.getSubChannel(Number(channel));
+                await this.redis.getRedis().set(`channel:subChannelList:${channel}`, JSON.stringify(subChannelList), "EX", 60 * 1);
+            }
+            else {
+                subChannelList = JSON.parse(subChannelList);
+            }
+            subChannelList.forEach((item) => {
+                if (item.id === subChannel) {
+                    if (item.amountType && item.amountType !== "") {
+                        if (item.amountType.includes('-')) {
+                            let a = item.amountType.split("-");
+                            let b = body.orderAmt.includes('.') ? body.orderAmt.split(".")[0] : body.orderAmt;
+                            if (isNaN(Number(b))) {
+                                console.error('订单金额必须是数字');
+                                throw new api_exception_1.ApiException(60015);
+                            }
+                            if (Number(a[0]) > Number(b) || Number(b) > Number(a[1])) {
+                                console.error(`订单金额不在范围内,${body.orderAmt} 不在 ${a[0]} - ${a[1]} 之间`);
+                                throw new api_exception_1.ApiException(60015);
+                            }
+                        }
+                        else {
+                            let a = item.amountType.split(",");
+                            let b = body.orderAmt.includes('.') ? body.orderAmt.split(".")[0] : body.orderAmt;
+                            if (!a.includes(b)) {
+                                console.error(body.orderAmt + "  金额不在范围内");
+                                throw new api_exception_1.ApiException(60015);
+                            }
+                        }
+                    }
+                }
+            });
+            if (sign?.toString().length > 32) {
+                throw new api_exception_1.ApiException(60003);
+                return 1;
+            }
+            else {
+                return await this.apiService.payMd5(body, user);
+            }
         }
         throw new api_exception_1.ApiException(60001);
     }

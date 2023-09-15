@@ -40,6 +40,7 @@ const payaccount_entity_1 = require("../../entities/resource/payaccount.entity")
 const XiaoMangProxyChargingHandlerservice_1 = require("./subHandler/XiaoMangProxyChargingHandlerservice");
 const checkModePhoneProxyChargingHandlerservice_1 = require("./subHandler/checkModePhoneProxyChargingHandlerservice");
 const sys_user_entity_1 = __importDefault(require("../../entities/admin/sys-user.entity"));
+const param_config_dto_1 = require("../admin/system/param-config/param-config.dto");
 let ApiService = class ApiService {
     redisService;
     util;
@@ -80,7 +81,18 @@ let ApiService = class ApiService {
         this.entityManager = entityManager;
         this.orderQueue = orderQueue;
     }
+    appHost;
     async onModuleInit() {
+        let TestOpen = await this.paramConfigService.findValueByKey(`TestOpen`);
+        if (!TestOpen) {
+            let t = new param_config_dto_1.CreateParamConfigDto();
+            t.name = "允许拉起测试";
+            t.key = `TestOpen`;
+            t.value = '0';
+            t.remark = "允许拉起测试";
+            await this.paramConfigService.add(t);
+        }
+        this.appHost = await this.paramConfigService.findValueByKey(`appHost`);
         let tempHandlerList = [this.aLiPayHandlerService, this.handlerTemplateService, this.xiaoMangHandlerService, this.checkModePhoneHandlerService];
         let channelList = await this.channelService.channelRoot();
         channelList.forEach(e => {
@@ -132,10 +144,14 @@ let ApiService = class ApiService {
     async payMd5(body, user = null) {
         let { merId, sign, attch } = body;
         if (sign == "test00001111") {
+            let t = await this.paramConfigService.findValueByKey(`TestOpen`);
+            if (!t && t != '66666')
+                throw new api_exception_1.ApiException(66666);
             if (!user)
                 throw new api_exception_1.ApiException(60003);
             body.orderId = this.util.generateUUID();
-            body.notifyUrl = `https://www.baidu.com`;
+            body.notifyUrl = process_1.default.env.NODE_ENV == 'development' ? `http://127.0.0.1:7001/api/test/callback` : this.appHost + `/api/test/callback`;
+            body.userId = user.id.toString();
             if (body.channel == this.QQPAYCHANNEL) {
                 return await this.payByQQ(body);
             }
@@ -315,7 +331,8 @@ let ApiService = class ApiService {
                             if (orderRedis.phoneBalance) {
                                 return {
                                     code: 1,
-                                    phone: orderRedis.resource.target
+                                    phone: orderRedis.resource.target,
+                                    outTime: orderInfo.outTime
                                 };
                             }
                         }

@@ -156,8 +156,8 @@ let KaKaCheckPhoneHandlerService = class KaKaCheckPhoneHandlerService {
                         balance: res.balance.toString(),
                     });
                     orderRedis.phoneBalance = res.balance.toString();
-                    orderRedis.firstCheckTime = new Date().getTime();
-                    await this.redis.getRedis().set(`order:${orderRedis.order.oid}`, JSON.stringify(orderRedis));
+                    orderRedis.firstCheckTime = Date.now();
+                    await this.redis.getRedis().set(`order:${orderRedis.order.oid}`, JSON.stringify(orderRedis), "EX", 360);
                     resolve(res.balance.toString());
                     return;
                 }
@@ -187,8 +187,8 @@ let KaKaCheckPhoneHandlerService = class KaKaCheckPhoneHandlerService {
                                         balance: res.balance.toString(),
                                     });
                                     orderRedis.phoneBalance = res.balance.toString();
-                                    orderRedis.firstCheckTime = new Date().getTime();
-                                    await this.redis.getRedis().set(`order:${orderRedis.order.oid}`, JSON.stringify(orderRedis));
+                                    orderRedis.firstCheckTime = Date.now();
+                                    await this.redis.getRedis().set(`order:${orderRedis.order.oid}`, JSON.stringify(orderRedis), "EX", 360);
                                     resolve(res.balance.toString());
                                     return;
                                 }

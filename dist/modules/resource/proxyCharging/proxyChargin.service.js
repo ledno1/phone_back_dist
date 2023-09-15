@@ -166,6 +166,29 @@ let ProxyChargingService = class ProxyChargingService {
     }
     async add(params, user) {
         let { phone, amount, channel, operator } = params;
+        let phoneInfo;
+        phoneInfo = phoneQuery(phone);
+        let operator2 = await this.operatorType(phoneInfo.type);
+        let u = await this.userService.findUserIdByNameOrId(user.id.toString());
+        let rate = await this.channelService.getRateByChannelId(user.id, Number(channel), u.uuid);
+        let proxyCharging = new proxyChargin_entity_1.ProxyCharging();
+        proxyCharging.pid = user.id;
+        proxyCharging.channel = Number(channel);
+        proxyCharging.target = phone;
+        proxyCharging.amount = Number(amount) * 100;
+        proxyCharging.mOid = `test` + this.util.generateUUID();
+        proxyCharging.status = 0;
+        proxyCharging.notifyUrl = 'http://www.baidu.com';
+        proxyCharging.pUid = this.util.generateUUID();
+        proxyCharging.weight = (0, lodash_1.isNaN)(Number(operator)) ? 0 : Number(operator);
+        proxyCharging.operator = operator2;
+        proxyCharging.parentChannel = 3;
+        proxyCharging.province = phoneInfo.province;
+        proxyCharging.city = phoneInfo.city;
+        proxyCharging.lRate = rate;
+        proxyCharging.SysUser = u;
+        proxyCharging.outTime = (0, lodash_1.isNaN)(Number(operator)) ? this.util.dayjs().add(3, "day").toDate() : Number(operator) == 100 ? this.util.dayjs().add(10, "minute").toDate() : this.util.dayjs().add(3, "day").toDate();
+        await this.proxyChargingRepository.save(proxyCharging);
         return "ok";
     }
     async edit(params, user) {

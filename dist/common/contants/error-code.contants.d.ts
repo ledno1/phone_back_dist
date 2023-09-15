@@ -90,6 +90,7 @@ export declare const ErrorCodeMap: {
     readonly 61200: "退单成功";
     readonly 61201: "该订单已经退单成功";
     readonly 61400: "退单失败,不存在该订单或该订单正处于充值中,无法退单";
+    readonly 66666: "尚未开启测试拉单";
     readonly 70001: "没有配置订单金额限定";
     readonly 70002: "该运营商禁止入单";
     readonly 70003: "该运营商的该省份禁止入单";
