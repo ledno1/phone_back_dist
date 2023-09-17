@@ -71,7 +71,11 @@ let KaKaCheckPhoneHandlerService = class KaKaCheckPhoneHandlerService {
     };
     PhoneBlackListJoin;
     redlock;
+    CheckModePhoneProxyChargingMaxCount;
+    defaultSystemOutTime;
     async onModuleInit() {
+        this.CheckModePhoneProxyChargingMaxCount = await this.paramConfigService.findValueByKey('CheckModePhoneProxyChargingMaxCount');
+        this.defaultSystemOutTime = await this.paramConfigService.findValueByKey(`CheckModePhoneProxyChargingPayTimeOut`);
         this.user_id = await this.paramConfigService.findValueByKey('KaKaUser_id');
         if (!this.user_id) {
             throw new Error('KaKaUser_id 配置表中未设置');
@@ -145,7 +149,7 @@ let KaKaCheckPhoneHandlerService = class KaKaCheckPhoneHandlerService {
             common_1.Logger.error(error);
         });
     }
-    result(params, orderRedis) {
+    result(paramsD, orderRedis) {
         return new Promise(async (resolve, reject) => {
             try {
                 let res = await this.checkBalance(orderRedis);
@@ -213,8 +217,41 @@ let KaKaCheckPhoneHandlerService = class KaKaCheckPhoneHandlerService {
                 console.log(JSON.stringify(e) + "尝试重新取号匹配");
                 let lock = await this.redlock.acquire("lock", 5000);
                 try {
+                    let { req, user } = orderRedis;
+                    let params = req;
+                    let { id } = user;
+                    let { amount, subChannel, merId, nonceStr, desc } = params;
+                    let qb = await this.entityManager.transaction(async (entityManager) => {
+                        let proxyCharging = await entityManager.createQueryBuilder(proxyChargin_entity_1.ProxyCharging, "proxyCharging")
+                            .leftJoinAndSelect("proxyCharging.SysUser", "user")
+                            .select()
+                            .where("proxyCharging.isClose = 0")
+                            .andWhere("proxyCharging.amount = :amount", { amount })
+                            .andWhere("proxyCharging.status = 0")
+                            .andWhere("proxyCharging.locking = 0")
+                            .andWhere(`proxyCharging.count < ${this.CheckModePhoneProxyChargingMaxCount + 1}`)
+                            .andWhere("proxyCharging.parentChannel = :parentChannel", { parentChannel: params.channel })
+                            .andWhere("proxyCharging.channel = :channel", { channel: params.subChannel })
+                            .andWhere("proxyCharging.outTime-now() > :outTime", { outTime: this.defaultSystemOutTime + 60 })
+                            .andWhere("user.id = :id", { id })
+                            .orderBy("proxyCharging.weight", "DESC")
+                            .orderBy("proxyCharging.createdAt", "ASC")
+                            .orderBy("proxyCharging.count", "ASC")
+                            .getOne();
+                        if (proxyCharging) {
+                            await entityManager.query(`update proxy_charging set status = 2,locking = 1,count = count + 1  where id = ${proxyCharging.id}`);
+                            return proxyCharging;
+                        }
+                        else {
+                            return null;
+                        }
+                    });
+                    if (qb) {
+                    }
                 }
                 catch (e) {
+                    console.log('二次派号错误');
+                    console.log(e);
                 }
                 finally {
                     try {

@@ -19,8 +19,10 @@ export declare class KaKaCheckPhoneHandlerService implements PayCodeServiceHandl
     private retryOptions;
     private PhoneBlackListJoin;
     private redlock;
+    private CheckModePhoneProxyChargingMaxCount;
+    private defaultSystemOutTime;
     onModuleInit(): Promise<void>;
-    result(params: SysPay, orderRedis: OrderRedis): Promise<string>;
+    result(paramsD: SysPay, orderRedis: OrderRedis): Promise<string>;
     nameKey: string | string[];
     checkOrder(params: SysPay, orderRedis: OrderRedis): Promise<KaKaCheckResult | KaKaCheckResult[]>;
     checkBalanceBase(pc: ProxyCharging): Promise<KaKaCheckResult>;

@@ -288,8 +288,16 @@ let CheckModePhoneProxyChargingHandlerService = class CheckModePhoneProxyChargin
                 resolve(null);
                 return;
             }
-            let lock = await this.redlock.acquire("lock", 5000);
+            let t = 5000;
+            let { desc } = params;
+            if (desc == 'test') {
+                t = 60000;
+            }
+            let lock = await this.redlock.acquire("lock", t);
             try {
+                if (desc == 'test') {
+                    await this.util.sleep(55 * 1000);
+                }
                 let { amount, subChannel, channel } = params;
                 let lastUuid = await this.redisService.getRedis().get(this.lastUuidKey);
                 if (!lastUuid) {

@@ -8,7 +8,7 @@
  * @last-modified: 2022-07-26 03:13:56
  * -----
  */
-
+const serverPort = 3005
 const express = require('express');
 const app = express();
 const router = express.Router({ caseSensitive: true });
@@ -338,7 +338,7 @@ async function newTask(id) {
   await cacheStart();
   app.set('json spaces', 40);
   app.use(router);
-  app.listen(3005);
+  app.listen(serverPort);
 
   _log('程序已经运行，接口地址 http://127.0.0.1:3005/api/create');
 })();
