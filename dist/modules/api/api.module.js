@@ -32,6 +32,7 @@ const test_service_1 = require("../code/subHandler/test.service");
 const product_service_1 = require("../code/product/product.service");
 const checkModePhoneProxyChargingHandlerservice_1 = require("./subHandler/checkModePhoneProxyChargingHandlerservice");
 const kakaCheckPhone_service_1 = require("../code/subHandler/kakaCheckPhone.service");
+const tg_service_1 = require("./bot/tg.service");
 let ApiModule = class ApiModule {
 };
 ApiModule = __decorate([
@@ -61,7 +62,9 @@ ApiModule = __decorate([
             ws_module_1.WSModule
         ],
         controllers: [orderSell_controller_1.OrderSellController, orderTop_controller_1.OrderTopController, api_controller_1.ApiController],
-        providers: [orderSell_service_1.OrderSellService, orderTop_service_1.OrderTopService, api_service_1.ApiService, aLiPayHandler_service_1.ALiPayHandlerService, handlerTemplate_service_1.HandlerTemplateService, XiaoMangProxyChargingHandlerservice_1.XiaoMangProxyChargingHandlerService, code_service_1.CodeService, test_service_1.TestHandlerService, product_service_1.PayCodeProductService, checkModePhoneProxyChargingHandlerservice_1.CheckModePhoneProxyChargingHandlerService, kakaCheckPhone_service_1.KaKaCheckPhoneHandlerService],
+        providers: [orderSell_service_1.OrderSellService, orderTop_service_1.OrderTopService, api_service_1.ApiService, aLiPayHandler_service_1.ALiPayHandlerService, handlerTemplate_service_1.HandlerTemplateService, XiaoMangProxyChargingHandlerservice_1.XiaoMangProxyChargingHandlerService, code_service_1.CodeService, test_service_1.TestHandlerService, product_service_1.PayCodeProductService, checkModePhoneProxyChargingHandlerservice_1.CheckModePhoneProxyChargingHandlerService, kakaCheckPhone_service_1.KaKaCheckPhoneHandlerService,
+            tg_service_1.TGBotService
+        ],
         exports: [orderSell_service_1.OrderSellService, orderTop_service_1.OrderTopService, api_service_1.ApiService]
     })
 ], ApiModule);
