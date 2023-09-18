@@ -22,8 +22,6 @@ const typeorm_logger_service_1 = require("./shared/logger/typeorm-logger.service
 const logger_constants_1 = require("./shared/logger/logger.constants");
 const newtest_module_1 = require("./modules/newtest/newtest.module");
 const hero_module_1 = require("./hero/hero.module");
-const serve_static_1 = require("@nestjs/serve-static");
-const path_1 = require("path");
 const app_controller_1 = require("./app.controller");
 const resource_module_1 = require("./modules/resource/resource.module");
 const usersys_module_1 = require("./modules/usersys/usersys.module");
@@ -86,9 +84,6 @@ AppModule = __decorate([
             usersys_module_1.UsersysModule,
             api_module_1.ApiModule,
             code_module_1.CodeModule,
-            process.env.NODE_ENV == 'development' ? serve_static_1.ServeStaticModule.forRoot({
-                rootPath: (0, path_1.join)(__dirname, '..', 'public'),
-            }) : null,
         ],
         controllers: [app_controller_1.AppController],
     })
