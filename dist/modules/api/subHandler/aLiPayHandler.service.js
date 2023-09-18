@@ -438,7 +438,7 @@ let ALiPayHandlerService = class ALiPayHandlerService {
                     let url = encodeURIComponent(`https://d.alipay.com/i/index.htm?pageSkin=skin-h5cashier&scheme=${schemeURL}`);
                     urlFinal = `alipays://platformapi/startapp?appId=20000691&url=${url}`;
                     await this.redisService.getRedis().set(`orderClient:${oid}`, JSON.stringify(Object.assign(order, {
-                        url: aLiPayQrCodeVersion == '1' ? urlFinal : `alipays://platformapi/startapp?appId=68687093&url=${encodeURIComponent(`${this.host}/alipayu2.html?orderid=${oid}`)}`,
+                        url: urlFinal,
                         qrcode: aLiPayQrCodeVersion == '1' ? qrcodeURL : qrURL,
                         outTime: new Date().getTime() + (Number(time) + this.defaultSystemOutTime) * 1000
                     })), "EX", Number(time) + this.defaultSystemOutTime);
@@ -681,8 +681,9 @@ let ALiPayHandlerService = class ALiPayHandlerService {
                                 }
                             }
                             else if (aLiPayQrCodeVersion == '2') {
+                                let real = realAmount / 100;
                                 for (let i = 0; i < resultList.length; i++) {
-                                    if (order.mOid == resultList[i].transMemo) {
+                                    if (order.mOid == resultList[i].transMemo && resultList[i].tradeAmount == real.toFixed(2)) {
                                         ishave = true;
                                         break;
                                     }
@@ -725,8 +726,9 @@ let ALiPayHandlerService = class ALiPayHandlerService {
                                 }
                             }
                             else if (aLiPayQrCodeVersion == '2') {
+                                let real = realAmount / 100;
                                 for (let i = 0; i < list.length; i++) {
-                                    if (order.mOid == list[i].transMemo) {
+                                    if (order.mOid == list[i].transMemo && list[i].tradeAmount == real.toFixed(2)) {
                                         ishaves = true;
                                         break;
                                     }
