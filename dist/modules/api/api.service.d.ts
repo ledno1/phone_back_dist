@@ -76,6 +76,7 @@ export declare class ApiService implements OnModuleInit {
         createAt?: undefined;
         showOrderid?: undefined;
         status?: undefined;
+        oid?: undefined;
         msg?: undefined;
         phone?: undefined;
         outTime?: undefined;
@@ -91,6 +92,7 @@ export declare class ApiService implements OnModuleInit {
         createAt: string | Date;
         showOrderid: string;
         status: boolean;
+        oid: string;
         msg?: undefined;
         phone?: undefined;
         outTime?: undefined;
@@ -107,6 +109,7 @@ export declare class ApiService implements OnModuleInit {
         createAt?: undefined;
         showOrderid?: undefined;
         status?: undefined;
+        oid?: undefined;
         phone?: undefined;
         outTime?: undefined;
         url?: undefined;
@@ -123,6 +126,7 @@ export declare class ApiService implements OnModuleInit {
         createAt?: undefined;
         showOrderid?: undefined;
         status?: undefined;
+        oid?: undefined;
         msg?: undefined;
         url?: undefined;
         qrcode?: undefined;
@@ -142,6 +146,7 @@ export declare class ApiService implements OnModuleInit {
         createAt?: undefined;
         showOrderid?: undefined;
         status?: undefined;
+        oid?: undefined;
         phone?: undefined;
     }>;
     alipayNotify(params: ALiPayNotify, query: any): Promise<"success" | "fail">;

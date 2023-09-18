@@ -20,12 +20,6 @@ const redis_service_1 = require("../../../shared/services/redis.service");
 const util_service_1 = require("../../../shared/services/util.service");
 const param_config_service_1 = require("../../admin/system/param-config/param-config.service");
 const param_config_dto_1 = require("../../admin/system/param-config/param-config.dto");
-const { Telegraf } = require('telegraf');
-const { message } = require('telegraf/filters');
-const proxyUrl = 'http://127.0.0.1:7890';
-const HttpsProxyAgent = require('https-proxy-agent');
-const proxy = new URL(proxyUrl);
-const proxyAgent = new HttpsProxyAgent(proxyUrl);
 let TGBotService = class TGBotService {
     redisService;
     entityManager;
@@ -50,14 +44,6 @@ let TGBotService = class TGBotService {
             await this.paramConfigService.add(t);
             throw new Error('tg机器人未设置token');
         }
-        const bot = new Telegraf(this.tgToken);
-        bot.start((ctx) => ctx.reply('Welcome'));
-        bot.help((ctx) => ctx.reply('Send me a sticker'));
-        bot.on(message('sticker'), (ctx) => ctx.reply('👍'));
-        bot.hears('hi', (ctx) => ctx.reply('Hey there'));
-        bot.launch();
-        process.once('SIGINT', () => bot.stop('SIGINT'));
-        process.once('SIGTERM', () => bot.stop('SIGTERM'));
     }
 };
 TGBotService = __decorate([

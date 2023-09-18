@@ -86,9 +86,9 @@ AppModule = __decorate([
             usersys_module_1.UsersysModule,
             api_module_1.ApiModule,
             code_module_1.CodeModule,
-            serve_static_1.ServeStaticModule.forRoot({
+            process.env.NODE_ENV == 'development' ? serve_static_1.ServeStaticModule.forRoot({
                 rootPath: (0, path_1.join)(__dirname, '..', 'public'),
-            }),
+            }) : null,
         ],
         controllers: [app_controller_1.AppController],
     })

@@ -308,7 +308,8 @@ let ApiService = class ApiService {
                     userid: resource.uid,
                     createAt: createAt,
                     showOrderid: order.mOid,
-                    status: res
+                    status: res,
+                    oid: order.mOid
                 };
             }
             else {
