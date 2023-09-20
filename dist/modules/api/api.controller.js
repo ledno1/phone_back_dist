@@ -236,6 +236,9 @@ let ApiController = class ApiController {
         }
         return await this.apiService.directBack(body);
     }
+    async callOrder(query, request) {
+        return await this.apiService.callOrder(query, request.headers.cookie);
+    }
 };
 __decorate([
     (0, keep_decorator_1.Keep)(),
@@ -332,6 +335,16 @@ __decorate([
     __metadata("design:paramtypes", [interface_1.DirectBack, Object]),
     __metadata("design:returntype", Promise)
 ], ApiController.prototype, "directBack", null);
+__decorate([
+    (0, authorize_decorator_1.Authorize)(),
+    (0, keep_decorator_1.Keep)(),
+    (0, common_1.Get)('/callorder'),
+    __param(0, (0, common_1.Query)()),
+    __param(1, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], ApiController.prototype, "callOrder", null);
 ApiController = __decorate([
     (0, swagger_1.ApiTags)("API模块"),
     (0, common_1.Controller)({

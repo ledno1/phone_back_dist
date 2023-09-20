@@ -150,6 +150,7 @@ export declare class ApiService implements OnModuleInit {
         phone?: undefined;
     }>;
     alipayNotify(params: ALiPayNotify, query: any): Promise<"success" | "fail">;
+    callOrder(params: any, cookies: string): Promise<string>;
     directPush(params: DirectPush): Promise<{
         code: number;
         message: string;

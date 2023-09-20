@@ -3,7 +3,7 @@ import { IAdminUser } from "@/modules/admin/admin.interface";
 export declare class OrderTopController {
     private readonly topService;
     constructor(topService: OrderTopService);
-    page(query: any, user: IAdminUser): Promise<{
+    page(query: any, user: IAdminUser): Promise<string | {
         totalAmount: any;
         totalSuccessCount: any;
         totalCount: any;

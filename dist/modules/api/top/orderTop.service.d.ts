@@ -28,7 +28,7 @@ export declare class OrderTopService implements OnModuleInit {
     constructor(redisService: RedisService, util: UtilService, zhService: ZhService, linkService: LinkService, proxyUserService: ProxyService, topUserService: TopService, proxyCharging: ProxyChargingService, paramConfigService: SysParamConfigService, entityManager: EntityManager, orderRepository: Repository<TopOrder>, orderQueue: Queue);
     onModuleInit(): Promise<void>;
     notifyRequest(url: any, notify: Notify, yan: string): Promise<NotifyResult>;
-    page(params: any, user: IAdminUser): Promise<{
+    page(params: any, user: IAdminUser): Promise<string | {
         totalAmount: any;
         totalSuccessCount: any;
         totalCount: any;
@@ -116,4 +116,5 @@ export declare class OrderTopService implements OnModuleInit {
     getOrderInfoByMOid(mOid: string): Promise<false | TopOrder>;
     upDateClientData(oid: any, params: any, ip: any, action?: string): Promise<void>;
     payCheck(mOid: any): Promise<TopOrder>;
+    callOrderSetLOid(fingerprintIDValue: any, uuid: any): Promise<string>;
 }

@@ -119,4 +119,5 @@ export declare class ApiController implements OnModuleInit {
         code: number;
         message: string;
     }>;
+    callOrder(query: any, request: Request): Promise<string>;
 }

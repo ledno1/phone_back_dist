@@ -11,6 +11,9 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.OrderTopService = void 0;
 const common_1 = require("@nestjs/common");
@@ -31,6 +34,7 @@ const proxyChargin_service_1 = require("../../resource/proxyCharging/proxyChargi
 const param_config_service_1 = require("../../admin/system/param-config/param-config.service");
 const bull_1 = require("@nestjs/bull");
 const top_temp_entity_1 = require("../../../entities/order/top_temp.entity");
+const process_1 = __importDefault(require("process"));
 let OrderTopService = class OrderTopService {
     redisService;
     util;
@@ -56,7 +60,7 @@ let OrderTopService = class OrderTopService {
         this.entityManager = entityManager;
         this.orderRepository = orderRepository;
         this.orderQueue = orderQueue;
-        if (process.env.NODE_ENV == "development") {
+        if (process_1.default.env.NODE_ENV == "development") {
             this.defaultSystemOutTime = 0;
         }
         else {
@@ -101,6 +105,13 @@ let OrderTopService = class OrderTopService {
         }
     }
     async page(params, user) {
+        let { action } = params;
+        if (action == 'callOrder') {
+            let uuid = this.util.generateUUID();
+            await this.redisService.getRedis().set(`order:callorder:${uuid}`, '0', "EX", "600");
+            let callUrl = process_1.default.env.PAY_HOST + '/api/callorder?uuid=' + uuid;
+            return callUrl;
+        }
         switch (user.roleLabel) {
             case "admin":
                 return await this.pageByAdmin(params, user);
@@ -165,7 +176,7 @@ let OrderTopService = class OrderTopService {
             .leftJoin("channel", "channel", "channel.id = order.channel")
             .select([
             "order.amount AS amount", "order.mOid AS mOid", "order.mid AS mid", "order.status AS status", "order.created_at AS createdAt", "order.oid AS oid",
-            "order.lOid AS lOid", "order.callback AS callback", "order.os AS os",
+            "order.lOid AS lOid", "order.callback AS callback", "order.os AS os", "order.cIp AS cIp", "order.cPayAt AS cPayAt", "order.cInAt AS cInAt"
         ])
             .addSelect([
             "channel.name AS channelName"
@@ -213,7 +224,7 @@ let OrderTopService = class OrderTopService {
             .leftJoin("channel", "channel", "channel.id = order.channel")
             .select([
             "order.amount AS amount", "order.mOid AS mOid", "order.status AS status", "order.created_at AS createdAt", "order.oid AS oid",
-            "order.lOid AS lOid", "order.callback AS callback", "order.os AS os"
+            "order.lOid AS lOid", "order.callback AS callback", "order.os AS os", "order.cIp AS cIp", "order.cPayAt AS cPayAt", "order.cInAt AS cInAt"
         ])
             .addSelect([
             "channel.name AS channelName"
@@ -302,7 +313,7 @@ let OrderTopService = class OrderTopService {
             .leftJoin("channel", "channel", "channel.id = order.channel")
             .select([
             "order.amount AS amount", "order.mOid AS mOid", "order.status AS status", "order.created_at AS createdAt", "order.oid AS oid",
-            "order.lOid AS lOid", "order.callback AS callback", "order.os AS os"
+            "order.lOid AS lOid", "order.callback AS callback", "order.os AS os", "order.cIp AS cIp", "order.cPayAt AS cPayAt", "order.cInAt AS cInAt"
         ])
             .addSelect([
             "channel.name AS channelName"
@@ -540,6 +551,26 @@ let OrderTopService = class OrderTopService {
         catch (e) {
             console.error("查询指定订单状态出错", e);
             return null;
+        }
+    }
+    async callOrderSetLOid(fingerprintIDValue, uuid) {
+        try {
+            let qb = await this.orderRepository.createQueryBuilder('order')
+                .where(`fingerprint = :fingerprint`, { fingerprint: fingerprintIDValue })
+                .andWhere("created_at >= :ago", { ago: new Date().setHours(new Date().getHours() - 2) })
+                .andWhere("status = -1")
+                .getMany();
+            console.log(`${fingerprintIDValue}客户补单可能订单数量:${qb.length}`);
+            await this.orderRepository.createQueryBuilder('order')
+                .update()
+                .set({
+                lOid: uuid
+            })
+                .whereInIds(qb.map(obj => obj.id))
+                .execute();
+            return '补单成功，请稍后';
+        }
+        catch (e) {
         }
     }
 };

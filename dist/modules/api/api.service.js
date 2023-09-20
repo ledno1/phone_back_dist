@@ -393,6 +393,24 @@ let ApiService = class ApiService {
             return r ? "success" : "fail";
         }
     }
+    async callOrder(params, cookies) {
+        let { uuid } = params;
+        if (!uuid) {
+            return '如需补单请咨询客服获取补单链接';
+        }
+        let have = await this.redisService.getRedis().get(`order:callorder:${uuid}`);
+        if (!have) {
+            return '如需补单请咨询客服获取补单链接';
+        }
+        const match = cookies.match(/fingerprintID=([^;]*)/);
+        if (match) {
+            const fingerprintIDValue = match[1];
+            return await this.topOrderService.callOrderSetLOid(fingerprintIDValue, params.uuid);
+        }
+        else {
+            return '请使用付款时使用的浏览器访问补单链接';
+        }
+    }
     async directPush(params) {
         let { merId, orderId } = params;
         if (merId) {
