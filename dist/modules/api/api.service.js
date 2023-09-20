@@ -27,7 +27,6 @@ const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const zh_service_1 = require("../resource/zh/zh.service");
 const proxy_service_1 = require("../usersys/proxy/proxy.service");
-const top_entity_1 = require("../../entities/order/top.entity");
 const bull_1 = require("@nestjs/bull");
 const process_1 = __importDefault(require("process"));
 const orderTop_service_1 = require("./top/orderTop.service");
@@ -249,16 +248,6 @@ let ApiService = class ApiService {
     }
     async getPayUrl(params, ip) {
         let { orderid, channel, action, os } = params;
-        if (orderid && os && os.length > 0 && os.length <= 32 && (os == "ios" || os == "android" || os == "windows" || os == "macOS")) {
-            try {
-                await this.entityManager.update(top_entity_1.TopOrder, { oid: orderid }, { os });
-            }
-            catch (e) {
-                console.error("收银台更新订单客户端系统类型出错", e);
-                common_1.Logger.error("收银台更新订单客户端系统类型出错");
-                common_1.Logger.error(e.toString());
-            }
-        }
         let orderInfo = await this.redisService.getRedis().get(`orderClient:${orderid}`);
         let code = 0;
         if (action == "checkorder") {

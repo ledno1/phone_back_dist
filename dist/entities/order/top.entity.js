@@ -39,8 +39,6 @@ let TopOrder = class TopOrder extends base_entity_1.BaseEntity {
     channel;
     parentChannel;
     lOid;
-    queryUrl;
-    APIKey;
     lRate;
     zh;
     SysUser;
@@ -133,14 +131,6 @@ __decorate([
     (0, typeorm_1.Column)({ type: "varchar", length: 256, comment: "订单创建时使用的链接的oid,或者API平台的oid" }),
     __metadata("design:type", String)
 ], TopOrder.prototype, "lOid", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ type: "varchar", length: 512, comment: "查单链接", nullable: true }),
-    __metadata("design:type", String)
-], TopOrder.prototype, "queryUrl", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ type: "varchar", length: 50, comment: "提取APIKey", nullable: true }),
-    __metadata("design:type", String)
-], TopOrder.prototype, "APIKey", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: "int", comment: "订单创建时该链接的支付通道实际费率" }),
     __metadata("design:type", Number)

@@ -509,7 +509,8 @@ let OrderTopService = class OrderTopService {
                     cIp: ip,
                     payer: params.fingerprint,
                     fingerprint: params.fingerprint,
-                    cInAt: new Date()
+                    cInAt: new Date(),
+                    os: params.os
                 })
                     .where("cIp IS NULL")
                     .andWhere("oid = :oid", { oid })
@@ -522,6 +523,7 @@ let OrderTopService = class OrderTopService {
                     cPayAt: new Date()
                 })
                     .where("oid = :oid", { oid })
+                    .andWhere("cPayAt IS NULL")
                     .execute();
             }
         }

@@ -23,8 +23,6 @@ export declare class TopOrder extends BaseEntity {
     channel: number;
     parentChannel: number;
     lOid: string;
-    queryUrl: string;
-    APIKey: string;
     lRate: number;
     zh: ZH;
     SysUser: SysUser;
