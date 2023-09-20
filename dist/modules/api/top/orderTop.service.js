@@ -501,7 +501,7 @@ let OrderTopService = class OrderTopService {
             let qb = await this.orderRepository.createQueryBuilder("order")
                 .leftJoinAndSelect("order.SysUser", "SysUser")
                 .leftJoinAndSelect("order.zh", "zh")
-                .select(["order.lOid", "order.amount", "order.oid", "order.mNotifyUrl", "order.mid", "order.mOid", "order.APIKey", "order.queryUrl", "order.pid",
+                .select(["order.lOid", "order.amount", "order.oid", "order.mNotifyUrl", "order.mid", "order.mOid", "order.pid",
                 "zh.zuid", "zh.accountNumber", "zh.openid", "zh.openkey",
                 "SysUser.uuid", "SysUser.username"
             ])
