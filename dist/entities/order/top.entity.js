@@ -28,6 +28,11 @@ let TopOrder = class TopOrder extends base_entity_1.BaseEntity {
     oid;
     mOid;
     mIp;
+    cIp;
+    payer;
+    fingerprint;
+    cPayAt;
+    cInAt;
     mNotifyUrl;
     callbackInfo;
     callback;
@@ -84,6 +89,26 @@ __decorate([
     (0, typeorm_1.Column)({ type: "varchar", length: 64, comment: "上游平台客户请求ip", nullable: true }),
     __metadata("design:type", String)
 ], TopOrder.prototype, "mIp", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: "varchar", length: 64, comment: "收银台客户请求ip", nullable: true }),
+    __metadata("design:type", String)
+], TopOrder.prototype, "cIp", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: "varchar", length: 64, comment: "客户标识", nullable: true }),
+    __metadata("design:type", String)
+], TopOrder.prototype, "payer", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: "varchar", length: 64, comment: "客户浏览器指纹", nullable: true }),
+    __metadata("design:type", String)
+], TopOrder.prototype, "fingerprint", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ name: 'c_pay_at', nullable: true }),
+    __metadata("design:type", Date)
+], TopOrder.prototype, "cPayAt", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ name: 'c_in_at', nullable: true }),
+    __metadata("design:type", Date)
+], TopOrder.prototype, "cInAt", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: "varchar", length: 512, comment: "上游平台回调地址" }),
     __metadata("design:type", String)

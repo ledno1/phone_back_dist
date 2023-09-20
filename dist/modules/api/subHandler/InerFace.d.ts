@@ -44,6 +44,10 @@ export declare class OrderRedis {
     phoneBalance?: string;
     firstCheckTime?: number;
 }
+export declare class CheckOrderResult {
+    have: boolean;
+    lOid: string;
+}
 export interface ServiceHandler {
     codeService: CodeService;
     nameKey: string | string[];
@@ -63,7 +67,7 @@ export interface ServiceHandler {
     rollback(params: SysPay, resource: PayAccount | ProxyCharging | null, user: HaveAmount | null, oid: string): Promise<void>;
     outTime(params: OrderRedis): Promise<void>;
     checkOrder(params: SysPay): Promise<void>;
-    checkOrderApi(params: OrderRedis): Promise<boolean>;
+    checkOrderApi(params: OrderRedis): Promise<boolean | CheckOrderResult>;
     checkOrderBySql(params: OrderRedis): Promise<boolean>;
     test(): any;
     autoCallback(params: ALiPayNotify, p: PayAccount): Promise<any>;

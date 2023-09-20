@@ -114,5 +114,6 @@ export declare class OrderTopService implements OnModuleInit {
     callback(params: any, user: IAdminUser): Promise<NotifyResult>;
     setOrderCallbackStatus(oid: string, callbackInfo: any): Promise<void>;
     getOrderInfoByMOid(mOid: string): Promise<false | TopOrder>;
+    upDateClientData(oid: any, params: any, ip: any, action?: string): Promise<void>;
     payCheck(mOid: any): Promise<TopOrder>;
 }

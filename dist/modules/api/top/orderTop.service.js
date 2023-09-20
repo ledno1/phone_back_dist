@@ -174,9 +174,9 @@ let OrderTopService = class OrderTopService {
             "zh.accountNumber AS accountNumber"
         ])
             .where(mid ? "order.mid = :mid" : "1=1", { mid })
-            .andWhere(mOid ? "order.mOid = :mOid" : "1=1", { mOid })
-            .andWhere(oid ? "order.oid = :oid" : "1=1", { oid })
-            .andWhere(lOid ? "order.lOid = :lOid" : "1=1", { lOid })
+            .andWhere(mOid ? "order.mOid LIKE :mOid" : "1=1", { mOid: `%${mOid}%` })
+            .andWhere(oid ? "order.oid LIKE :oid" : "1=1", { oid: `%${oid}%` })
+            .andWhere(lOid ? "order.lOid LIKE :lOid" : "1=1", { lOid: `%${lOid}%` })
             .andWhere(accountNumber ? "zh.accountNumber = :accountNumber" : "1=1", { accountNumber })
             .andWhere(amount ? "order.amount = :amount" : "1=1", { amount: !(0, lodash_1.isNaN)(amount) ? amount : null })
             .andWhere(createdAt ? "order.created_at BETWEEN :createdStart AND :createdEnd" : "1=1", {
@@ -222,8 +222,8 @@ let OrderTopService = class OrderTopService {
             "zh.accountNumber AS accountNumber"
         ])
             .where("user.uuid = :uuid", { uuid: user.uuid })
-            .andWhere(oid ? "order.oid = :oid" : "1=1", { oid })
-            .andWhere(lOid ? "order.lOid = :lOid" : "1=1", { lOid })
+            .andWhere(oid ? "order.oid LIKE :oid" : "1=1", { oid: `%${oid}%` })
+            .andWhere(lOid ? "order.lOid LIKE :lOid" : "1=1", { lOid: `%${lOid}%` })
             .andWhere(accountNumber ? "zh.accountNumber = :accountNumber" : "1=1", { accountNumber })
             .andWhere(amount ? "order.amount = :amount" : "1=1", { amount: !(0, lodash_1.isNaN)(amount) ? amount : null })
             .andWhere(createdAt ? "order.created_at BETWEEN :createdStart AND :createdEnd" : "1=1", {
@@ -264,9 +264,9 @@ let OrderTopService = class OrderTopService {
             "channel.name AS channelName"
         ])
             .where("order.mid = :mid", { mid: user.id })
-            .andWhere(mOid ? "order.mOid = :mOid" : "1=1", { mOid })
-            .andWhere(oid ? "order.oid = :oid" : "1=1", { oid })
-            .andWhere(lOid ? "order.lOid = :lOid" : "1=1", { lOid })
+            .andWhere(mOid ? "order.mOid LIKE :mOid" : "1=1", { mOid: `%${mOid}%` })
+            .andWhere(oid ? "order.oid LIKE :oid" : "1=1", { oid: `%${oid}%` })
+            .andWhere(lOid ? "order.lOid LIKE :lOid" : "1=1", { lOid: `%${lOid}%` })
             .andWhere(amount ? "order.amount = :amount" : "1=1", { amount: !(0, lodash_1.isNaN)(amount) ? amount : null })
             .andWhere(createdAt ? "order.created_at BETWEEN :createdStart AND :createdEnd" : "1=1", {
             createdStart: createdAt ? createdAt[0] : this.util.dayjsFormat(new Date()),
@@ -498,6 +498,34 @@ let OrderTopService = class OrderTopService {
         catch (e) {
             common_1.Logger.error("查询订单信息失败");
             return false;
+        }
+    }
+    async upDateClientData(oid, params, ip, action = 'default') {
+        try {
+            if (action == 'default') {
+                await this.orderRepository.createQueryBuilder('order')
+                    .update()
+                    .set({
+                    cIp: ip,
+                    payer: params.fingerprint,
+                    fingerprint: params.fingerprint,
+                    cInAt: new Date()
+                })
+                    .where("cIp IS NULL")
+                    .andWhere("oid = :oid", { oid })
+                    .execute();
+            }
+            else if (action == 'payat') {
+                await this.orderRepository.createQueryBuilder('order')
+                    .update()
+                    .set({
+                    cPayAt: new Date()
+                })
+                    .where("oid = :oid", { oid })
+                    .execute();
+            }
+        }
+        catch (e) {
         }
     }
     async payCheck(mOid) {

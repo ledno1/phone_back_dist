@@ -353,11 +353,19 @@ let ApiService = class ApiService {
             }
             return Object.assign({ code: 0 }, { outTime: orderInfo.outTime });
         }
+        else if (action == 'payat') {
+            if (!orderInfo)
+                return { code: 3, msg: "订单超时,请重新拉取" };
+            orderInfo = JSON.parse(orderInfo);
+            let o = orderInfo;
+            this.topOrderService.upDateClientData(o.oid, params, ip, action);
+        }
         else {
             if (!orderInfo)
                 return { code: 3, msg: "订单超时,请重新拉取" };
             orderInfo = JSON.parse(orderInfo);
             let o = orderInfo;
+            this.topOrderService.upDateClientData(o.oid, params, ip);
             let r = await this.paramConfigService.findValueByKey("devLog");
             if (r == "1") {
                 console.log(`${ip}==${this.util.dayjs().format("YYYY-MM-DD HH:mm:ss")}==${params.os}==${o.mOid}到收银台,金额${o.amount / 100}元,通道${o.channel}`);

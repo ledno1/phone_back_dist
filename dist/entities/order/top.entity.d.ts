@@ -12,6 +12,11 @@ export declare class TopOrder extends BaseEntity {
     oid: string;
     mOid: string;
     mIp: string;
+    cIp: string;
+    payer: string;
+    fingerprint: string;
+    cPayAt: Date;
+    cInAt: Date;
     mNotifyUrl: string;
     callbackInfo: string;
     callback: number;

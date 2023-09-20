@@ -546,7 +546,7 @@ let ALiPayHandlerService = class ALiPayHandlerService {
                 let { order, resource, user, req, createAt, realAmount } = params;
                 let checkMode = await this.paramConfigService.findValueByKey(InerFace_1.PayMode.aLiPayCheckMode);
                 let r = checkMode == "1" ? false : await this.checkOrderApi(params);
-                if (r) {
+                if (r.have) {
                     await this.entityManager.update(top_entity_1.TopOrder, { oid: order.oid }, {
                         status: 1
                     });
@@ -619,11 +619,12 @@ let ALiPayHandlerService = class ALiPayHandlerService {
                         await this.redisService.getRedis().srem(this.redisOrderName, orders[i]);
                     }
                     else {
-                        let ishave = await this.checkOrderApi(orderRedis);
-                        if (ishave) {
+                        let checkResult = await this.checkOrderApi(orderRedis);
+                        if (checkResult.have) {
                             let { order, resource, user, req, createAt, realAmount } = orderRedis;
                             await this.entityManager.update(top_entity_1.TopOrder, { oid: orderRedis.order.oid }, {
-                                status: 1
+                                status: 1,
+                                lOid: checkResult.lOid
                             });
                             let err;
                             let body = {
@@ -662,6 +663,7 @@ let ALiPayHandlerService = class ALiPayHandlerService {
         return new Promise(async (resolve, reject) => {
             let { req, order, resource, user, realAmount } = params;
             resource = resource;
+            let lOid = '';
             try {
                 let resultList = await this.redisService.getRedis().get(`order:result:${resource.uid}`);
                 let aLiPayQrCodeVersion = await this.paramConfigService.findValueByKey('aLiPayQrCodeVersion');
@@ -685,6 +687,7 @@ let ALiPayHandlerService = class ALiPayHandlerService {
                                 for (let i = 0; i < resultList.length; i++) {
                                     if (order.mOid == resultList[i].transMemo && resultList[i].tradeAmount == real.toFixed(2)) {
                                         ishave = true;
+                                        lOid = resultList[i].tradeNo;
                                         break;
                                     }
                                 }
@@ -699,7 +702,10 @@ let ALiPayHandlerService = class ALiPayHandlerService {
                             }
                         }
                     }
-                    resolve(ishave);
+                    resolve({
+                        have: ishave,
+                        lOid
+                    });
                     return;
                 }
                 let is = await this.redisService.getRedis().get("cache:status:" + resource.uid);
@@ -709,7 +715,10 @@ let ALiPayHandlerService = class ALiPayHandlerService {
                     let list = await this.requestApi(resource.uid, cookies, ctoken, resource.name, user.id);
                     let ishaves = false;
                     if (!list) {
-                        resolve(false);
+                        resolve({
+                            have: false,
+                            lOid
+                        });
                         return;
                     }
                     await this.redisService.getRedis().set(`order:result:${resource.uid}`, JSON.stringify(list), "EX", 20);
@@ -729,6 +738,7 @@ let ALiPayHandlerService = class ALiPayHandlerService {
                                 let real = realAmount / 100;
                                 for (let i = 0; i < list.length; i++) {
                                     if (order.mOid == list[i].transMemo && list[i].tradeAmount == real.toFixed(2)) {
+                                        lOid = list[i].tradeNo;
                                         ishaves = true;
                                         break;
                                     }
@@ -744,19 +754,28 @@ let ALiPayHandlerService = class ALiPayHandlerService {
                             }
                         }
                     }
-                    resolve(ishaves);
+                    resolve({
+                        have: ishaves,
+                        lOid
+                    });
                     return;
                 }
                 else {
                     console.error(`aLiPay订单查单失败,${resource.id}-${resource.name}cookies失效`);
                     common_1.Logger.error(`aLiPay订单查单失败,${resource.id}-${resource.name}cookies失效`);
-                    resolve(false);
+                    resolve({
+                        have: false,
+                        lOid
+                    });
                 }
             }
             catch (e) {
                 console.error("订单查单失败", e);
                 common_1.Logger.error("订单查单失败", e, "checkOrderApi");
-                resolve(false);
+                resolve({
+                    have: false,
+                    lOid
+                });
             }
         });
     }
@@ -837,7 +856,12 @@ let ALiPayHandlerService = class ALiPayHandlerService {
             }
             else if (order && order.status == 2) {
                 let res = await this.checkOrderApi(orderRedis);
-                resolve(res);
+                if (res.have) {
+                    resolve(true);
+                }
+                else {
+                    resolve(false);
+                }
             }
         });
     }

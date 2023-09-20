@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.OrderRedis = exports.PayAccountEx = exports.ProxyChargingAndMerchant = exports.PayAccountAndMerchant = exports.HaveAmount = exports.PayMode = exports.ProcessModel = exports.ChannelType = void 0;
+exports.CheckOrderResult = exports.OrderRedis = exports.PayAccountEx = exports.ProxyChargingAndMerchant = exports.PayAccountAndMerchant = exports.HaveAmount = exports.PayMode = exports.ProcessModel = exports.ChannelType = void 0;
 const payaccount_entity_1 = require("../../../entities/resource/payaccount.entity");
 var ChannelType;
 (function (ChannelType) {
@@ -50,4 +50,9 @@ class OrderRedis {
     firstCheckTime;
 }
 exports.OrderRedis = OrderRedis;
+class CheckOrderResult {
+    have;
+    lOid;
+}
+exports.CheckOrderResult = CheckOrderResult;
 //# sourceMappingURL=InerFace.js.map

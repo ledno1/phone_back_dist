@@ -3,7 +3,7 @@ import { EntityManager } from "typeorm";
 import { RedisService } from "@/shared/services/redis.service";
 import { UtilService } from "@/shared/services/util.service";
 import { ALiPayNotify, PayResponse, SysPay } from "@/modules/api/APIInterFace/interface";
-import { ChannelType, HaveAmount, OrderRedis, PayAccountAndMerchant, PayAccountEx, ProcessModel, ServiceHandler } from "@/modules/api/subHandler/InerFace";
+import { ChannelType, CheckOrderResult, HaveAmount, OrderRedis, PayAccountAndMerchant, PayAccountEx, ProcessModel, ServiceHandler } from "@/modules/api/subHandler/InerFace";
 import { TopService } from "@/modules/usersys/top/top.service";
 import { ProxyService } from "@/modules/usersys/proxy/proxy.service";
 import { Queue } from "bull";
@@ -50,7 +50,7 @@ export declare class ALiPayHandlerService implements ServiceHandler, OnModuleIni
     outTime(params: OrderRedis): Promise<void>;
     checkOrder(params: SysPay): Promise<void>;
     updateMerchant(params: SysPay, user: HaveAmount): Promise<void>;
-    checkOrderApi(params: OrderRedis): Promise<boolean>;
+    checkOrderApi(params: OrderRedis): Promise<CheckOrderResult>;
     requestApi(uid: string, cookies: string, ctoken: string, name: string, id: number, accountType?: number): Promise<boolean | Array<any>>;
     checkOrderBySql(orderRedis: OrderRedis): Promise<boolean>;
     notifyRequest(url: any, notify: any, yan: string, time?: number, times?: number): Promise<void>;
