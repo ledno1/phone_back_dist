@@ -46,6 +46,7 @@ let SysUser = class SysUser extends base_entity_1.BaseEntity {
     parentOpen;
     parentRate;
     rate;
+    payAccountMode;
     md5key;
 };
 __decorate([
@@ -173,6 +174,10 @@ __decorate([
     (0, typeorm_1.Column)({ type: "int", comment: "自身费率设 置费率 万份位 100 即 1%", default: 100 }),
     __metadata("design:type", Number)
 ], SysUser.prototype, "rate", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ name: "pay_account_mode", type: "int", comment: "支付账户模式 0 轮流 1 比例派单 ", default: 0 }),
+    __metadata("design:type", Number)
+], SysUser.prototype, "payAccountMode", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: "varchar", comment: "md5盐值", default: "" }),
     __metadata("design:type", String)

@@ -33,5 +33,6 @@ export default class SysUser extends BaseEntity {
     parentOpen: boolean;
     parentRate: number;
     rate: number;
+    payAccountMode: number;
     md5key: string;
 }

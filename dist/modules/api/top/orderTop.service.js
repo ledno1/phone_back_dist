@@ -154,6 +154,11 @@ let OrderTopService = class OrderTopService {
             let androidSuccessCount = await entityManager.query(`SELECT COUNT(*) as count FROM top_order WHERE created_at BETWEEN '${params.createdAt[0]}' AND '${params.createdAt[1]}' AND os IS NOT NULL AND status <> -1`);
             return (androidSuccessCount[0].count / androidTotalCount[0].count * 100).toFixed(2);
         });
+        let payClientRate = await this.entityManager.transaction(async (entityManager) => {
+            let androidTotalCount = await entityManager.query(`SELECT COUNT(*) as count FROM top_order WHERE created_at BETWEEN '${params.createdAt[0]}' AND '${params.createdAt[1]}' `);
+            let androidSuccessCount = await entityManager.query(`SELECT COUNT(*) as count FROM top_order WHERE created_at BETWEEN '${params.createdAt[0]}' AND '${params.createdAt[1]}' AND os IS NOT NULL `);
+            return (androidSuccessCount[0].count / androidTotalCount[0].count * 100).toFixed(2);
+        });
         return {
             "查询时间": this.util.dayjs().format("YYYY-MM-DD HH:mm:ss"),
             "日期": !date && !all ? "今天" : (all ? "全部" : date),
@@ -162,6 +167,7 @@ let OrderTopService = class OrderTopService {
             "安卓成功率": androidRate == "NaN" ? "0%" : androidRate + "%",
             "苹果成功率": iosRate == "NaN" ? "0%" : iosRate + "%",
             "收银台成功率": clientRate + "%",
+            "到达收银台率": payClientRate + "%",
             "总笔数": r.totalCount,
             "总额": (r.totalAmount / 100 + r.totalFailAmount / 100).toFixed(2),
             "合计总笔数": Number(r.totalCount) + Number(t.tempTotalCount),
