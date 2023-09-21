@@ -22,10 +22,9 @@ export declare class OrderTopController {
         成功笔数: any;
         安卓成功率: string;
         苹果成功率: string;
+        收银台成功率: string;
         总笔数: any;
         总额: string;
-        无法录入笔数: any;
-        无法录入总额: string;
         合计总笔数: number;
         合计总额: string;
         失败总额: string;

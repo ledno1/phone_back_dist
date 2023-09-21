@@ -149,17 +149,21 @@ let OrderTopService = class OrderTopService {
             let androidSuccessCount = await entityManager.query(`SELECT COUNT(*) as count FROM top_order WHERE created_at BETWEEN '${params.createdAt[0]}' AND '${params.createdAt[1]}' AND os='android' AND status <> -1`);
             return (androidSuccessCount[0].count / androidTotalCount[0].count * 100).toFixed(2);
         });
+        let clientRate = await this.entityManager.transaction(async (entityManager) => {
+            let androidTotalCount = await entityManager.query(`SELECT COUNT(*) as count FROM top_order WHERE created_at BETWEEN '${params.createdAt[0]}' AND '${params.createdAt[1]}' AND os IS NOT NULL`);
+            let androidSuccessCount = await entityManager.query(`SELECT COUNT(*) as count FROM top_order WHERE created_at BETWEEN '${params.createdAt[0]}' AND '${params.createdAt[1]}' AND os IS NOT NULL AND status <> -1`);
+            return (androidSuccessCount[0].count / androidTotalCount[0].count * 100).toFixed(2);
+        });
         return {
             "查询时间": this.util.dayjs().format("YYYY-MM-DD HH:mm:ss"),
             "日期": !date && !all ? "今天" : (all ? "全部" : date),
             "成功总额": (r.totalAmount / 100).toFixed(2),
             "成功笔数": r.totalSuccessCount,
-            "安卓成功率": androidRate,
-            "苹果成功率": iosRate,
+            "安卓成功率": androidRate == "NaN" ? "0%" : androidRate + "%",
+            "苹果成功率": iosRate == "NaN" ? "0%" : iosRate + "%",
+            "收银台成功率": clientRate + "%",
             "总笔数": r.totalCount,
             "总额": (r.totalAmount / 100 + r.totalFailAmount / 100).toFixed(2),
-            "无法录入笔数": t.tempTotalCount,
-            "无法录入总额": (t.tempTotalAmount / 100).toFixed(2),
             "合计总笔数": Number(r.totalCount) + Number(t.tempTotalCount),
             "合计总额": ((Number(r.totalAmount) + Number(t.tempTotalAmount)) / 100).toFixed(2),
             "失败总额": (r.totalFailAmount / 100).toFixed(2),
@@ -379,7 +383,7 @@ let OrderTopService = class OrderTopService {
     async statistics(params, user = undefined) {
         let { page, limit, oid, lOid, accountNumber, amount, createdAt, channelName, callback, status, mOid } = params;
         amount ? amount = Number(amount) * 100 : 0;
-        let totalAmount = null, totalSuccessCount = null, totalCount = null;
+        let totalAmount = null, totalSuccessCount = null, totalCount = null, totalClientAmount = null, totalClientSuccessCount = null, totalClientCount = null;
         let qbSuccessTotal = await this.orderRepository.createQueryBuilder("order")
             .leftJoin("order.zh", "zh")
             .leftJoin("channel", "channel", "channel.id = order.channel")
@@ -429,7 +433,7 @@ let OrderTopService = class OrderTopService {
             totalFailAmount: qbFailTotal.totalAmount ? qbFailTotal.totalAmount : 0,
             totalAmount: totalAmount ? totalAmount : 0,
             totalSuccessCount: totalSuccessCount ? totalSuccessCount : 0,
-            totalCount: totalCount ? totalCount : 0
+            totalCount: totalCount ? totalCount : 0,
         };
     }
     async callback(params, user) {
