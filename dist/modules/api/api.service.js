@@ -172,7 +172,7 @@ let ApiService = class ApiService {
         }
         else {
             let md5Key = await this.topUserService.getMd5Key(Number(merId));
-            let sign = process_1.default.env.NODE_ENV == "development" ? true : this.util.checkSign(body, md5Key);
+            let sign = this.util.checkSign(body, md5Key);
             if (sign) {
                 let p = body;
                 p.md5Key = md5Key;
@@ -192,17 +192,7 @@ let ApiService = class ApiService {
         throw new api_exception_1.ApiException(60003);
     }
     async payByALI(body, user = null) {
-        let subChannelList = await this.channelService.getSubChannel(this.ALIAYCHANNEL);
-        if (!subChannelList || subChannelList.length == 0)
-            throw new api_exception_1.ApiException(60011);
         let { attch, channel, subChannel } = body;
-        if (attch && attch != "") {
-            if (!subChannelList.find(e => e.id == subChannel && e.isUse))
-                throw new api_exception_1.ApiException(60002);
-        }
-        else {
-            let subChannelGetStrategy = await this.channelService.getChannelInfo(channel);
-        }
         let handlerService = this.handlerMap.get(subChannel);
         if (!handlerService)
             throw new api_exception_1.ApiException(60103);

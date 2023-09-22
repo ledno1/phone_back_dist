@@ -204,7 +204,6 @@ let ChannelService = class ChannelService {
                     .where("channel.parentId = :id", { id: rootChannelId })
                     .andWhere("channel.isUse = 1")
                     .getMany();
-                await this.redisService.getRedis().set(`channel:subChannelList:${rootChannelId}`, JSON.stringify(qb), "EX", 60);
                 return qb;
             }
         }
