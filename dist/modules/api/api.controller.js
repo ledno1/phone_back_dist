@@ -52,7 +52,7 @@ let ApiController = class ApiController {
             if (!channelList) {
                 channelList = await this.channelService.channelRoot();
                 channelList = channelList.map((item) => item.id);
-                await this.redis.getRedis().set("channel:list", JSON.stringify(channelList), "EX", 60 * 1);
+                await this.redis.getRedis().set("channel:list", JSON.stringify(channelList), "EX", 36000 * 1);
             }
             else {
                 channelList = JSON.parse(channelList);
@@ -63,7 +63,7 @@ let ApiController = class ApiController {
             let subChannelList = await this.redis.getRedis().get(`channel:subChannelList:${channel}`);
             if (!subChannelList) {
                 subChannelList = await this.channelService.getSubChannel(Number(channel));
-                await this.redis.getRedis().set(`channel:subChannelList:${channel}`, JSON.stringify(subChannelList), "EX", 60 * 1);
+                await this.redis.getRedis().set(`channel:subChannelList:${channel}`, JSON.stringify(subChannelList), "EX", 36000 * 1);
             }
             else {
                 subChannelList = JSON.parse(subChannelList);
