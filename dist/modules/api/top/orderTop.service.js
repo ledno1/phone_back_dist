@@ -124,11 +124,13 @@ let OrderTopService = class OrderTopService {
         }
     }
     async statistic(params) {
-        let { date, mid, all } = params;
+        let { date, mid, all, createdAt } = params;
         params.limit = 1;
         params.page = 1;
-        if (!date && !all) {
+        if (!date && !all && !createdAt) {
             params.createdAt = [this.util.dayjsFormat(this.util.dayjs().startOf("day").valueOf()), this.util.dayjsFormat(this.util.dayjs().endOf("day").valueOf())];
+        }
+        else if (createdAt) {
         }
         else if (!all) {
             let reg = /^\d{4}-\d{2}-\d{2}$/;
@@ -137,6 +139,7 @@ let OrderTopService = class OrderTopService {
             }
             params.createdAt = [this.util.dayjsFormat(this.util.dayjs(date).startOf("day").valueOf()), this.util.dayjsFormat(this.util.dayjs(date).endOf("day").valueOf())];
         }
+        console.log(params.createdAt);
         let r = await this.statistics(params);
         let t = await this.statisticsTemp(params);
         let iosRate = await this.entityManager.transaction(async (entityManager) => {

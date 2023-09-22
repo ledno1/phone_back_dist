@@ -194,8 +194,10 @@ let ApiService = class ApiService {
     async payByALI(body, user = null) {
         let { attch, channel, subChannel } = body;
         let handlerService = this.handlerMap.get(subChannel);
-        if (!handlerService)
+        if (!handlerService) {
+            console.error(`创建订单失败,请联系管理员`);
             throw new api_exception_1.ApiException(60103);
+        }
         try {
             let res = await handlerService.result(body, user);
             return res;
