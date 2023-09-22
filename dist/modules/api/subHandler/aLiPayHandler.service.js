@@ -514,7 +514,7 @@ let ALiPayHandlerService = class ALiPayHandlerService {
                     let url = encodeURIComponent(`https://d.alipay.com/i/index.htm?pageSkin=skin-h5cashier&scheme=${schemeURL}`);
                     urlFinal = `alipays://platformapi/startapp?appId=20000691&url=${url}`;
                     await this.redisService.getRedis().set(`orderClient:${oid}`, JSON.stringify(Object.assign(order, {
-                        url: urlFinal,
+                        url: aLiPayQrCodeVersion == '1' ? urlFinal : `alipays://platformapi/startapp?appId=68687093&url=${encodeURIComponent(`${this.host}/alipayu2.html?orderid=${oid}`)}`,
                         qrcode: aLiPayQrCodeVersion == '1' ? qrcodeURL : qrURL,
                         outTime: new Date().getTime() + (Number(time) + this.defaultSystemOutTime) * 1000
                     })), "EX", Number(time) + this.defaultSystemOutTime);
