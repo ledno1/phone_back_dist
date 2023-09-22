@@ -44,6 +44,7 @@ export declare class ALiPayHandlerService implements ServiceHandler, OnModuleIni
     findMerchant(params: SysPay, payUserQueue: HaveAmount[], oid: string): Promise<PayAccountAndMerchant | null>;
     findProxyChargingAndUpdate(params: SysPay, user: HaveAmount, oid: string): Promise<any>;
     findPayAccountAndUpdate(params: SysPay, user: HaveAmount, oid: string): Promise<PayAccount | PayAccountEx>;
+    getCache(uuid: any, checkMode: any, nonceStr: any, amount: any, id: any): Promise<any>;
     getApiUrl(params: any): Promise<void>;
     createOrder(params: SysPay, account: PayAccountAndMerchant, oid: string): Promise<void>;
     rollback(params: SysPay, resource: PayAccount | null, user: HaveAmount | null, oid: string): Promise<void>;

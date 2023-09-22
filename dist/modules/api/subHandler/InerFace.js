@@ -22,6 +22,7 @@ class HaveAmount {
     uuid;
     count;
     rate;
+    payAccountMode;
 }
 exports.HaveAmount = HaveAmount;
 class PayAccountAndMerchant {

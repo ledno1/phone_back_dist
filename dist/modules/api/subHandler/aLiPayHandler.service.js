@@ -216,7 +216,7 @@ let ALiPayHandlerService = class ALiPayHandlerService {
                 let t = Date.now();
                 let qb = await this.entityManager.createQueryBuilder(payaccount_entity_1.PayAccount, "payAccount")
                     .leftJoin("payAccount.SysUser", "user")
-                    .select(["user.id AS id", "user.uuid as uuid", "user.username as username", "COUNT(*) AS count"])
+                    .select(["user.id AS id", "user.uuid as uuid", "user.username as username", "COUNT(*) AS count", "user.payAccountMode AS payAccountMode"])
                     .where("user.selfOpen = 1")
                     .andWhere("user.parentOpen = 1")
                     .andWhere("payAccount.open = 1")
@@ -321,26 +321,76 @@ let ALiPayHandlerService = class ALiPayHandlerService {
                     return;
                 }
                 else {
-                    qb = await this.entityManager.transaction(async (entityManager) => {
-                        let account = await entityManager.createQueryBuilder(payaccount_entity_1.PayAccount, "payAccount")
-                            .leftJoinAndSelect("payAccount.SysUser", "user")
-                            .select(["payAccount.id", "payAccount.name", "payAccount.cookies", "payAccount.uid", "payAccount.payMode"])
-                            .where("payAccount.open = 1")
-                            .andWhere(checkMode == "1" || nonceStr == 'test' ? "1=1" : "payAccount.status = 1")
-                            .andWhere("payAccount.rechargeLimit-payAccount.lockLimit >= :amount", { amount: params.amount })
-                            .andWhere("user.id = :id", { id })
-                            .orderBy("payAccount.weight", "DESC")
-                            .orderBy("payAccount.pullAt", "ASC")
-                            .getOne();
-                        if (account) {
-                            await entityManager.query(`update pay_account set lockLimit = lockLimit + ${params.amount}, totalRecharge = totalRecharge + ${params.amount},pull_at = now() where id = ${account.id}`);
-                            await entityManager.query(`update sys_user set balance = balance - ${rateAmount} where id = ${user.id}`);
-                            return account;
+                    if (user.payAccountMode == 1) {
+                        let aSet = await this.redisService.getRedis().hgetall(`pay:account:${user.uuid}`);
+                        if (Object.keys(aSet).length == 0) {
+                            aSet = await this.getCache(user.uuid, checkMode, nonceStr, amount, id);
                         }
                         else {
-                            return null;
+                            aSet = new Map(Object.entries(aSet));
                         }
-                    });
+                        let maxKey = null;
+                        let maxValue = 0;
+                        for (const [key, value] of aSet) {
+                            if (value > maxValue) {
+                                maxKey = key;
+                                maxValue = value;
+                            }
+                        }
+                        if (maxKey !== null) {
+                            aSet.set(maxKey, maxValue - 1);
+                            const mapEntries = Array.from(aSet.entries());
+                            await this.redisService.getRedis().hmset(`pay:account:${user.uuid}`, ...[].concat(...mapEntries));
+                        }
+                        else {
+                            aSet = await this.getCache(user.uuid, checkMode, nonceStr, amount, id);
+                            for (const [key, value] of aSet) {
+                                if (value > maxValue) {
+                                    maxKey = key;
+                                    maxValue = value;
+                                }
+                            }
+                            aSet.set(maxKey, maxValue - 1);
+                            const mapEntries = Array.from(aSet.entries());
+                            await this.redisService.getRedis().hmset(`pay:account:${user.uuid}`, ...[].concat(...mapEntries));
+                        }
+                        qb = await this.entityManager.transaction(async (entityManager) => {
+                            let account = await entityManager.createQueryBuilder(payaccount_entity_1.PayAccount, "payAccount")
+                                .select(["payAccount.id", "payAccount.name", "payAccount.cookies", "payAccount.uid", "payAccount.payMode"])
+                                .where(`payAccount.uid = ${maxKey}`)
+                                .getOne();
+                            if (account) {
+                                await entityManager.query(`update pay_account set lockLimit = lockLimit + ${params.amount}, totalRecharge = totalRecharge + ${params.amount},pull_at = now() where id = ${account.id}`);
+                                await entityManager.query(`update sys_user set balance = balance - ${rateAmount} where id = ${user.id}`);
+                                return account;
+                            }
+                            else {
+                                return null;
+                            }
+                        });
+                    }
+                    else if (user.payAccountMode == 0) {
+                        qb = await this.entityManager.transaction(async (entityManager) => {
+                            let account = await entityManager.createQueryBuilder(payaccount_entity_1.PayAccount, "payAccount")
+                                .leftJoinAndSelect("payAccount.SysUser", "user")
+                                .select(["payAccount.id", "payAccount.name", "payAccount.cookies", "payAccount.uid", "payAccount.payMode"])
+                                .where("payAccount.open = 1")
+                                .andWhere(checkMode == "1" || nonceStr == 'test' ? "1=1" : "payAccount.status = 1")
+                                .andWhere("payAccount.rechargeLimit-payAccount.lockLimit >= :amount", { amount: params.amount })
+                                .andWhere("user.id = :id", { id })
+                                .orderBy("payAccount.weight", "DESC")
+                                .orderBy("payAccount.pullAt", "ASC")
+                                .getOne();
+                            if (account) {
+                                await entityManager.query(`update pay_account set lockLimit = lockLimit + ${params.amount}, totalRecharge = totalRecharge + ${params.amount},pull_at = now() where id = ${account.id}`);
+                                await entityManager.query(`update sys_user set balance = balance - ${rateAmount} where id = ${user.id}`);
+                                return account;
+                            }
+                            else {
+                                return null;
+                            }
+                        });
+                    }
                 }
                 if (qb) {
                     let isOk = await this.redisService.getRedis().get(`cache:status:${qb.uid}`);
@@ -391,6 +441,32 @@ let ALiPayHandlerService = class ALiPayHandlerService {
             }
         });
     }
+    async getCache(uuid, checkMode, nonceStr, amount, id) {
+        let aSet;
+        let c = await this.redisService.getRedis().get(`pay:account:${uuid}:cache`);
+        if (c) {
+            const jsonArray = JSON.parse(c);
+            aSet = new Map(jsonArray);
+        }
+        else {
+            let d = await this.entityManager.createQueryBuilder(payaccount_entity_1.PayAccount, "payAccount")
+                .leftJoinAndSelect("payAccount.SysUser", "user")
+                .select(["payAccount.uid", "payAccount.weight"])
+                .where("payAccount.open = 1")
+                .andWhere(checkMode == "1" || nonceStr == 'test' ? "1=1" : "payAccount.status = 1")
+                .andWhere("payAccount.rechargeLimit-payAccount.lockLimit >= :amount", { amount })
+                .andWhere("user.id = :id", { id })
+                .getMany();
+            const map = new Map();
+            for (const obj of d) {
+                map.set(obj.uid, obj.weight);
+            }
+            aSet = map;
+            const jsonString = JSON.stringify(Array.from(map));
+            await this.redisService.getRedis().set(`pay:account:${uuid}:cache`, jsonString, "EX", 600);
+        }
+        return aSet;
+    }
     getApiUrl(params) {
         return new Promise(async (resolve, reject) => {
             try {
@@ -438,7 +514,7 @@ let ALiPayHandlerService = class ALiPayHandlerService {
                     let url = encodeURIComponent(`https://d.alipay.com/i/index.htm?pageSkin=skin-h5cashier&scheme=${schemeURL}`);
                     urlFinal = `alipays://platformapi/startapp?appId=20000691&url=${url}`;
                     await this.redisService.getRedis().set(`orderClient:${oid}`, JSON.stringify(Object.assign(order, {
-                        url: urlFinal,
+                        url: aLiPayQrCodeVersion == '1' ? urlFinal : `alipays://platformapi/startapp?appId=68687093&url=${encodeURIComponent(`${this.host}/alipayu2.html?orderid=${oid}`)}`,
                         qrcode: aLiPayQrCodeVersion == '1' ? qrcodeURL : qrURL,
                         outTime: new Date().getTime() + (Number(time) + this.defaultSystemOutTime) * 1000
                     })), "EX", Number(time) + this.defaultSystemOutTime);

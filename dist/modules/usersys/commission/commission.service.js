@@ -226,16 +226,17 @@ let CommissionService = class CommissionService {
                 let userData = {};
                 let topOrder = await entity.query(`SELECT status,amount FROM top_order WHERE (status = 1 OR status = 4 OR status = 3) AND created_at >= DATE_FORMAT(DATE_SUB(NOW(),INTERVAL 48 HOUR),'%Y-%m-%d %H:%i:%s') AND sysUserId = ${user.id}`);
                 userData["topOrder"] = topOrder;
-                let userinfo = await entity.query(`SELECT balance,selfOpen FROM sys_user WHERE uuid = '${user.uuid}'`);
+                let userinfo = await entity.query(`SELECT balance,selfOpen,pay_account_mode FROM sys_user WHERE uuid = '${user.uuid}'`);
                 userData["balance"] = userinfo[0].balance;
                 userData["selfOpen"] = Boolean(userinfo[0].selfOpen);
+                userData["payAccountMode"] = Boolean(userinfo[0].pay_account_mode);
                 return userData;
             });
             return Object.assign({ googleCodeBind: isBind[0].googleSecret ? true : false }, qb);
         }
     }
     async edit(params, user) {
-        let { action, open, phoneType } = params;
+        let { action, open, phoneType, aLiPayModel } = params;
         let userInfo = await this.userRepository.findOne({ where: { uuid: user.uuid } });
         switch (action) {
             case "open":
@@ -251,11 +252,7 @@ let CommissionService = class CommissionService {
                 }
                 break;
             case "aLiPayModel":
-                if (user.roleLabel == "admin") {
-                    let { aLiPayModel } = params;
-                    let t = aLiPayModel ? "1" : "0";
-                    await this.paramConfigService.updateValueByKey("aLiPayModel", t);
-                }
+                await this.userRepository.update({ uuid: user.uuid }, { payAccountMode: aLiPayModel });
                 return 1;
                 break;
             case "googleOpen":

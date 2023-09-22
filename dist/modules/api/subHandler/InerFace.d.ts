@@ -21,6 +21,7 @@ export declare class HaveAmount {
     uuid: string;
     count?: number | string;
     rate?: number | string;
+    payAccountMode?: number;
 }
 export declare class PayAccountAndMerchant {
     payAccount: PayAccount | PayAccountEx;
