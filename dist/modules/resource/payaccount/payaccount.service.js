@@ -79,8 +79,8 @@ let PayAccountService = class PayAccountService {
             let t = new param_config_dto_1.CreateParamConfigDto();
             t.name = "上号自动补单时间范围";
             t.key = `callOrderTime`;
-            t.value = '15';
-            t.remark = "上号自动补单时间范围,单位：分钟,默认15分钟";
+            t.value = '20';
+            t.remark = "上号自动补单时间范围,单位：分钟,默认20分钟";
             await this.paramConfigService.add(t);
         }
     }
