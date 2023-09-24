@@ -139,7 +139,6 @@ let OrderTopService = class OrderTopService {
             }
             params.createdAt = [this.util.dayjsFormat(this.util.dayjs(date).startOf("day").valueOf()), this.util.dayjsFormat(this.util.dayjs(date).endOf("day").valueOf())];
         }
-        console.log(params.createdAt);
         let r = await this.statistics(params);
         let t = await this.statisticsTemp(params);
         let iosRate = await this.entityManager.transaction(async (entityManager) => {

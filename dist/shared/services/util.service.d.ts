@@ -1,5 +1,6 @@
 import { HttpService } from "@nestjs/axios";
 import { FastifyRequest } from "fastify";
+import { Notify, NotifyResult } from "@/modules/resource/link/dto/dto";
 export declare class UtilService {
     private readonly httpService;
     constructor(httpService: HttpService);
@@ -30,4 +31,5 @@ export declare class UtilService {
         qrcodeUrl: string;
     }>;
     isCodeCorrect: (code: any, secret: any) => boolean;
+    notifyRequest(url: any, notify: Notify, yan: string): Promise<NotifyResult>;
 }

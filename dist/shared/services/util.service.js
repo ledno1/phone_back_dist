@@ -45,6 +45,7 @@ const otplib_1 = require("otplib");
 const qrcode_1 = __importDefault(require("qrcode"));
 const socks_proxy_agent_1 = __importDefault(require("socks-proxy-agent"));
 const retry = require('retry');
+const REQ = require("request-promise-native");
 let UtilService = class UtilService {
     httpService;
     constructor(httpService) {
@@ -181,6 +182,37 @@ let UtilService = class UtilService {
     isCodeCorrect = (code, secret) => {
         return otplib_1.authenticator.check(code, secret);
     };
+    async notifyRequest(url, notify, yan) {
+        let sign = this.ascesign(notify, yan);
+        let form = JSON.stringify(notify);
+        form = JSON.parse(form);
+        form["sign"] = sign;
+        console.log(form);
+        try {
+            let r = await REQ.post({ url: url, form: form, timeout: 1000 * 20 });
+            console.log("上号补单执行回调结果");
+            console.log(r);
+            common_1.Logger.log("上号补单执行回调结果");
+            common_1.Logger.log(r);
+            if (r && r === "success") {
+                return {
+                    result: true,
+                    msg: ""
+                };
+            }
+            return {
+                result: false,
+                msg: r
+            };
+        }
+        catch (error) {
+            console.log("上号补单执行回调请求出错", error);
+            return {
+                result: false,
+                msg: error.toString()
+            };
+        }
+    }
 };
 UtilService = __decorate([
     (0, common_1.Injectable)(),

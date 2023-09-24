@@ -7,6 +7,7 @@ import SysUser from "@/entities/admin/sys-user.entity";
 import { ZhPage } from "@/modules/resource/zh/interface";
 import { PayAccount } from "@/entities/resource/payaccount.entity";
 import { SysParamConfigService } from "@/modules/admin/system/param-config/param-config.service";
+import { ProxyService } from "@/modules/usersys/proxy/proxy.service";
 declare enum CheckStatus {
     "success" = "success",
     "deny" = "deny",
@@ -17,6 +18,7 @@ export declare class PayAccountService implements OnModuleInit {
     private payAccountRepository;
     private userRepository;
     private entityManager;
+    private proxyUserService;
     private paramConfigService;
     private redisService;
     private util;
@@ -24,7 +26,7 @@ export declare class PayAccountService implements OnModuleInit {
     private task_page_map;
     private mainFrameUrl;
     private pupHost;
-    constructor(payAccountRepository: Repository<PayAccount>, userRepository: Repository<SysUser>, entityManager: EntityManager, paramConfigService: SysParamConfigService, redisService: RedisService, util: UtilService);
+    constructor(payAccountRepository: Repository<PayAccount>, userRepository: Repository<SysUser>, entityManager: EntityManager, proxyUserService: ProxyService, paramConfigService: SysParamConfigService, redisService: RedisService, util: UtilService);
     onModuleInit(): Promise<void>;
     page(params: ZhPage, user: IAdminUser): Promise<1 | {
         list: any;
@@ -60,6 +62,7 @@ export declare class PayAccountService implements OnModuleInit {
         uid?: undefined;
     }>;
     addAppid(params: any, user: IAdminUser): Promise<number>;
+    callOrder(p: PayAccount): Promise<void>;
     edit(params: any, user: IAdminUser): Promise<{
         code: number;
         msg: string;
@@ -69,6 +72,6 @@ export declare class PayAccountService implements OnModuleInit {
         address: string;
         msg?: undefined;
     }>;
-    requestApi(uid: string, cookies: string, ctoken: string): Promise<boolean | Array<any> | CheckStatus>;
+    requestApi(uid: string, cookies: string, ctoken: string, is?: boolean): Promise<boolean | Array<any> | CheckStatus>;
 }
 export {};

@@ -32,6 +32,10 @@ const dayjs_1 = __importDefault(require("dayjs"));
 const param_config_service_1 = require("../../admin/system/param-config/param-config.service");
 const InerFace_1 = require("../../api/subHandler/InerFace");
 const process_1 = __importDefault(require("process"));
+const lodash_1 = require("lodash");
+const param_config_dto_1 = require("../../admin/system/param-config/param-config.dto");
+const sys_balance_entity_1 = require("../../../entities/admin/sys-balance.entity");
+const proxy_service_1 = require("../../usersys/proxy/proxy.service");
 var CheckStatus;
 (function (CheckStatus) {
     CheckStatus["success"] = "success";
@@ -43,6 +47,7 @@ let PayAccountService = class PayAccountService {
     payAccountRepository;
     userRepository;
     entityManager;
+    proxyUserService;
     paramConfigService;
     redisService;
     util;
@@ -50,10 +55,11 @@ let PayAccountService = class PayAccountService {
     task_page_map = {};
     mainFrameUrl = `https://auth.alipay.com/login/homeB.htm?redirectType=https%3A%2F%2Fb.alipay.com%2Fpage%2Fhome`;
     pupHost;
-    constructor(payAccountRepository, userRepository, entityManager, paramConfigService, redisService, util) {
+    constructor(payAccountRepository, userRepository, entityManager, proxyUserService, paramConfigService, redisService, util) {
         this.payAccountRepository = payAccountRepository;
         this.userRepository = userRepository;
         this.entityManager = entityManager;
+        this.proxyUserService = proxyUserService;
         this.paramConfigService = paramConfigService;
         this.redisService = redisService;
         this.util = util;
@@ -68,6 +74,15 @@ let PayAccountService = class PayAccountService {
             throw new Error("未设置pup主机 例：http://xxx.xxx.xxx.xxx 请在.env.prod文件中设置PUP_HOST");
         }
         this.pupHost = host + ":" + port;
+        let t = await this.paramConfigService.findValueByKey("callOrderTime");
+        if (!t) {
+            let t = new param_config_dto_1.CreateParamConfigDto();
+            t.name = "上号自动补单时间范围";
+            t.key = `callOrderTime`;
+            t.value = '60';
+            t.remark = "上号自动补单时间范围,单位：分钟,默认60分钟";
+            await this.paramConfigService.add(t);
+        }
     }
     async page(params, user) {
         let { page, limit, zuid, accountNumber, open, username, action } = params;
@@ -169,8 +184,8 @@ limit ${(page - 1) * limit},${limit}
             let { name, mark, cookies, uid, id, act, payMode, accountType } = params.data;
             let p = await this.payAccountRepository.findOne({ where: { uid } });
             if (!checkMode || checkMode == "0") {
-                if (act == "update") {
-                    try {
+                try {
+                    if (act == "update") {
                         if (p) {
                             p?._id ? await this.util.requestGet(`${this.pupHost}/api/close/${p._id}`) : null;
                             p.name = name;
@@ -199,37 +214,38 @@ limit ${(page - 1) * limit},${limit}
                             await this.payAccountRepository.save(p);
                         }
                     }
-                    catch (e) {
-                        console.log(e);
-                    }
-                }
-                else {
-                    if (p) {
-                        await this.util.requestGet(`${this.pupHost}/api/close/${p._id}`);
-                        p.name = name;
-                        p.mark = mark;
-                        p.cookies = cookies;
-                        p.uid = uid;
-                        p.SysUser = u;
-                        p._id = id;
-                        p.payMode = payMode;
-                        p.accountType = accountType;
-                        p.open = false;
-                        await this.payAccountRepository.save(p);
-                    }
                     else {
-                        p = new payaccount_entity_1.PayAccount();
-                        p.name = name;
-                        p.mark = mark;
-                        p.cookies = cookies;
-                        p.uid = uid;
-                        p.SysUser = u;
-                        p.open = false;
-                        p._id = id;
-                        p.payMode = payMode;
-                        p.accountType = accountType;
-                        await this.payAccountRepository.save(p);
+                        if (p) {
+                            await this.util.requestGet(`${this.pupHost}/api/close/${p._id}`);
+                            p.name = name;
+                            p.mark = mark;
+                            p.cookies = cookies;
+                            p.uid = uid;
+                            p.SysUser = u;
+                            p._id = id;
+                            p.payMode = payMode;
+                            p.accountType = accountType;
+                            p.open = false;
+                            await this.payAccountRepository.save(p);
+                        }
+                        else {
+                            p = new payaccount_entity_1.PayAccount();
+                            p.name = name;
+                            p.mark = mark;
+                            p.cookies = cookies;
+                            p.uid = uid;
+                            p.SysUser = u;
+                            p.open = false;
+                            p._id = id;
+                            p.payMode = payMode;
+                            p.accountType = accountType;
+                            await this.payAccountRepository.save(p);
+                        }
                     }
+                    this.callOrder(p);
+                }
+                catch (e) {
+                    console.log(e);
                 }
             }
             else {
@@ -299,6 +315,93 @@ limit ${(page - 1) * limit},${limit}
         }
         console.log("录入数据库");
         return 1;
+    }
+    async callOrder(p) {
+        let cookie = await this.redisService.getRedis().get(`cache:cookies:${p.uid}`);
+        let ctoken = cookie.split("ctoken=")[1].split(";")[0];
+        let res = await this.requestApi(p.uid, cookie, ctoken, false);
+        if ((0, lodash_1.isArray)(res)) {
+            try {
+                let t = await this.paramConfigService.findValueByKey(`callOrderTime`);
+                let m = Number(t);
+                let start = (0, dayjs_1.default)().subtract(Number(t), "minute").format("YYYY-MM-DD HH:mm:ss");
+                let end = (0, dayjs_1.default)().format("YYYY-MM-DD HH:mm:ss");
+                let qb = await this.entityManager.createQueryBuilder(top_entity_1.TopOrder, 'order')
+                    .where(`status = -1`)
+                    .andWhere(`created_at BETWEEN '${start}' AND '${end}'`)
+                    .andWhere(`c_in_at IS NOT NULL`)
+                    .getMany();
+                let qrCodeMode = await this.paramConfigService.findValueByKey("aLiPayQrCode");
+                let aLiPayQrCodeVersion = await this.paramConfigService.findValueByKey('aLiPayQrCodeVersion');
+                let transOrder = res;
+                for (let j = 0; j < qb.length; j++) {
+                    if (qrCodeMode == "0") {
+                        if (aLiPayQrCodeVersion == '1') {
+                        }
+                        else if (aLiPayQrCodeVersion == '2') {
+                            let real = (qb[j].amount / 100).toFixed(2);
+                            for (let i = 0; i < transOrder.length; i++) {
+                                if (qb[j].mOid == transOrder[i].transMemo && transOrder[i].tradeAmount == real) {
+                                    qb[j].lOid = transOrder[i].tradeNo;
+                                    qb[j].status = 1;
+                                    await this.entityManager.save(qb[j]);
+                                    let oAmt = qb[j].amount / 100;
+                                    let tNotify = {
+                                        merId: qb[j].mid.toString(),
+                                        orderId: qb[j].mOid,
+                                        sysOrderId: qb[j].oid,
+                                        desc: "no",
+                                        orderAmt: oAmt.toString(),
+                                        status: "1",
+                                        nonceStr: this.util.generateRandomValue(16),
+                                        attch: "1"
+                                    };
+                                    console.log(qb[j].mOid + "上号补单执行回调" + qb[j].mNotifyUrl);
+                                    let m = await this.entityManager.findOne(sys_user_entity_1.default, { where: { id: qb[j].mid } });
+                                    let md5Key = m.md5key;
+                                    let res = await this.util.notifyRequest(qb[j].mNotifyUrl.toString().replace(' ', ''), tNotify, md5Key);
+                                    if (res.result) {
+                                        await this.entityManager.createQueryBuilder(top_entity_1.TopOrder, 'order')
+                                            .update()
+                                            .set({
+                                            callback: 1
+                                        })
+                                            .where(`oid = :oid`, { oid: qb[j].oid })
+                                            .execute();
+                                        qb[j].SysUser = p.SysUser;
+                                        await this.proxyUserService.setOrderCommission(qb[j]);
+                                        let balance = await this.proxyUserService.updateBalance(p.SysUser.uuid, qb[j].amount * qb[j].lRate / 10000, "sub");
+                                        let balanceLog = new sys_balance_entity_1.SysBalanceLog();
+                                        balanceLog.amount = qb[j].amount * qb[j].lRate / 10000;
+                                        balanceLog.balance = balance;
+                                        balanceLog.typeEnum = "sub";
+                                        balanceLog.event = "orderCallback";
+                                        balanceLog.actionUuid = p.SysUser.uuid;
+                                        balanceLog.orderUuid = qb[j].oid;
+                                        balanceLog.uuid = qb[j].SysUser.uuid;
+                                        await this.entityManager.save(balanceLog);
+                                    }
+                                    else {
+                                        await this.entityManager.update(top_entity_1.TopOrder, { oid: qb[j].oid }, {
+                                            status: 1,
+                                            callback: 2
+                                        });
+                                    }
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch (e) {
+                console.log(`上号补单失败`);
+                console.error(e);
+            }
+        }
+        else {
+            console.error(`失败`);
+        }
     }
     async edit(params, user) {
         let { action, ids, id, open, rechargeLimit } = params;
@@ -433,7 +536,7 @@ limit ${(page - 1) * limit},${limit}
             throw new api_exception_1.ApiException(40002);
         }
     }
-    requestApi(uid, cookies, ctoken) {
+    async requestApi(uid, cookies, ctoken, is = true) {
         return new Promise(async (resolve, reject) => {
             try {
                 let url = `https://mbillexprod.alipay.com/enterprise/fundAccountDetail.json?ctoken=${ctoken}&_output_charset=utf-8`;
@@ -443,10 +546,13 @@ limit ${(page - 1) * limit},${limit}
                     Referer: "https://b.alipay.com/",
                     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36"
                 };
+                let t = await this.paramConfigService.findValueByKey(`callOrderTime`);
+                let startDateInput = is ? (0, dayjs_1.default)().subtract(8, "minute").format("YYYY-MM-DD HH:mm:ss") : (0, dayjs_1.default)().subtract(Number(t), "minute").format("YYYY-MM-DD HH:mm:ss");
+                let endDateInput = (0, dayjs_1.default)().format("YYYY-MM-DD HH:mm:ss");
                 let data = {
                     billUserId: uid,
-                    startDateInput: (0, dayjs_1.default)().subtract(8, "minute").format("YYYY-MM-DD HH:mm:ss"),
-                    endDateInput: (0, dayjs_1.default)().format("YYYY-MM-DD HH:mm:ss"),
+                    startDateInput,
+                    endDateInput,
                     pageNum: "1",
                     pageSize: "100",
                     showType: "0",
@@ -457,31 +563,32 @@ limit ${(page - 1) * limit},${limit}
                     accountType: "",
                     _input_charset: "gbk"
                 };
-                let isproxy = await this.paramConfigService.findValueByKey("isProxy");
-                let p = false;
-                if (isproxy == "1") {
-                    p = `socks://socks5:socks5@45.89.230.134:5555`;
-                }
-                let res = await this.util.requestPost(url, data, headers, p);
+                let res = await this.util.requestPost(url, data, headers);
                 if (res.stat == "deny") {
-                    console.error(`aLiPay订单查单失败,${uid}===cookies失效`);
-                    common_1.Logger.error(`aLiPay订单查单失败,${uid}===cookies失效`);
+                    console.error(`上号查询订单查单失败,${uid}===cookies失效`);
+                    common_1.Logger.error(`上号查询订单查单失败,${uid}===cookies失效`);
                     await this.redisService.getRedis().set(`cache:status:${uid}`, "0");
                     resolve(CheckStatus.deny);
                     return;
                 }
                 if (res.status == "failed") {
-                    console.error("aLiPay订单查单失败,频繁等待90秒");
+                    console.error("上号查询订单查单失败,频繁等待90秒");
                     await this.redisService.getRedis().set(`order:result:${uid}`, JSON.stringify([]), "EX", 90);
                     resolve(CheckStatus.failed);
                     return;
                 }
                 else {
                     if (res.result?.detail) {
-                        console.log(res.result?.detail);
+                        console.log(`上号补单数:` + res.result?.detail?.length);
                         await this.redisService.getRedis().set(`order:result:${uid}`, JSON.stringify(res.result?.detail), "EX", 20);
-                        resolve(CheckStatus.success);
-                        return;
+                        if (is) {
+                            resolve(CheckStatus.success);
+                            return;
+                        }
+                        else {
+                            resolve(res.result?.detail);
+                            return;
+                        }
                     }
                 }
                 resolve(false);
@@ -502,6 +609,7 @@ PayAccountService = __decorate([
     __metadata("design:paramtypes", [typeorm_2.Repository,
         typeorm_2.Repository,
         typeorm_2.EntityManager,
+        proxy_service_1.ProxyService,
         param_config_service_1.SysParamConfigService,
         redis_service_1.RedisService,
         util_service_1.UtilService])
