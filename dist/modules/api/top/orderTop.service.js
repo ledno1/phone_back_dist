@@ -337,9 +337,9 @@ let OrderTopService = class OrderTopService {
             "zh.accountNumber AS accountNumber"
         ])
             .where("user.uuid = :uuid", { uuid: user.uuid })
-            .andWhere(mOid ? "order.mOid = :mOid" : "1=1", { mOid })
-            .andWhere(oid ? "order.oid = :oid" : "1=1", { oid })
-            .andWhere(lOid ? "order.lOid = :lOid" : "1=1", { lOid })
+            .andWhere(mOid ? "order.mOid LIKE :mOid" : "1=1", { mOid: `%${mOid}%` })
+            .andWhere(oid ? "order.oid LIKE :oid" : "1=1", { oid: `%${oid}%` })
+            .andWhere(lOid ? "order.lOid LIKE :lOid" : "1=1", { lOid: `%${lOid}%` })
             .andWhere(accountNumber ? "zh.accountNumber = :accountNumber" : "1=1", { accountNumber })
             .andWhere(amount ? "order.amount = :amount" : "1=1", { amount: !(0, lodash_1.isNaN)(amount) ? amount : null })
             .andWhere(createdAt ? "order.created_at BETWEEN :createdStart AND :createdEnd" : "1=1", {
