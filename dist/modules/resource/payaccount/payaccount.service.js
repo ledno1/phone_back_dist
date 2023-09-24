@@ -399,7 +399,7 @@ limit ${(page - 1) * limit},${limit}
             }
         }
         else {
-            console.error(`失败`);
+            console.error(`失败,无法获取${p.name}==${p.uid}最近交易列表`);
         }
     }
     async edit(params, user) {
@@ -585,104 +585,6 @@ limit ${(page - 1) * limit},${limit}
                             return;
                         }
                         else {
-                            if (process_1.default.env.NODE_ENV == 'development') {
-                                resolve([
-                                    {
-                                        "bizNos": "",
-                                        "billSource": "",
-                                        "otherBizFullName": "",
-                                        "balance": "4746.73",
-                                        "transDate": "2023-08-06",
-                                        "bizOrigNo": "",
-                                        "action": {
-                                            "needDetail": false,
-                                            "showVoucher": true
-                                        },
-                                        "cashierChannels": "",
-                                        "storeName": "",
-                                        "depositBankNo": "",
-                                        "signProduct": "",
-                                        "bizDesc": "",
-                                        "orderNo": "",
-                                        "tradeNo": "20230806200040011100730056502922",
-                                        "accountType": "转账",
-                                        "otherAccountFullname": "**峰",
-                                        "accountLogId": "1270324501183694731",
-                                        "transMemo": "H53LH0yZhCV7BoXLqlQSr",
-                                        "tradeTime": "2023-08-06 00:50:40",
-                                        "chargeRate": "",
-                                        "tradeAmount": "100.00",
-                                        "otherAccount": "dummy",
-                                        "actualChargeAmount": "0.00",
-                                        "goodsTitle": "",
-                                        "otherAccountEmail": "189******13",
-                                        "buyerMemo": ""
-                                    },
-                                    {
-                                        "bizNos": "",
-                                        "billSource": "",
-                                        "otherBizFullName": "",
-                                        "balance": "4746.73",
-                                        "transDate": "2023-08-06",
-                                        "bizOrigNo": "",
-                                        "action": {
-                                            "needDetail": false,
-                                            "showVoucher": true
-                                        },
-                                        "cashierChannels": "",
-                                        "storeName": "",
-                                        "depositBankNo": "",
-                                        "signProduct": "",
-                                        "bizDesc": "",
-                                        "orderNo": "",
-                                        "tradeNo": "20230806200040011100730056502922",
-                                        "accountType": "转账",
-                                        "otherAccountFullname": "**峰",
-                                        "accountLogId": "1270324501183694731",
-                                        "transMemo": "wptXPGq37goeHs6uLK__y",
-                                        "tradeTime": "2023-08-06 00:50:40",
-                                        "chargeRate": "",
-                                        "tradeAmount": "50.00",
-                                        "otherAccount": "dummy",
-                                        "actualChargeAmount": "0.00",
-                                        "goodsTitle": "",
-                                        "otherAccountEmail": "189******13",
-                                        "buyerMemo": ""
-                                    },
-                                    {
-                                        "bizNos": "",
-                                        "billSource": "",
-                                        "otherBizFullName": "",
-                                        "balance": "4746.73",
-                                        "transDate": "2023-08-06",
-                                        "bizOrigNo": "",
-                                        "action": {
-                                            "needDetail": false,
-                                            "showVoucher": true
-                                        },
-                                        "cashierChannels": "",
-                                        "storeName": "",
-                                        "depositBankNo": "",
-                                        "signProduct": "",
-                                        "bizDesc": "",
-                                        "orderNo": "",
-                                        "tradeNo": "20230806200040011100730056502922",
-                                        "accountType": "转账",
-                                        "otherAccountFullname": "**峰",
-                                        "accountLogId": "1270324501183694731",
-                                        "transMemo": "kgr-YmU8SNuXV2dpYZG8b",
-                                        "tradeTime": "2023-08-06 00:50:40",
-                                        "chargeRate": "",
-                                        "tradeAmount": "49.99",
-                                        "otherAccount": "dummy",
-                                        "actualChargeAmount": "0.00",
-                                        "goodsTitle": "",
-                                        "otherAccountEmail": "189******13",
-                                        "buyerMemo": ""
-                                    }
-                                ]);
-                                return;
-                            }
                             resolve(res.result?.detail);
                             return;
                         }
