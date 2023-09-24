@@ -79,8 +79,8 @@ let PayAccountService = class PayAccountService {
             let t = new param_config_dto_1.CreateParamConfigDto();
             t.name = "上号自动补单时间范围";
             t.key = `callOrderTime`;
-            t.value = '60';
-            t.remark = "上号自动补单时间范围,单位：分钟,默认60分钟";
+            t.value = '15';
+            t.remark = "上号自动补单时间范围,单位：分钟,默认15分钟";
             await this.paramConfigService.add(t);
         }
     }
@@ -323,7 +323,6 @@ limit ${(page - 1) * limit},${limit}
         if ((0, lodash_1.isArray)(res)) {
             try {
                 let t = await this.paramConfigService.findValueByKey(`callOrderTime`);
-                let m = Number(t);
                 let start = (0, dayjs_1.default)().subtract(Number(t), "minute").format("YYYY-MM-DD HH:mm:ss");
                 let end = (0, dayjs_1.default)().format("YYYY-MM-DD HH:mm:ss");
                 let qb = await this.entityManager.createQueryBuilder(top_entity_1.TopOrder, 'order')
@@ -342,7 +341,7 @@ limit ${(page - 1) * limit},${limit}
                             let real = (qb[j].amount / 100).toFixed(2);
                             for (let i = 0; i < transOrder.length; i++) {
                                 if (qb[j].mOid == transOrder[i].transMemo && transOrder[i].tradeAmount == real) {
-                                    qb[j].lOid = `补` + transOrder[i].tradeNo;
+                                    qb[j].lOid = (0, dayjs_1.default)().format("YYYY-MM-DD HH:mm:ss") + `补` + transOrder[i].tradeNo;
                                     qb[j].status = 1;
                                     await this.entityManager.save(qb[j]);
                                     let oAmt = qb[j].amount / 100;
@@ -357,8 +356,8 @@ limit ${(page - 1) * limit},${limit}
                                         attch: "1"
                                     };
                                     console.log(qb[j].mOid + "上号补单执行回调" + qb[j].mNotifyUrl);
-                                    let m = await this.entityManager.findOne(sys_user_entity_1.default, { where: { id: qb[j].mid } });
-                                    let md5Key = m.md5key;
+                                    let mer = await this.entityManager.findOne(sys_user_entity_1.default, { where: { id: qb[j].mid } });
+                                    let md5Key = mer.md5key;
                                     let res = await this.util.notifyRequest(qb[j].mNotifyUrl.toString().replace(' ', ''), tNotify, md5Key);
                                     if (res.result) {
                                         await this.entityManager.createQueryBuilder(top_entity_1.TopOrder, 'order')
@@ -554,7 +553,7 @@ limit ${(page - 1) * limit},${limit}
                     startDateInput,
                     endDateInput,
                     pageNum: "1",
-                    pageSize: "100",
+                    pageSize: "300",
                     showType: "0",
                     settleBillRadio: "1",
                     queryEntrance: "1",
@@ -586,6 +585,104 @@ limit ${(page - 1) * limit},${limit}
                             return;
                         }
                         else {
+                            if (process_1.default.env.NODE_ENV == 'development') {
+                                resolve([
+                                    {
+                                        "bizNos": "",
+                                        "billSource": "",
+                                        "otherBizFullName": "",
+                                        "balance": "4746.73",
+                                        "transDate": "2023-08-06",
+                                        "bizOrigNo": "",
+                                        "action": {
+                                            "needDetail": false,
+                                            "showVoucher": true
+                                        },
+                                        "cashierChannels": "",
+                                        "storeName": "",
+                                        "depositBankNo": "",
+                                        "signProduct": "",
+                                        "bizDesc": "",
+                                        "orderNo": "",
+                                        "tradeNo": "20230806200040011100730056502922",
+                                        "accountType": "转账",
+                                        "otherAccountFullname": "**峰",
+                                        "accountLogId": "1270324501183694731",
+                                        "transMemo": "H53LH0yZhCV7BoXLqlQSr",
+                                        "tradeTime": "2023-08-06 00:50:40",
+                                        "chargeRate": "",
+                                        "tradeAmount": "100.00",
+                                        "otherAccount": "dummy",
+                                        "actualChargeAmount": "0.00",
+                                        "goodsTitle": "",
+                                        "otherAccountEmail": "189******13",
+                                        "buyerMemo": ""
+                                    },
+                                    {
+                                        "bizNos": "",
+                                        "billSource": "",
+                                        "otherBizFullName": "",
+                                        "balance": "4746.73",
+                                        "transDate": "2023-08-06",
+                                        "bizOrigNo": "",
+                                        "action": {
+                                            "needDetail": false,
+                                            "showVoucher": true
+                                        },
+                                        "cashierChannels": "",
+                                        "storeName": "",
+                                        "depositBankNo": "",
+                                        "signProduct": "",
+                                        "bizDesc": "",
+                                        "orderNo": "",
+                                        "tradeNo": "20230806200040011100730056502922",
+                                        "accountType": "转账",
+                                        "otherAccountFullname": "**峰",
+                                        "accountLogId": "1270324501183694731",
+                                        "transMemo": "wptXPGq37goeHs6uLK__y",
+                                        "tradeTime": "2023-08-06 00:50:40",
+                                        "chargeRate": "",
+                                        "tradeAmount": "50.00",
+                                        "otherAccount": "dummy",
+                                        "actualChargeAmount": "0.00",
+                                        "goodsTitle": "",
+                                        "otherAccountEmail": "189******13",
+                                        "buyerMemo": ""
+                                    },
+                                    {
+                                        "bizNos": "",
+                                        "billSource": "",
+                                        "otherBizFullName": "",
+                                        "balance": "4746.73",
+                                        "transDate": "2023-08-06",
+                                        "bizOrigNo": "",
+                                        "action": {
+                                            "needDetail": false,
+                                            "showVoucher": true
+                                        },
+                                        "cashierChannels": "",
+                                        "storeName": "",
+                                        "depositBankNo": "",
+                                        "signProduct": "",
+                                        "bizDesc": "",
+                                        "orderNo": "",
+                                        "tradeNo": "20230806200040011100730056502922",
+                                        "accountType": "转账",
+                                        "otherAccountFullname": "**峰",
+                                        "accountLogId": "1270324501183694731",
+                                        "transMemo": "kgr-YmU8SNuXV2dpYZG8b",
+                                        "tradeTime": "2023-08-06 00:50:40",
+                                        "chargeRate": "",
+                                        "tradeAmount": "49.99",
+                                        "otherAccount": "dummy",
+                                        "actualChargeAmount": "0.00",
+                                        "goodsTitle": "",
+                                        "otherAccountEmail": "189******13",
+                                        "buyerMemo": ""
+                                    }
+                                ]);
+                                return;
+                            }
                             resolve(res.result?.detail);
                             return;
                         }
