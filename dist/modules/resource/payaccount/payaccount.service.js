@@ -342,7 +342,7 @@ limit ${(page - 1) * limit},${limit}
                             let real = (qb[j].amount / 100).toFixed(2);
                             for (let i = 0; i < transOrder.length; i++) {
                                 if (qb[j].mOid == transOrder[i].transMemo && transOrder[i].tradeAmount == real) {
-                                    qb[j].lOid = transOrder[i].tradeNo;
+                                    qb[j].lOid = `补` + transOrder[i].tradeNo;
                                     qb[j].status = 1;
                                     await this.entityManager.save(qb[j]);
                                     let oAmt = qb[j].amount / 100;
