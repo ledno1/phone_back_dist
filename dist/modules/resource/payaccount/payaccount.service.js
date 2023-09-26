@@ -83,6 +83,15 @@ let PayAccountService = class PayAccountService {
             t.remark = "上号自动补单时间范围,单位：分钟,默认20分钟";
             await this.paramConfigService.add(t);
         }
+        let p = await this.paramConfigService.findValueByKey("PayAccountRechargeLimit");
+        if (!p) {
+            let t = new param_config_dto_1.CreateParamConfigDto();
+            t.name = "支付宝上号默认当天限额";
+            t.key = `PayAccountRechargeLimit`;
+            t.value = '1000000';
+            t.remark = "支付宝上号默认当天限额,单位:元,默认1000000";
+            await this.paramConfigService.add(t);
+        }
     }
     async page(params, user) {
         let { page, limit, zuid, accountNumber, open, username, action } = params;
@@ -185,6 +194,7 @@ limit ${(page - 1) * limit},${limit}
             let p = await this.payAccountRepository.findOne({ where: { uid } });
             if (!checkMode || checkMode == "0") {
                 try {
+                    let rechargeLimt = await this.paramConfigService.findValueByKey(`PayAccountRechargeLimit`) || 1000000;
                     if (act == "update") {
                         if (p) {
                             p?._id ? await this.util.requestGet(`${this.pupHost}/api/close/${p._id}`) : null;
@@ -211,6 +221,7 @@ limit ${(page - 1) * limit},${limit}
                             p._id = id;
                             p.payMode = payMode;
                             p.accountType = accountType;
+                            p.rechargeLimit = Number(rechargeLimt) * 100;
                             await this.payAccountRepository.save(p);
                         }
                     }
@@ -237,6 +248,7 @@ limit ${(page - 1) * limit},${limit}
                             p.SysUser = u;
                             p.open = false;
                             p._id = id;
+                            p.rechargeLimit = Number(rechargeLimt) * 100;
                             p.payMode = payMode;
                             p.accountType = accountType;
                             await this.payAccountRepository.save(p);
