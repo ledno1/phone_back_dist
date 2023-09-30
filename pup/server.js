@@ -82,13 +82,23 @@ router.get('/api/create', async (req, res, next) => {
     try {
       //页面5分钟刷新一次
       task_page_map[id].sid = setInterval(async () => {
-        await page.reload({
-          timeout: 0,
-        });
-
-      }, 1 * 60 * 1000);
+        try{
+          await page.reload({
+            timeout: 0,
+          });
+        }catch(error){
+          if (error.message.includes('Protocol error (Page.reload): Session closed')) {
+            // 捕捉并处理特定的错误消息
+            console.error(id+'捕捉到页面重新加载错误: Session 已关闭或页面已关闭');
+          } else {
+            // 处理其他可能的错误
+            console.error('发生其他错误:', error);
+          }
+        }
+      }, 1 * 60 * 1000,id);
     } catch (error) {
       _log('页面刷新失败', error);
+      
     }
 
 
