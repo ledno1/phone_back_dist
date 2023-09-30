@@ -63,7 +63,7 @@ export declare class PayAccountService implements OnModuleInit {
     }>;
     addAppid(params: any, user: IAdminUser): Promise<number>;
     callOrder(p: PayAccount): Promise<void>;
-    edit(params: any, user: IAdminUser): Promise<{
+    edit(params: any, user: IAdminUser): Promise<1 | {
         code: number;
         msg: string;
         address?: undefined;

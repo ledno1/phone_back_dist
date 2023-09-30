@@ -28,7 +28,7 @@ export declare class PayAccountController {
         id?: undefined;
         uid?: undefined;
     }>;
-    edit(body: any, user: IAdminUser): Promise<{
+    edit(body: any, user: IAdminUser): Promise<1 | {
         code: number;
         msg: string;
         address?: undefined;

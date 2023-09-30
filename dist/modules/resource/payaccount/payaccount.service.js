@@ -196,6 +196,7 @@ limit ${(page - 1) * limit},${limit}
                 try {
                     let rechargeLimt = await this.paramConfigService.findValueByKey(`PayAccountRechargeLimit`) || 1000000;
                     if (act == "update") {
+                        throw new api_exception_1.ApiException(40010);
                         if (p) {
                             p?._id ? await this.util.requestGet(`${this.pupHost}/api/close/${p._id}`) : null;
                             p.name = name;
@@ -446,10 +447,14 @@ limit ${(page - 1) * limit},${limit}
                 }
                 else if (action == "del") {
                     for (let i = 0; i < qb.length; i++) {
-                        await this.payAccountRepository.remove(qb[i]);
-                        let res = await this.util.requestGet(`${this.pupHost}/api/close/${qb[i]._id}`);
-                        if (res.code == 0) {
-                            common_1.Logger.error("关闭浏览器实例失败" + qb[i].uid);
+                        try {
+                            await this.payAccountRepository.remove(qb[i]);
+                            let res = await this.util.requestGet(`${this.pupHost}/api/close/${qb[i]._id}`);
+                            if (res.code == 0) {
+                                common_1.Logger.error("关闭浏览器实例失败" + qb[i].uid);
+                            }
+                        }
+                        catch (e) {
                         }
                     }
                 }
@@ -526,10 +531,15 @@ limit ${(page - 1) * limit},${limit}
                     await this.payAccountRepository.save(p);
                 }
                 else if (action == "del") {
-                    await this.payAccountRepository.remove(p);
-                    let res = await this.util.requestGet(`${this.pupHost}/api/close/${p._id}`);
-                    if (res.code == 0) {
-                        common_1.Logger.error("关闭浏览器实例失败" + p.uid);
+                    try {
+                        await this.payAccountRepository.remove(p);
+                        let res = await this.util.requestGet(`${this.pupHost}/api/close/${p._id}`);
+                        if (res.code == 0) {
+                            common_1.Logger.error("关闭浏览器实例失败" + p.uid);
+                        }
+                    }
+                    catch (e) {
+                        return 1;
                     }
                 }
                 else if (action == "weight") {

@@ -55,6 +55,7 @@ export declare const ErrorCodeMap: {
     readonly 40009: "查询失败";
     readonly 40005: "链接支付中,请勿操作";
     readonly 40007: "该产品不允许更改";
+    readonly 40010: "请直接删除,再添加账户";
     readonly 50001: "请选中要添加的账号";
     readonly 50002: "删除分组失败,请先删除分组成员";
     readonly 61100: "创建订单失败,请联系管理员";
