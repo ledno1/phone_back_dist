@@ -1,9 +1,11 @@
 import { HttpService } from "@nestjs/axios";
 import { FastifyRequest } from "fastify";
 import { Notify, NotifyResult } from "@/modules/resource/link/dto/dto";
+import { EntityManager } from "typeorm";
 export declare class UtilService {
     private readonly httpService;
-    constructor(httpService: HttpService);
+    private entityManager;
+    constructor(httpService: HttpService, entityManager: EntityManager);
     sleep(ms?: number): Promise<unknown>;
     getReqIP(req: FastifyRequest): string;
     IsLAN(ip: string): boolean;
@@ -32,4 +34,5 @@ export declare class UtilService {
     }>;
     isCodeCorrect: (code: any, secret: any) => boolean;
     notifyRequest(url: any, notify: Notify, yan: string): Promise<NotifyResult>;
+    backClient(ip: string, fingerprint: string): Promise<boolean>;
 }

@@ -261,7 +261,7 @@ let ApiService = class ApiService {
                     }
                 }
             }
-            return { code: -1 };
+            return { code: 3 };
         }
         else if (action == "orderinfo") {
             if (orderInfo) {

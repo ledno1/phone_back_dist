@@ -32,6 +32,7 @@ const test_service_1 = require("../code/subHandler/test.service");
 const product_service_1 = require("../code/product/product.service");
 const checkModePhoneProxyChargingHandlerservice_1 = require("./subHandler/checkModePhoneProxyChargingHandlerservice");
 const kakaCheckPhone_service_1 = require("../code/subHandler/kakaCheckPhone.service");
+const fingerprint_entity_1 = require("../../entities/resource/fingerprint.entity");
 let ApiModule = class ApiModule {
 };
 ApiModule = __decorate([
@@ -42,7 +43,8 @@ ApiModule = __decorate([
             resource_module_1.ResourceModule,
             typeorm_1.TypeOrmModule.forFeature([
                 top_entity_1.TopOrder,
-                top_temp_entity_1.TopOrderTemp
+                top_temp_entity_1.TopOrderTemp,
+                fingerprint_entity_1.Fingerprint
             ]),
             bull_1.BullModule.registerQueueAsync({
                 name: 'order',

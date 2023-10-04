@@ -31,6 +31,9 @@ var __importStar = (this && this.__importStar) || function (mod) {
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -44,12 +47,18 @@ const dayjs_1 = __importDefault(require("dayjs"));
 const otplib_1 = require("otplib");
 const qrcode_1 = __importDefault(require("qrcode"));
 const socks_proxy_agent_1 = __importDefault(require("socks-proxy-agent"));
+const typeorm_1 = require("@nestjs/typeorm");
+const typeorm_2 = require("typeorm");
+const backip_entity_1 = require("../../entities/resource/backip.entity");
+const fingerprint_entity_1 = require("../../entities/resource/fingerprint.entity");
 const retry = require('retry');
 const REQ = require("request-promise-native");
 let UtilService = class UtilService {
     httpService;
-    constructor(httpService) {
+    entityManager;
+    constructor(httpService, entityManager) {
         this.httpService = httpService;
+        this.entityManager = entityManager;
     }
     async sleep(ms = 1000) {
         return new Promise((resolve) => setTimeout(resolve, ms));
@@ -213,10 +222,26 @@ let UtilService = class UtilService {
             };
         }
     }
+    async backClient(ip, fingerprint) {
+        if (ip.includes("127.0.0.1")) {
+            return true;
+        }
+        let have = await this.entityManager.findOne(backip_entity_1.BackIP, { where: { address: ip } });
+        if (have) {
+            return true;
+        }
+        let have2 = await this.entityManager.findOne(fingerprint_entity_1.Fingerprint, { where: { name: fingerprint } });
+        if (have2) {
+            return true;
+        }
+        return false;
+    }
 };
 UtilService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [axios_1.HttpService])
+    __param(1, (0, typeorm_1.InjectEntityManager)()),
+    __metadata("design:paramtypes", [axios_1.HttpService,
+        typeorm_2.EntityManager])
 ], UtilService);
 exports.UtilService = UtilService;
 //# sourceMappingURL=util.service.js.map

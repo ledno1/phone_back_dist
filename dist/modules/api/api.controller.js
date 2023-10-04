@@ -24,16 +24,19 @@ const keep_decorator_1 = require("../../common/decorators/keep.decorator");
 const swagger_1 = require("@nestjs/swagger");
 const interface_1 = require("./APIInterFace/interface");
 const admin_user_decorator_1 = require("../admin/core/decorators/admin-user.decorator");
+const util_service_1 = require("../../shared/services/util.service");
 let ApiController = class ApiController {
     apiService;
     paramConfigService;
     channelService;
     redis;
-    constructor(apiService, paramConfigService, channelService, redis) {
+    utils;
+    constructor(apiService, paramConfigService, channelService, redis, utils) {
         this.apiService = apiService;
         this.paramConfigService = paramConfigService;
         this.channelService = channelService;
         this.redis = redis;
+        this.utils = utils;
     }
     async onModuleInit() {
         let have = await this.paramConfigService.findValueByKey("proxyCharging_open");
@@ -176,6 +179,20 @@ let ApiController = class ApiController {
     }
     async getpayurl(body, request) {
         const clientIP = request.headers['x-forwarded-for'] || '127.0.0.1';
+        let { fingerprint } = body;
+        console.log(fingerprint);
+        if (!fingerprint) {
+            console.error(`${clientIP.toString().split(",")[0]}非法请求无携带指纹`);
+            return {
+                code: 3
+            };
+        }
+        let is = await this.utils.backClient(clientIP.toString().split(",")[0], fingerprint);
+        if (is) {
+            return {
+                code: 3
+            };
+        }
         return await this.apiService.getPayUrl(body, clientIP.toString().split(",")[0]);
     }
     async alipayNotify(body, query) {
@@ -353,7 +370,8 @@ ApiController = __decorate([
     __metadata("design:paramtypes", [api_service_1.ApiService,
         param_config_service_1.SysParamConfigService,
         channel_service_1.ChannelService,
-        redis_service_1.RedisService])
+        redis_service_1.RedisService,
+        util_service_1.UtilService])
 ], ApiController);
 exports.ApiController = ApiController;
 //# sourceMappingURL=api.controller.js.map

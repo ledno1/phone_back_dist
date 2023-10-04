@@ -6,12 +6,14 @@ import { ChannelService } from "@/modules/resource/channel/channel.service";
 import { RedisService } from "@/shared/services/redis.service";
 import { DirectBack, DirectPush, Pay, PayCheck, PayResponse } from "@/modules/api/APIInterFace/interface";
 import { IAdminUser } from "@/modules/admin/admin.interface";
+import { UtilService } from "@/shared/services/util.service";
 export declare class ApiController implements OnModuleInit {
     private readonly apiService;
     private paramConfigService;
     private readonly channelService;
     private redis;
-    constructor(apiService: ApiService, paramConfigService: SysParamConfigService, channelService: ChannelService, redis: RedisService);
+    private utils;
+    constructor(apiService: ApiService, paramConfigService: SysParamConfigService, channelService: ChannelService, redis: RedisService, utils: UtilService);
     onModuleInit(): Promise<void>;
     pay(body: Pay): Promise<string | 1 | PayResponse>;
     payTest(body: any, user: IAdminUser): Promise<string | 1 | PayResponse>;
@@ -28,22 +30,6 @@ export declare class ApiController implements OnModuleInit {
     } & {
         outTime: any;
     }) | {
-        code: number;
-        price?: undefined;
-        orderid?: undefined;
-        userid?: undefined;
-        createAt?: undefined;
-        showOrderid?: undefined;
-        status?: undefined;
-        oid?: undefined;
-        msg?: undefined;
-        phone?: undefined;
-        outTime?: undefined;
-        url?: undefined;
-        qrcode?: undefined;
-        mode?: undefined;
-        mOid?: undefined;
-    } | {
         code: number;
         price: string;
         orderid: string;
@@ -77,36 +63,6 @@ export declare class ApiController implements OnModuleInit {
         mOid?: undefined;
     } | {
         code: number;
-        phone: string;
-        outTime: any;
-        price?: undefined;
-        orderid?: undefined;
-        userid?: undefined;
-        createAt?: undefined;
-        showOrderid?: undefined;
-        status?: undefined;
-        oid?: undefined;
-        msg?: undefined;
-        url?: undefined;
-        qrcode?: undefined;
-        mode?: undefined;
-        mOid?: undefined;
-    } | {
-        code: number;
-        msg: string;
-        url: any;
-        qrcode: any;
-        outTime: any;
-        mode: string;
-        mOid: string;
-        price?: undefined;
-        orderid?: undefined;
-        userid?: undefined;
-        createAt?: undefined;
-        showOrderid?: undefined;
-        status?: undefined;
-        oid?: undefined;
-        phone?: undefined;
     }>;
     alipayNotify(body: any, query: any): Promise<"success" | "fail">;
     startcheck(query: any): Promise<void>;

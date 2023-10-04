@@ -189,7 +189,7 @@ let OrderTopService = class OrderTopService {
             .select([
             "order.amount AS amount", "order.mOid AS mOid", "order.mid AS mid", "order.status AS status", "order.created_at AS createdAt", "order.oid AS oid",
             "order.lOid AS lOid", "order.callback AS callback", "order.os AS os", "order.cIp AS cIp", "order.cPayAt AS cPayAt", "order.cInAt AS cInAt",
-            "order.mIp AS mIp"
+            "order.mIp AS mIp", "order.fingerprint AS fingerprint"
         ])
             .addSelect([
             "channel.name AS channelName"
@@ -238,7 +238,7 @@ let OrderTopService = class OrderTopService {
             .select([
             "order.amount AS amount", "order.mOid AS mOid", "order.status AS status", "order.created_at AS createdAt", "order.oid AS oid",
             "order.lOid AS lOid", "order.callback AS callback", "order.os AS os", "order.cIp AS cIp", "order.cPayAt AS cPayAt", "order.cInAt AS cInAt",
-            "order.mIp AS mIp"
+            "order.mIp AS mIp", "order.fingerprint AS fingerprint"
         ])
             .addSelect([
             "channel.name AS channelName"
@@ -328,7 +328,7 @@ let OrderTopService = class OrderTopService {
             .select([
             "order.amount AS amount", "order.mOid AS mOid", "order.status AS status", "order.created_at AS createdAt", "order.oid AS oid",
             "order.lOid AS lOid", "order.callback AS callback", "order.os AS os", "order.cIp AS cIp", "order.cPayAt AS cPayAt", "order.cInAt AS cInAt",
-            "order.mIp AS mIp"
+            "order.mIp AS mIp", "order.fingerprint AS fingerprint"
         ])
             .addSelect([
             "channel.name AS channelName"
