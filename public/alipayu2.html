@@ -1,17 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <title>订单确认</title>
-    <meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0" name="viewport" />
-    <meta content="yes" name="apple-mobile-web-app-capable" />
-    <meta content="black" name="apple-mobile-web-app-status-bar-style" />
-    <meta content="telephone=no" name="format-detection" />
+    <meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0" name="viewport"/>
+    <meta content="yes" name="apple-mobile-web-app-capable"/>
+    <meta content="black" name="apple-mobile-web-app-status-bar-style"/>
+    <meta content="telephone=no" name="format-detection"/>
     <!--<meta http-equiv="refresh" content="4">-->
     <style>
-        html,
-        body {
+        html, body {
             color: #333;
             margin: 0;
             height: 100%;
@@ -32,11 +30,7 @@
             color: #000;
         }
 
-        a,
-        label,
-        button,
-        input,
-        select {
+        a, label, button, input, select {
             -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
         }
 
@@ -52,32 +46,7 @@
             color: #666;
         }
 
-        html,
-        body,
-        div,
-        dl,
-        dt,
-        dd,
-        ol,
-        ul,
-        li,
-        h1,
-        h2,
-        h3,
-        h4,
-        h5,
-        h6,
-        p,
-        blockquote,
-        pre,
-        button,
-        fieldset,
-        form,
-        input,
-        legend,
-        textarea,
-        th,
-        td {
+        html, body, div, dl, dt, dd, ol, ul, li, h1, h2, h3, h4, h5, h6, p, blockquote, pre, button, fieldset, form, input, legend, textarea, th, td {
             margin: 0;
             padding: 0;
         }
@@ -91,11 +60,7 @@
             outline: 0;
         }
 
-        button,
-        input,
-        optgroup,
-        select,
-        textarea {
+        button, input, optgroup, select, textarea {
             margin: 0;
             font: inherit;
             color: inherit;
@@ -118,7 +83,8 @@
             visibility: hidden;
         }
 
-        .clearfix {}
+        .clearfix {
+        }
 
         .divHeight {
             width: 100%;
@@ -545,184 +511,172 @@
         }
     </style>
 </head>
-
 <body>
 
-    <section class="aui-flexView">
-        <header class="aui-navBar aui-navBar-fixed">
-            <div class="aui-center">
-                <span class="aui-center-title">
-                    <img src="/img/alipay.jpg">
-                </span>
+<section class="aui-flexView">
+    <header class="aui-navBar aui-navBar-fixed">
+        <div class="aui-center">
+                    <span class="aui-center-title">
+                        <img src="/img/alipay.jpg">
+                    </span>
+        </div>
+    </header>
+    <section class="aui-scrollView">
+        <div class="aui-pay-box">
+            <div class="aui-pay-text">
+                <p>支付金额</p>
+                <h2 id="price">
+                    <em>￥</em>
+                    -
+                </h2>
+                <p>付款后请稍候几秒即可，切勿关闭页面。</p>
             </div>
-        </header>
-        <section class="aui-scrollView">
-            <div class="aui-pay-box">
-                <div class="aui-pay-text">
-                    <p>支付金额</p>
-                    <h2 id="price">
-                        <em>￥</em>
-                        -
-                    </h2>
-                    <p>付款后请稍候几秒即可，切勿关闭页面。</p>
-                </div>
-                <div class="aui-pay-fill">
-                    <div class="aui-pay-flex">
-                        <div class="aui-flex b-line">
-                            <div class="aui-flex-box">
-                                <h2 class="aui-pay-titleS">支付信息</h2>
-                            </div>
-                        </div>
-                        <div class="aui-pay-info">
-                            <p class="aui-flex">
-                                订单金额 <em id="priceA" class="aui-flex-box">-</em>
-                            </p>
-                            <p class="aui-flex">
-                                应支付金额 <em id="priceB" class="aui-flex-box">-</em>
-                            </p>
-                            <p class="aui-flex">
-                                订单号 <em id="orderid" class="aui-flex-box">-</em>
-                            </p>
-                            <p id="status" class="aui-flex" id="order_status">
-                                当前状态 <em class="aui-flex-box" style="color:#FF0000;">-</em>
-                            </p>
-                            <p class="aui-flex">
-                                下单时间 <em id="createAt" class="aui-flex-box">-</em>
-                            </p>
+            <div class="aui-pay-fill">
+                <div class="aui-pay-flex">
+                    <div class="aui-flex b-line">
+                        <div class="aui-flex-box">
+                            <h2 class="aui-pay-titleS">支付信息</h2>
                         </div>
                     </div>
+                    <div class="aui-pay-info">
+                        <p class="aui-flex">
+                            订单金额 <em id="priceA" class="aui-flex-box">-</em>
+                        </p>
+                        <p class="aui-flex">
+                            应支付金额 <em id="priceB" class="aui-flex-box">-</em>
+                        </p>
+                        <p class="aui-flex">
+                            订单号 <em id="orderid" class="aui-flex-box">-</em>
+                        </p>
+                        <p id="status" class="aui-flex" id="order_status">
+                            当前状态 <em class="aui-flex-box" style="color:#FF0000;">-</em>
+                        </p>
+                        <p class="aui-flex">
+                            下单时间 <em id="createAt" class="aui-flex-box">-</em>
+                        </p>
+                    </div>
                 </div>
-                <div class="aui-pay-com">
-                    <button id="pay_button">立即支付</button>
-                </div>
-                <div class="copyright">Copyright © 支付宝版权所有 2004-2023</div>
             </div>
-        </section>
+            <div class="aui-pay-com">
+                <button id="pay_button">立即支付</button>
+            </div>
+            <div class="copyright">Copyright © 支付宝版权所有 2004-2023</div>
+        </div>
     </section>
-    <script type="text/javascript" src="/newassets/css/wechat/jquery.min.js"></script>
-    <script type="text/javascript" src="/newassets/layer/layer.js"></script>
-    <script>
-        function getQueryVariable(variable) {
-            var query = window.location.search.substring(1);
-            var vars = query.split("&");
-            for (var i = 0; i < vars.length; i++) {
-                var pair = vars[i].split("=");
-                if (pair[0] == variable) {
-                    return pair[1];
-                }
+</section>
+<script type="text/javascript" src="/newassets/css/wechat/jquery.min.js"></script>
+<script type="text/javascript" src="/newassets/layer/layer.js"></script>
+<script>
+
+    function getQueryVariable(variable) {
+        var query = window.location.search.substring(1);
+        var vars = query.split("&");
+        for (var i = 0; i < vars.length; i++) {
+            var pair = vars[i].split("=");
+            if (pair[0] == variable) {
+                return pair[1];
             }
-            return null;
         }
+        return null;
+    }
 
-        var orderstatus = "3";
-        //1为已支付完，2为待支付， -1为已过期,3为等待订单信息
-        var userid = "0";
-        var price = "0";
-        var orderid = getQueryVariable("orderid");
+    var orderstatus = "3";
+    //1为已支付完，2为待支付， -1为已过期,3为等待订单信息
+    var userid = "0";
+    var price = "0";
+    var orderid = getQueryVariable("orderid");
+    var oid = '';
 
-        function GetPayUrl() {
-            $.post("/api/getpayurl", { action: "orderinfo", orderid: orderid }, function (res) {
-                if (res.code == 1) {
-                    userid = res.userid;
-                    price = res.price;
-                    $("#price").html("<em>￥</em>" + res.price);
-                    $("#priceA").html("<em>￥</em>" + res.price);
-                    $("#priceB").html("<em>￥</em>" + res.price);
-                    $("#orderid").html(res.showOrderid);
-                    $("#createAt").html(res.createAt);
-                    orderstatus = "2";
-                    //#FF0000 红色 #00FF00 绿色 黄色 #FFFF00
-                    $("#status").html(orderstatus == "2" ? `当前状态 <em id="status" class="aui-flex-box" style="color:#00FF00;">待支付</em>` : (orderstatus == "1" ? `当前状态 <em class="aui-flex-box" style="color:#00FF00;">支付成功</em>` : `当前状态 <em class="aui-flex-box" style="color:#FF0000;">已经过期</em>`));
-                } else {
-                    orderstatus = "-1";
-                    //过期
-                    $("#status").html(`当前状态 <em class="aui-flex-box" style="color:#FF0000;">已经过期</em>`);
+    function GetPayUrl() {
+        $.post("/api/getpayurl", {action: "orderinfo", orderid: orderid}, function (res) {
+            if (res.code == 1) {
+                userid = res.userid;
+                price = res.price;
+                oid = res.oid;
+                $("#price").html("<em>￥</em>" + res.price);
+                $("#priceA").html("<em>￥</em>" + res.price);
+                $("#priceB").html("<em>￥</em>" + res.price);
+                $("#orderid").html(res.showOrderid);
+                $("#createAt").html(res.createAt);
+                orderstatus = "2";
+
+                //#FF0000 红色 #00FF00 绿色 黄色 #FFFF00
+                $("#status").html(orderstatus == "2" ? `当前状态 <em id="status" class="aui-flex-box" style="color:#00FF00;">待支付</em>` : (orderstatus == "1" ? `当前状态 <em class="aui-flex-box" style="color:#00FF00;">支付成功</em>` : `当前状态 <em class="aui-flex-box" style="color:#FF0000;">已经过期</em>`));
+            } else {
+                orderstatus = "-1";
+                //过期
+                $("#status").html(`当前状态 <em class="aui-flex-box" style="color:#FF0000;">已经过期</em>`);
+                $("#pay_button").attr("disabled", "disabled");
+            }
+        });
+    }
+
+    GetPayUrl();
+
+    function ready(callback) {
+        // 如果jsbridge已经注入则直接调用
+        if (window.AlipayJSBridge) {
+            callback && callback();
+        } else {
+            // 如果没有注入则监听注入的事件
+            document.addEventListener("AlipayJSBridgeReady", callback, false);
+        }
+    }
+
+    var browser = navigator.userAgent.toLowerCase();
+    if (browser.match(/Alipay/i) == "alipay") {
+        ready(function () {
+        });
+        //隐藏右上角菜单
+        AlipayJSBridge.call("hideOptionMenu");
+    }
+
+    $(document).ready(function (e) {
+        $(".aui-pay-com button").click(function (e) {
+            var browser = navigator.userAgent.toLowerCase();
+            if (browser.match(/Alipay/i) == "alipay" && orderstatus == "2") {
+                AlipayJSBridge.call('pushWindow', {
+                    url: "alipays://platformapi/startapp?appId=20000989&url=" + encodeURIComponent("https://www.alipay.com/?appId=20000116&actionType=toAccount&sourceId=contactStage&chatUserId=" + userid + "&displayName=TK&chatUserName=TK&chatLoginId=186******71&chatHeaderUrl=http://tfs.alipayobjects.com/images/partner/TB1OD00cMSJDuNj_160X160&chatUserType=1&skipAuth=true&amount=" + price + "&memo=" + oid)
+                });
+            } else if (browser.match(/Alipay/i) == "alipay" && orderstatus == "1") {
+                alert("订单已支付完成，请勿重复支付");
+            } else if (browser.match(/Alipay/i) == "alipay" && orderstatus == "-1") {
+                alert("订单已过期，请重新发起");
+            } else if (browser.match(/Alipay/i) == "alipay" && orderstatus == "3") {
+                alert("正在获取订单信息请稍后...");
+            } else {
+                alert("仅限在支付宝内支付");
+            }
+        });
+    });
+
+    function order() {
+        $.ajax({
+            type: "POST",
+            dataType: "json",
+            url: "/api/getpayurl",
+            data: {
+                action: "checkorder",
+                orderid
+            },
+            cache: false,
+            success: function (data) {
+                if (data.code == 1) {
+                    window.clearInterval(orderlst);
+                    $("#status").html("当前状态 <em class=\"aui-flex-box\" style=\"color:#00FF00;\">支付成功</em>");
+                    $("#pay_button").attr("disabled", "disabled");
+                    orderstatus = 1;
+                } else if (data.code == -1) {
+                    window.clearInterval(orderlst);
+                    $("#status").html("当前状态 <em class=\"aui-flex-box\" style=\"color:red;\">已过期</em>");
                     $("#pay_button").attr("disabled", "disabled");
                 }
-            });
-        }
-
-        GetPayUrl();
-
-        function ready(callback) {
-            // 如果jsbridge已经注入则直接调用
-            if (window.AlipayJSBridge) {
-                callback && callback();
-            } else {
-                // 如果没有注入则监听注入的事件
-                document.addEventListener("AlipayJSBridgeReady", callback, false);
             }
-        }
-
-        var browser = navigator.userAgent.toLowerCase();
-        if (browser.match(/Alipay/i) == "alipay") {
-            ready(function () {
-            });
-            //隐藏右上角菜单
-            AlipayJSBridge.call("hideOptionMenu");
-        }
-
-        $(document).ready(function (e) {
-            $(".aui-pay-com button").click(function (e) {
-                var browser = navigator.userAgent.toLowerCase();
-                if (browser.match(/Alipay/i) == "alipay" && orderstatus == "2") {
-                    var a = {
-                        actionType: "scan",
-                        u: userid,
-                        a: price,
-                        m: orderid,
-                        biz_data: {
-                            s: "money",
-                            u: userid,
-                            a: price,
-                            m: orderid
-                        }
-                    };
-                    AlipayJSBridge.call("startApp", {
-                        appId: "20000123",
-                        param: a
-                    }, function (a) {
-                    });
-                } else if (browser.match(/Alipay/i) == "alipay" && orderstatus == "1") {
-                    alert("订单已支付完成，请勿重复支付");
-                } else if (browser.match(/Alipay/i) == "alipay" && orderstatus == "-1") {
-                    alert("订单已过期，请重新发起");
-                } else if (browser.match(/Alipay/i) == "alipay" && orderstatus == "3") {
-                    alert("正在获取订单信息请稍后...");
-                } else {
-                    alert("仅限在支付宝内支付");
-                }
-            });
         });
+    }
 
-        function order() {
-            $.ajax({
-                type: "POST",
-                dataType: "json",
-                url: "/api/getpayurl",
-                data: {
-                    action: "checkorder",
-                    orderid
-                },
-                cache: false,
-                success: function (data) {
-                    if (data.code == 1) {
-                        window.clearInterval(orderlst);
-                        $("#status").html("当前状态 <em class=\"aui-flex-box\" style=\"color:#00FF00;\">支付成功</em>");
-                        $("#pay_button").attr("disabled", "disabled");
-                        orderstatus = 1;
-                    } else if (data.code == -1) {
-                        window.clearInterval(orderlst);
-                        $("#status").html("当前状态 <em class=\"aui-flex-box\" style=\"color:red;\">已过期</em>");
-                        $("#pay_button").attr("disabled", "disabled");
-                    }
-                }
-            });
-        }
-
-        //周期监听
-        var orderlst = setInterval("order()", 5000);
-    </script>
+    //周期监听
+    var orderlst = setInterval("order()", 5000);
+</script>
 </body>
-
 </html>

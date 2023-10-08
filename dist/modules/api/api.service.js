@@ -40,6 +40,7 @@ const XiaoMangProxyChargingHandlerservice_1 = require("./subHandler/XiaoMangProx
 const checkModePhoneProxyChargingHandlerservice_1 = require("./subHandler/checkModePhoneProxyChargingHandlerservice");
 const sys_user_entity_1 = __importDefault(require("../../entities/admin/sys-user.entity"));
 const param_config_dto_1 = require("../admin/system/param-config/param-config.dto");
+const payCodePhoneChargingHandler_service_1 = require("./subHandler/payCodePhoneChargingHandler.service");
 let ApiService = class ApiService {
     redisService;
     util;
@@ -55,6 +56,7 @@ let ApiService = class ApiService {
     handlerTemplateService;
     xiaoMangHandlerService;
     checkModePhoneHandlerService;
+    payCodePhoneChargingHandlerService;
     entityManager;
     orderQueue;
     host = null;
@@ -62,7 +64,7 @@ let ApiService = class ApiService {
     WXPAYCHANNEL;
     ALIAYCHANNEL;
     handlerMap = new Map();
-    constructor(redisService, util, topUserService, proxyUserService, linkService, topOrderService, zhService, paramConfigService, channelService, proxyChargingService, aLiPayHandlerService, handlerTemplateService, xiaoMangHandlerService, checkModePhoneHandlerService, entityManager, orderQueue) {
+    constructor(redisService, util, topUserService, proxyUserService, linkService, topOrderService, zhService, paramConfigService, channelService, proxyChargingService, aLiPayHandlerService, handlerTemplateService, xiaoMangHandlerService, checkModePhoneHandlerService, payCodePhoneChargingHandlerService, entityManager, orderQueue) {
         this.redisService = redisService;
         this.util = util;
         this.topUserService = topUserService;
@@ -77,6 +79,7 @@ let ApiService = class ApiService {
         this.handlerTemplateService = handlerTemplateService;
         this.xiaoMangHandlerService = xiaoMangHandlerService;
         this.checkModePhoneHandlerService = checkModePhoneHandlerService;
+        this.payCodePhoneChargingHandlerService = payCodePhoneChargingHandlerService;
         this.entityManager = entityManager;
         this.orderQueue = orderQueue;
     }
@@ -101,7 +104,7 @@ let ApiService = class ApiService {
             await this.paramConfigService.add(t);
         }
         this.appHost = await this.paramConfigService.findValueByKey(`appHost`);
-        let tempHandlerList = [this.aLiPayHandlerService, this.handlerTemplateService, this.xiaoMangHandlerService, this.checkModePhoneHandlerService];
+        let tempHandlerList = [this.aLiPayHandlerService, this.handlerTemplateService, this.xiaoMangHandlerService, this.checkModePhoneHandlerService, this.payCodePhoneChargingHandlerService];
         let channelList = await this.channelService.channelRoot();
         channelList.forEach(e => {
             if (e.name.includes("QQ")) {
@@ -456,8 +459,8 @@ let ApiService = class ApiService {
 };
 ApiService = __decorate([
     (0, common_1.Injectable)(),
-    __param(14, (0, typeorm_1.InjectEntityManager)()),
-    __param(15, (0, bull_1.InjectQueue)("order")),
+    __param(15, (0, typeorm_1.InjectEntityManager)()),
+    __param(16, (0, bull_1.InjectQueue)("order")),
     __metadata("design:paramtypes", [redis_service_1.RedisService,
         util_service_1.UtilService,
         top_service_1.TopService,
@@ -472,6 +475,7 @@ ApiService = __decorate([
         handlerTemplate_service_1.HandlerTemplateService,
         XiaoMangProxyChargingHandlerservice_1.XiaoMangProxyChargingHandlerService,
         checkModePhoneProxyChargingHandlerservice_1.CheckModePhoneProxyChargingHandlerService,
+        payCodePhoneChargingHandler_service_1.PayCodePhoneChargingHandlerService,
         typeorm_2.EntityManager, Object])
 ], ApiService);
 exports.ApiService = ApiService;

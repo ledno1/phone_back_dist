@@ -8,7 +8,7 @@
   "scripts": {
     "build": "nest build",
     "start": "cross-env NODE_ENV=development nest start",
-    "dev": "cross-env NODE_ENV=development nest start --watch",
+    "dev": "cross-env NODE_ENV=development nest start --watch ",
     "start:debug": "cross-env NODE_ENV=development nest start --debug --watch",
     "start:prod": "cross-env NODE_ENV=production node dist/main.js",
     "pm2:prod": "pm2 start ecosystem.config.js --env production",
@@ -27,7 +27,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "cleanlog": "rimraf logs",
     "docker:rmi": "docker compose --env-file .env.production stop nest-admin-server && docker container rm nest-admin-server && docker rmi nest-admin-server",
-    "docker:build:dev": "docker compose --env-file .env.production up --build",
+    "docker:build:dev": "docker compose --env-file .env.development up --build",
     "docker:build": "docker compose --env-file .env.production up --build",
     "docker:up": "docker compose --env-file .env.production up -d --no-build",
     "docker:down": "docker compose --env-file .env.production down",
@@ -43,6 +43,7 @@
     "@grpc/proto-loader": "^0.7.4",
     "@nestjs/axios": "^1.0.0",
     "@nestjs/bull": "^0.6.2",
+    "@nestjs/cli": "^10.1.17",
     "@nestjs/common": "^9.2.0",
     "@nestjs/config": "^2.2.0",
     "@nestjs/core": "^9.2.0",
@@ -79,6 +80,7 @@
     "puppeteer-chromium-resolver": "^20.0.0",
     "qiniu": "^7.8.0",
     "qrcode": "^1.5.1",
+    "query-mobile-phone-area": "^1.0.6",
     "redlock": "^5.0.0-beta.2",
     "reflect-metadata": "^0.1.13",
     "reqeust": "^2.81.1",
@@ -94,7 +96,6 @@
     "winston-daily-rotate-file": "^4.7.1"
   },
   "devDependencies": {
-    "@nestjs/cli": "^9.1.5",
     "@nestjs/schematics": "^9.0.3",
     "@nestjs/testing": "^9.2.0",
     "@types/bull": "^4.10.0",

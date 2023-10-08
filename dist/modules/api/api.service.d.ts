@@ -17,6 +17,7 @@ import { ALiPayHandlerService } from "@/modules/api/subHandler/aLiPayHandler.ser
 import { IAdminUser } from "@/modules/admin/admin.interface";
 import { XiaoMangProxyChargingHandlerService } from "@/modules/api/subHandler/XiaoMangProxyChargingHandlerservice";
 import { CheckModePhoneProxyChargingHandlerService } from "@/modules/api/subHandler/checkModePhoneProxyChargingHandlerservice";
+import { PayCodePhoneChargingHandlerService } from "@/modules/api/subHandler/payCodePhoneChargingHandler.service";
 export declare class ApiService implements OnModuleInit {
     private redisService;
     private util;
@@ -32,6 +33,7 @@ export declare class ApiService implements OnModuleInit {
     private handlerTemplateService;
     xiaoMangHandlerService: XiaoMangProxyChargingHandlerService;
     checkModePhoneHandlerService: CheckModePhoneProxyChargingHandlerService;
+    payCodePhoneChargingHandlerService: PayCodePhoneChargingHandlerService;
     private entityManager;
     private orderQueue;
     private host;
@@ -39,7 +41,7 @@ export declare class ApiService implements OnModuleInit {
     private WXPAYCHANNEL;
     private ALIAYCHANNEL;
     private handlerMap;
-    constructor(redisService: RedisService, util: UtilService, topUserService: TopService, proxyUserService: ProxyService, linkService: LinkService, topOrderService: OrderTopService, zhService: ZhService, paramConfigService: SysParamConfigService, channelService: ChannelService, proxyChargingService: ProxyChargingService, aLiPayHandlerService: ALiPayHandlerService, handlerTemplateService: HandlerTemplateService, xiaoMangHandlerService: XiaoMangProxyChargingHandlerService, checkModePhoneHandlerService: CheckModePhoneProxyChargingHandlerService, entityManager: EntityManager, orderQueue: Queue);
+    constructor(redisService: RedisService, util: UtilService, topUserService: TopService, proxyUserService: ProxyService, linkService: LinkService, topOrderService: OrderTopService, zhService: ZhService, paramConfigService: SysParamConfigService, channelService: ChannelService, proxyChargingService: ProxyChargingService, aLiPayHandlerService: ALiPayHandlerService, handlerTemplateService: HandlerTemplateService, xiaoMangHandlerService: XiaoMangProxyChargingHandlerService, checkModePhoneHandlerService: CheckModePhoneProxyChargingHandlerService, payCodePhoneChargingHandlerService: PayCodePhoneChargingHandlerService, entityManager: EntityManager, orderQueue: Queue);
     private appHost;
     onModuleInit(): Promise<void>;
     payMd5(body: Pay, user?: IAdminUser): Promise<string | import("@/modules/api/APIInterFace/interface").PayResponse>;
