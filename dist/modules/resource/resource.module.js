@@ -45,6 +45,7 @@ const kakaCheckPhone_service_1 = require("../code/subHandler/kakaCheckPhone.serv
 const ipBackList_controller_1 = require("./ipbacklist/ipBackList.controller");
 const ipBackList_service_1 = require("./ipbacklist/ipBackList.service");
 const backip_entity_1 = require("../../entities/resource/backip.entity");
+const kakaPayCode_service_1 = require("../code/subHandler/kakaPayCode.service");
 let ResourceModule = class ResourceModule {
 };
 ResourceModule = __decorate([
@@ -81,7 +82,9 @@ ResourceModule = __decorate([
             })
         ],
         controllers: [zh_controller_1.ZhController, link_controller_1.LinkController, channel_controller_1.ChannelController, group_controller_1.GroupController, proxyChargincontroller_1.ProxyChargingController, takeLink_controller_1.TakeLinkController, payaccount_controller_1.PayAccountController, ipBackList_controller_1.IpBackListController],
-        providers: [zh_service_1.ZhService, link_service_1.LinkService, channel_service_1.ChannelService, group_service_1.GroupService, proxyChargin_service_1.ProxyChargingService, takeLink_service_1.TakeLinkService, payaccount_service_1.PayAccountService, code_service_1.CodeService, test_service_1.TestHandlerService, product_service_1.PayCodeProductService, kakaCheckPhone_service_1.KaKaCheckPhoneHandlerService, ipBackList_service_1.IpBackListService],
+        providers: [zh_service_1.ZhService, link_service_1.LinkService, channel_service_1.ChannelService, group_service_1.GroupService, proxyChargin_service_1.ProxyChargingService, takeLink_service_1.TakeLinkService, payaccount_service_1.PayAccountService, code_service_1.CodeService, test_service_1.TestHandlerService, product_service_1.PayCodeProductService, ipBackList_service_1.IpBackListService,
+            kakaCheckPhone_service_1.KaKaCheckPhoneHandlerService, kakaPayCode_service_1.KaKaPayCodeHandlerService
+        ],
         exports: [zh_service_1.ZhService, link_service_1.LinkService, channel_service_1.ChannelService, group_service_1.GroupService, proxyChargin_service_1.ProxyChargingService, takeLink_service_1.TakeLinkService, payaccount_service_1.PayAccountService, ipBackList_service_1.IpBackListService]
     })
 ], ResourceModule);

@@ -22,7 +22,7 @@ let KaKaPayCodeHandlerService = class KaKaPayCodeHandlerService {
             resolve(true);
         });
     }
-    nameKey = 'test';
+    nameKey = '支付码';
     checkOrder(params, orderRedis) {
         return new Promise((resolve, reject) => {
             console.log('查单实现');

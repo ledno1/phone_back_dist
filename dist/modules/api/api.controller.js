@@ -180,7 +180,9 @@ let ApiController = class ApiController {
     async getpayurl(body, request) {
         const clientIP = request.headers['x-forwarded-for'] || '127.0.0.1';
         let { fingerprint } = body;
-        console.log(fingerprint);
+        if (body.action == 'orderinfo') {
+            return await this.apiService.getPayUrl(body, clientIP.toString().split(",")[0]);
+        }
         if (!fingerprint) {
             console.error(`${clientIP.toString().split(",")[0]}非法请求无携带指纹`);
             return {

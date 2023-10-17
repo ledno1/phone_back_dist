@@ -48,7 +48,7 @@ export declare class ProxyChargingService implements OnModuleInit {
         code: number;
         message: string;
     }>;
-    operatorType(type: string): Promise<"YIDONG" | "DIANXIN" | "LIANTONG">;
+    operatorType(type: string): Promise<"DIANXIN" | "LIANTONG" | "YIDONG">;
     provinceType(type: string, province: string): Promise<boolean>;
 }
 export declare class PhoneInfo {

@@ -31,6 +31,22 @@ export declare class ApiController implements OnModuleInit {
         outTime: any;
     }) | {
         code: number;
+        price?: undefined;
+        orderid?: undefined;
+        userid?: undefined;
+        createAt?: undefined;
+        showOrderid?: undefined;
+        status?: undefined;
+        oid?: undefined;
+        msg?: undefined;
+        phone?: undefined;
+        outTime?: undefined;
+        url?: undefined;
+        qrcode?: undefined;
+        mode?: undefined;
+        mOid?: undefined;
+    } | {
+        code: number;
         price: string;
         orderid: string;
         userid: string;
@@ -61,8 +77,6 @@ export declare class ApiController implements OnModuleInit {
         qrcode?: undefined;
         mode?: undefined;
         mOid?: undefined;
-    } | {
-        code: number;
     }>;
     alipayNotify(body: any, query: any): Promise<"success" | "fail">;
     startcheck(query: any): Promise<void>;

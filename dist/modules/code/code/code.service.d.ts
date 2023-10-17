@@ -10,6 +10,7 @@ import { PayCodeServiceHandler } from "@/modules/code/subHandler/InerFace";
 import { ChannelService } from "@/modules/resource/channel/channel.service";
 import { PayCodeProductService } from "@/modules/code/product/product.service";
 import { KaKaCheckPhoneHandlerService } from "@/modules/code/subHandler/kakaCheckPhone.service";
+import { KaKaPayCodeHandlerService } from "@/modules/code/subHandler/kakaPayCode.service";
 export declare class CodeService implements OnModuleInit {
     private redisService;
     private entityManager;
@@ -17,8 +18,9 @@ export declare class CodeService implements OnModuleInit {
     private channelService;
     private productService;
     private kakaCheckPhoneHandlerService;
+    private KaKaPayCodeHandlerService;
     private util;
-    constructor(redisService: RedisService, entityManager: EntityManager, testService: TestHandlerService, channelService: ChannelService, productService: PayCodeProductService, kakaCheckPhoneHandlerService: KaKaCheckPhoneHandlerService, util: UtilService);
+    constructor(redisService: RedisService, entityManager: EntityManager, testService: TestHandlerService, channelService: ChannelService, productService: PayCodeProductService, kakaCheckPhoneHandlerService: KaKaCheckPhoneHandlerService, KaKaPayCodeHandlerService: KaKaPayCodeHandlerService, util: UtilService);
     handlerMap: Map<number, PayCodeServiceHandler>;
     onModuleInit(): Promise<void>;
     createPayCodeByChannel(params: SysPay, orderRedis: OrderRedis): Promise<void>;

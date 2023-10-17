@@ -25,6 +25,7 @@ const product_entity_1 = require("../../../entities/paycode/product.entity");
 const channel_service_1 = require("../../resource/channel/channel.service");
 const product_service_1 = require("../product/product.service");
 const kakaCheckPhone_service_1 = require("../subHandler/kakaCheckPhone.service");
+const kakaPayCode_service_1 = require("../subHandler/kakaPayCode.service");
 let CodeService = class CodeService {
     redisService;
     entityManager;
@@ -32,19 +33,21 @@ let CodeService = class CodeService {
     channelService;
     productService;
     kakaCheckPhoneHandlerService;
+    KaKaPayCodeHandlerService;
     util;
-    constructor(redisService, entityManager, testService, channelService, productService, kakaCheckPhoneHandlerService, util) {
+    constructor(redisService, entityManager, testService, channelService, productService, kakaCheckPhoneHandlerService, KaKaPayCodeHandlerService, util) {
         this.redisService = redisService;
         this.entityManager = entityManager;
         this.testService = testService;
         this.channelService = channelService;
         this.productService = productService;
         this.kakaCheckPhoneHandlerService = kakaCheckPhoneHandlerService;
+        this.KaKaPayCodeHandlerService = KaKaPayCodeHandlerService;
         this.util = util;
     }
     handlerMap = new Map();
     async onModuleInit() {
-        let serviceList = [this.testService, this.kakaCheckPhoneHandlerService];
+        let serviceList = [this.testService, this.kakaCheckPhoneHandlerService, this.KaKaPayCodeHandlerService];
         let product = await this.entityManager.find(product_entity_1.PayCodeProduct, { select: ['id', 'name'] });
         product.forEach(product => {
             serviceList.forEach(h => {
@@ -169,6 +172,7 @@ CodeService = __decorate([
         channel_service_1.ChannelService,
         product_service_1.PayCodeProductService,
         kakaCheckPhone_service_1.KaKaCheckPhoneHandlerService,
+        kakaPayCode_service_1.KaKaPayCodeHandlerService,
         util_service_1.UtilService])
 ], CodeService);
 exports.CodeService = CodeService;
