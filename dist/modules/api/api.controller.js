@@ -183,19 +183,21 @@ let ApiController = class ApiController {
         if (body.action == 'orderinfo') {
             return await this.apiService.getPayUrl(body, clientIP.toString().split(",")[0]);
         }
-        if (!fingerprint) {
-            console.error(`${clientIP.toString().split(",")[0]}非法请求无携带指纹`);
-            return {
-                code: 3
-            };
+        else {
+            if (!fingerprint) {
+                console.error(`${clientIP.toString().split(",")[0]}非法请求无携带指纹`);
+                return {
+                    code: 3
+                };
+            }
+            let is = await this.utils.backClient(clientIP.toString().split(",")[0], fingerprint);
+            if (is) {
+                return {
+                    code: 3
+                };
+            }
+            return await this.apiService.getPayUrl(body, clientIP.toString().split(",")[0]);
         }
-        let is = await this.utils.backClient(clientIP.toString().split(",")[0], fingerprint);
-        if (is) {
-            return {
-                code: 3
-            };
-        }
-        return await this.apiService.getPayUrl(body, clientIP.toString().split(",")[0]);
     }
     async alipayNotify(body, query) {
         return await this.apiService.alipayNotify(body, query);
