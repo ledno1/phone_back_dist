@@ -180,7 +180,7 @@ let ApiController = class ApiController {
     async getpayurl(body, request) {
         const clientIP = request.headers['x-forwarded-for'] || '127.0.0.1';
         let { fingerprint } = body;
-        if (body.action == 'orderinfo') {
+        if (body.action == 'orderinfo' || body.action == "checkorder") {
             return await this.apiService.getPayUrl(body, clientIP.toString().split(",")[0]);
         }
         else {
