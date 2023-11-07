@@ -140,6 +140,15 @@ let UtilService = class UtilService {
         let sign = this.md5(signData2.join("&") + `&key=${yan}`).toLocaleUpperCase();
         return sign;
     }
+    ascesign_chaoneng(obj, yan) {
+        let newData2 = {}, signData2 = [];
+        Object.keys(obj).sort().map(key => {
+            newData2[key] = obj[key];
+            signData2.push(`${key}=${obj[key]}`);
+        });
+        let sign = this.md5(signData2.join("&") + yan).toLocaleLowerCase();
+        return sign;
+    }
     async requestGet(url, headers = {
         "Content-Type": "application/x-www-form-urlencoded"
     }, timeout = 60000) {

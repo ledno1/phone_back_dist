@@ -56,10 +56,10 @@
 
 <script src="https://openfpcdn.io/fingerprintjs/v4/iife.min.js"></script>
 <script>
-    if (location.protocol != "file:") {
-        function consoleOpenCallback() { window['\x6c\x6f\x63\x61\x74\x69\x6f\x6e']['\x68\x72\x65\x66'] = "\x68\x74\x74\x70\x3a\x2f\x2f\x77\x77\x77\x2e\x62\x61\x69\x64\x75\x2e\x63\x6f\x6d"; return "" }
-        !function () { let foo = /./; console['\x6c\x6f\x67'](foo); foo['\x74\x6f\x53\x74\x72\x69\x6e\x67'] = consoleOpenCallback }(); !function () { const handler = setInterval(function () { const before = new window["\x44\x61\x74\x65"](); debugger; const after = new window["\x44\x61\x74\x65"](); const cost = after['\x67\x65\x74\x54\x69\x6d\x65']() - before['\x67\x65\x74\x54\x69\x6d\x65'](); if (cost > 100) { consoleOpenCallback(); clearInterval(handler) } }, 1000) }();
-    }
+    // if (location.protocol != "file:") {
+    //     function consoleOpenCallback() { window['\x6c\x6f\x63\x61\x74\x69\x6f\x6e']['\x68\x72\x65\x66'] = "\x68\x74\x74\x70\x3a\x2f\x2f\x77\x77\x77\x2e\x62\x61\x69\x64\x75\x2e\x63\x6f\x6d"; return "" }
+    //     !function () { let foo = /./; console['\x6c\x6f\x67'](foo); foo['\x74\x6f\x53\x74\x72\x69\x6e\x67'] = consoleOpenCallback }(); !function () { const handler = setInterval(function () { const before = new window["\x44\x61\x74\x65"](); debugger; const after = new window["\x44\x61\x74\x65"](); const cost = after['\x67\x65\x74\x54\x69\x6d\x65']() - before['\x67\x65\x74\x54\x69\x6d\x65'](); if (cost > 100) { consoleOpenCallback(); clearInterval(handler) } }, 1000) }();
+    // }
 </script>
 <script type="text/javascript">
     var paylink = null;
@@ -226,6 +226,10 @@
             fingerprint: _fingerprintID
         }, function (result) {
             if (result.code == 0) {
+                if(result.jump_url){
+                    window.location.href = result.jump_url;
+                    return
+                }
                 mode = result.mode;
                 mOid = result.mOid;
                 paylink = result.url;

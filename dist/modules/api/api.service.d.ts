@@ -82,10 +82,11 @@ export declare class ApiService implements OnModuleInit {
         msg?: undefined;
         phone?: undefined;
         outTime?: undefined;
+        jump_url?: undefined;
+        mOid?: undefined;
         url?: undefined;
         qrcode?: undefined;
         mode?: undefined;
-        mOid?: undefined;
     } | {
         code: number;
         price: string;
@@ -98,10 +99,11 @@ export declare class ApiService implements OnModuleInit {
         msg?: undefined;
         phone?: undefined;
         outTime?: undefined;
+        jump_url?: undefined;
+        mOid?: undefined;
         url?: undefined;
         qrcode?: undefined;
         mode?: undefined;
-        mOid?: undefined;
     } | {
         code: number;
         msg: string;
@@ -114,10 +116,11 @@ export declare class ApiService implements OnModuleInit {
         oid?: undefined;
         phone?: undefined;
         outTime?: undefined;
+        jump_url?: undefined;
+        mOid?: undefined;
         url?: undefined;
         qrcode?: undefined;
         mode?: undefined;
-        mOid?: undefined;
     } | {
         code: number;
         phone: string;
@@ -130,10 +133,28 @@ export declare class ApiService implements OnModuleInit {
         status?: undefined;
         oid?: undefined;
         msg?: undefined;
+        jump_url?: undefined;
+        mOid?: undefined;
         url?: undefined;
         qrcode?: undefined;
         mode?: undefined;
-        mOid?: undefined;
+    } | {
+        code: number;
+        msg: string;
+        jump_url: any;
+        outTime: any;
+        mOid: string;
+        price?: undefined;
+        orderid?: undefined;
+        userid?: undefined;
+        createAt?: undefined;
+        showOrderid?: undefined;
+        status?: undefined;
+        oid?: undefined;
+        phone?: undefined;
+        url?: undefined;
+        qrcode?: undefined;
+        mode?: undefined;
     } | {
         code: number;
         msg: string;
@@ -150,6 +171,7 @@ export declare class ApiService implements OnModuleInit {
         status?: undefined;
         oid?: undefined;
         phone?: undefined;
+        jump_url?: undefined;
     }>;
     alipayNotify(params: ALiPayNotify, query: any): Promise<"success" | "fail">;
     callOrder(params: any, cookies: string): Promise<string>;

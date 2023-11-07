@@ -41,10 +41,11 @@ export declare class ApiController implements OnModuleInit {
         msg?: undefined;
         phone?: undefined;
         outTime?: undefined;
+        jump_url?: undefined;
+        mOid?: undefined;
         url?: undefined;
         qrcode?: undefined;
         mode?: undefined;
-        mOid?: undefined;
     } | {
         code: number;
         price: string;
@@ -57,10 +58,11 @@ export declare class ApiController implements OnModuleInit {
         msg?: undefined;
         phone?: undefined;
         outTime?: undefined;
+        jump_url?: undefined;
+        mOid?: undefined;
         url?: undefined;
         qrcode?: undefined;
         mode?: undefined;
-        mOid?: undefined;
     } | {
         code: number;
         msg: string;
@@ -73,14 +75,68 @@ export declare class ApiController implements OnModuleInit {
         oid?: undefined;
         phone?: undefined;
         outTime?: undefined;
+        jump_url?: undefined;
+        mOid?: undefined;
         url?: undefined;
         qrcode?: undefined;
         mode?: undefined;
+    } | {
+        code: number;
+        phone: string;
+        outTime: any;
+        price?: undefined;
+        orderid?: undefined;
+        userid?: undefined;
+        createAt?: undefined;
+        showOrderid?: undefined;
+        status?: undefined;
+        oid?: undefined;
+        msg?: undefined;
+        jump_url?: undefined;
         mOid?: undefined;
+        url?: undefined;
+        qrcode?: undefined;
+        mode?: undefined;
+    } | {
+        code: number;
+        msg: string;
+        jump_url: any;
+        outTime: any;
+        mOid: string;
+        price?: undefined;
+        orderid?: undefined;
+        userid?: undefined;
+        createAt?: undefined;
+        showOrderid?: undefined;
+        status?: undefined;
+        oid?: undefined;
+        phone?: undefined;
+        url?: undefined;
+        qrcode?: undefined;
+        mode?: undefined;
+    } | {
+        code: number;
+        msg: string;
+        url: any;
+        qrcode: any;
+        outTime: any;
+        mode: string;
+        mOid: string;
+        price?: undefined;
+        orderid?: undefined;
+        userid?: undefined;
+        createAt?: undefined;
+        showOrderid?: undefined;
+        status?: undefined;
+        oid?: undefined;
+        phone?: undefined;
+        jump_url?: undefined;
     }>;
     alipayNotify(body: any, query: any): Promise<"success" | "fail">;
     startcheck(query: any): Promise<void>;
     callback(): Promise<string>;
+    notify_url(query: any): Promise<string>;
+    return_rul(query: any): Promise<string>;
     directPush(body: DirectPush, request: Request): Promise<{
         code: number;
         message: string;

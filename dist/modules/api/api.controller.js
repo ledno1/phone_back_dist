@@ -184,18 +184,6 @@ let ApiController = class ApiController {
             return await this.apiService.getPayUrl(body, clientIP.toString().split(",")[0]);
         }
         else {
-            if (!fingerprint) {
-                console.error(`${clientIP.toString().split(",")[0]}非法请求无携带指纹`);
-                return {
-                    code: 3
-                };
-            }
-            let is = await this.utils.backClient(clientIP.toString().split(",")[0], fingerprint);
-            if (is) {
-                return {
-                    code: 3
-                };
-            }
             return await this.apiService.getPayUrl(body, clientIP.toString().split(",")[0]);
         }
     }
@@ -208,6 +196,14 @@ let ApiController = class ApiController {
         }
     }
     async callback() {
+        return 'success';
+    }
+    async notify_url(query) {
+        console.log(query);
+        return 'success';
+    }
+    async return_rul(query) {
+        console.log(query);
         return 'success';
     }
     async directPush(body, request) {
@@ -336,6 +332,24 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], ApiController.prototype, "callback", null);
+__decorate([
+    (0, authorize_decorator_1.Authorize)(),
+    (0, common_1.Post)("/notify_url"),
+    (0, keep_decorator_1.Keep)(),
+    __param(0, (0, common_1.Query)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], ApiController.prototype, "notify_url", null);
+__decorate([
+    (0, authorize_decorator_1.Authorize)(),
+    (0, common_1.Post)("/return_rul"),
+    (0, keep_decorator_1.Keep)(),
+    __param(0, (0, common_1.Query)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], ApiController.prototype, "return_rul", null);
 __decorate([
     (0, keep_decorator_1.Keep)(),
     (0, authorize_decorator_1.Authorize)(),

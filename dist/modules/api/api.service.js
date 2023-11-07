@@ -347,23 +347,37 @@ let ApiService = class ApiService {
         else {
             if (!orderInfo)
                 return { code: 3, msg: "订单超时,请重新拉取" };
-            orderInfo = JSON.parse(orderInfo);
-            let o = orderInfo;
-            this.topOrderService.upDateClientData(o.oid, params, ip);
-            let r = await this.paramConfigService.findValueByKey("devLog");
-            if (r == "1") {
-                console.log(`${ip}==${this.util.dayjs().format("YYYY-MM-DD HH:mm:ss")}==${params.os}==${o.mOid}到收银台,金额${o.amount / 100}元,通道${o.channel}`);
+            let aLiPayQrCodeVersion = await this.paramConfigService.findValueByKey(`aLiPayQrCodeVersion`);
+            if (aLiPayQrCodeVersion == '3') {
+                orderInfo = JSON.parse(orderInfo);
+                let o = orderInfo;
+                return {
+                    code,
+                    msg: "ok",
+                    jump_url: orderInfo.jump_url,
+                    outTime: orderInfo.outTime,
+                    mOid: o.mOid
+                };
             }
-            let mode = await this.paramConfigService.findValueByKey("aLiPayQrCode");
-            return {
-                code,
-                msg: "ok",
-                url: orderInfo.url,
-                qrcode: orderInfo.qrcode,
-                outTime: orderInfo.outTime,
-                mode,
-                mOid: o.mOid
-            };
+            else {
+                orderInfo = JSON.parse(orderInfo);
+                let o = orderInfo;
+                this.topOrderService.upDateClientData(o.oid, params, ip);
+                let r = await this.paramConfigService.findValueByKey("devLog");
+                if (r == "1") {
+                    console.log(`${ip}==${this.util.dayjs().format("YYYY-MM-DD HH:mm:ss")}==${params.os}==${o.mOid}到收银台,金额${o.amount / 100}元,通道${o.channel}`);
+                }
+                let mode = await this.paramConfigService.findValueByKey("aLiPayQrCode");
+                return {
+                    code,
+                    msg: "ok",
+                    url: orderInfo.url,
+                    qrcode: orderInfo.qrcode,
+                    outTime: orderInfo.outTime,
+                    mode,
+                    mOid: o.mOid
+                };
+            }
         }
     }
     async alipayNotify(params, query) {

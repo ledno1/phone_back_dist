@@ -21,6 +21,7 @@ export declare class UtilService {
     dayjsFormat(t: any): any;
     unique(arr: any[], key: string): any[];
     ascesign(obj: any, yan: string): string;
+    ascesign_chaoneng(obj: any, yan: string): string;
     requestGet(url: string, headers?: {
         "Content-Type": string;
     }, timeout?: number): Promise<any>;
