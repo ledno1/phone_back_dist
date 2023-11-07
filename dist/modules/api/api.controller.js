@@ -334,7 +334,7 @@ __decorate([
 ], ApiController.prototype, "callback", null);
 __decorate([
     (0, authorize_decorator_1.Authorize)(),
-    (0, common_1.Post)("/notify_url"),
+    (0, common_1.Get)("/notify_url"),
     (0, keep_decorator_1.Keep)(),
     __param(0, (0, common_1.Query)()),
     __metadata("design:type", Function),
@@ -343,7 +343,7 @@ __decorate([
 ], ApiController.prototype, "notify_url", null);
 __decorate([
     (0, authorize_decorator_1.Authorize)(),
-    (0, common_1.Post)("/return_rul"),
+    (0, common_1.Get)("/return_rul"),
     (0, keep_decorator_1.Keep)(),
     __param(0, (0, common_1.Query)()),
     __metadata("design:type", Function),
