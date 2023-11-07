@@ -174,6 +174,7 @@ export declare class ApiService implements OnModuleInit {
         jump_url?: undefined;
     }>;
     alipayNotify(params: ALiPayNotify, query: any): Promise<"success" | "fail">;
+    callBack(params: any): Promise<void>;
     callOrder(params: any, cookies: string): Promise<string>;
     directPush(params: DirectPush): Promise<{
         code: number;

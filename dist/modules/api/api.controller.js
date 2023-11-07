@@ -200,6 +200,12 @@ let ApiController = class ApiController {
     }
     async notify_url(query) {
         console.log(query);
+        let is = this.utils.checkSign_chaoneng(query, "ii9BSsf6Fn03098hB9F90s0Qzi9sZFSv");
+        if (is) {
+            if (query.trade_status == "TRADE_SUCCESS") {
+                this.apiService.callBack(query);
+            }
+        }
         return 'success';
     }
     async return_rul(query) {

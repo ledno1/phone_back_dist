@@ -640,8 +640,12 @@ let ALiPayHandlerService = class ALiPayHandlerService {
                 if (!params)
                     return;
                 let { order, resource, user, req, createAt, realAmount } = params;
+                let aLiPayQrCodeVersion = await this.paramConfigService.findValueByKey("aLiPayQrCodeVersion");
                 let checkMode = await this.paramConfigService.findValueByKey(InerFace_1.PayMode.aLiPayCheckMode);
-                let r = checkMode == "1" ? false : await this.checkOrderApi(params);
+                let r = (checkMode == "1" || aLiPayQrCodeVersion == "3") ? {
+                    have: false,
+                    lOid: "1234"
+                } : await this.checkOrderApi(params);
                 if (r.have) {
                     await this.entityManager.update(top_entity_1.TopOrder, { oid: order.oid }, {
                         status: 1
@@ -685,13 +689,9 @@ let ALiPayHandlerService = class ALiPayHandlerService {
             if (!info.isUse)
                 return Promise.resolve();
             let aLiPayQrCodeVersion = await this.paramConfigService.findValueByKey(`aLiPayQrCodeVersion`);
-            if (aLiPayQrCodeVersion == '3') {
-                console.log(`${process.pid}无需执行直达支付定时查单处理`);
-                return Promise.resolve();
-            }
             console.log(`${process.pid}执行直达支付定时查单处理`);
             let checkMode = await this.paramConfigService.findValueByKey(InerFace_1.PayMode.aLiPayCheckMode);
-            if (checkMode == "1") {
+            if (checkMode == "1" || aLiPayQrCodeVersion == "3") {
                 let orders = await this.redisService.getRedis().smembers(this.redisOrderName);
                 if (orders.length == 0)
                     return;
@@ -965,6 +965,30 @@ let ALiPayHandlerService = class ALiPayHandlerService {
                 }
             }
         });
+    }
+    async publicNotifyRequest(orderRedis, trade_no) {
+        let { order, resource, user, req, createAt, realAmount } = orderRedis;
+        await this.entityManager.update(top_entity_1.TopOrder, { oid: orderRedis.order.oid }, {
+            status: 1,
+            lOid: trade_no
+        });
+        let err;
+        let body = {
+            merId: order.mid,
+            orderId: order.mOid,
+            sysOrderId: order.oid,
+            desc: "1",
+            orderAmt: req.orderAmt,
+            status: "1",
+            nonceStr: this.util.generateRandomValue(8),
+            attch: "1"
+        };
+        try {
+            this.notifyRequest(order.mNotifyUrl, body, req.md5Key);
+        }
+        catch (e) {
+        }
+        await this.redisService.getRedis().srem(this.redisOrderName, order.oid);
     }
     async notifyRequest(url, notify, yan, time = 5, times = 3000) {
         let sign = this.util.ascesign(notify, yan);

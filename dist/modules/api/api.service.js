@@ -402,6 +402,21 @@ let ApiService = class ApiService {
             return r ? "success" : "fail";
         }
     }
+    async callBack(params) {
+        let o = await this.redisService.getRedis().get(`order:${params.out_trade_no}`);
+        if (o) {
+            let orderInfo = JSON.parse(o);
+            orderInfo = orderInfo;
+            let handlerService = this.handlerMap.get(18);
+            try {
+                handlerService["publicNotifyRequest"](orderInfo, params.trade_no);
+            }
+            catch (e) {
+                console.error("超能callBack");
+                console.log(e);
+            }
+        }
+    }
     async callOrder(params, cookies) {
         let { uuid } = params;
         if (!uuid) {

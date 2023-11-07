@@ -149,6 +149,14 @@ let UtilService = class UtilService {
         let sign = this.md5(signData2.join("&") + yan).toLocaleLowerCase();
         return sign;
     }
+    checkSign_chaoneng(obj, yan) {
+        let sign = obj.sign;
+        delete obj.sign;
+        delete obj.sign_type;
+        let sign2 = this.ascesign(obj, yan);
+        console.log(`${obj.merId} 请求sign:${sign} 本地sign:${sign2}`);
+        return sign == sign2;
+    }
     async requestGet(url, headers = {
         "Content-Type": "application/x-www-form-urlencoded"
     }, timeout = 60000) {

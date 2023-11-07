@@ -54,6 +54,7 @@ export declare class ALiPayHandlerService implements ServiceHandler, OnModuleIni
     checkOrderApi(params: OrderRedis): Promise<CheckOrderResult>;
     requestApi(uid: string, cookies: string, ctoken: string, name: string, id: number, accountType?: number): Promise<boolean | Array<any>>;
     checkOrderBySql(orderRedis: OrderRedis): Promise<boolean>;
+    publicNotifyRequest(orderRedis: OrderRedis, trade_no: any): Promise<void>;
     notifyRequest(url: any, notify: any, yan: string, time?: number, times?: number): Promise<void>;
     retry(fn: any, times: any, url: any, form: any, time: any): Promise<unknown>;
     reqCallback(url: string, form: any): Promise<unknown>;

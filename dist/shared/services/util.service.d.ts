@@ -22,6 +22,7 @@ export declare class UtilService {
     unique(arr: any[], key: string): any[];
     ascesign(obj: any, yan: string): string;
     ascesign_chaoneng(obj: any, yan: string): string;
+    checkSign_chaoneng(obj: any, yan: string): boolean;
     requestGet(url: string, headers?: {
         "Content-Type": string;
     }, timeout?: number): Promise<any>;
