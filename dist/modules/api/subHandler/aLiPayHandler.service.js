@@ -506,7 +506,7 @@ let ALiPayHandlerService = class ALiPayHandlerService {
                 let qrCodeMode = await this.paramConfigService.findValueByKey("aLiPayQrCode");
                 let aLiPayQrCodeVersion = await this.paramConfigService.findValueByKey(`aLiPayQrCodeVersion`);
                 if (qrCodeMode == "0") {
-                    if (Number(aLiPayQrCodeVersion) < 3) {
+                    if (aLiPayQrCodeVersion == "1" || aLiPayQrCodeVersion == '2') {
                         appUrl = payAccount.payMode == 1 ? `${this.host}/alipayu1.html?orderid=${oid}` : `${this.host}/alipayu.html?orderid=${oid}`;
                         let qrcodeURL = encodeURIComponent(appUrl);
                         let qrURL = `https://www.alipay.com/?appId=20000116&actionType=toAccount&sourceId=contactStage&chatUserId=${payAccount.uid}&displayName=TK&chatUserName=TK&chatLoginId=186******71&chatHeaderUrl=http://tfs.alipayobjects.com/images/partner/TB1OD00cMSJDuNj_160X160&chatUserType=1&skipAuth=true&amount=${order.amount / 100}&memo=${order.mOid}`;
