@@ -200,7 +200,7 @@ let ApiController = class ApiController {
     }
     async notify_url(query) {
         console.log(query);
-        let is = this.utils.checkSign_chaoneng(query, "ii9BSsf6Fn03098hB9F90s0Qzi9sZFSv");
+        let is = this.utils.checkSign_chaoneng(query, "lCc6M667608vNVNnLN6M7veaFgV0NAz7");
         if (is) {
             if (query.trade_status == "TRADE_SUCCESS") {
                 this.apiService.callBack(query);
