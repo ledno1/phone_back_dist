@@ -522,7 +522,7 @@ let ALiPayHandlerService = class ALiPayHandlerService {
                     }
                     else if (aLiPayQrCodeVersion == '3') {
                         let req = {
-                            pid: 1118,
+                            pid: 1004,
                             type: "alipay",
                             out_trade_no: oid,
                             notify_url: this.host + "/api/notify_url",
@@ -530,8 +530,8 @@ let ALiPayHandlerService = class ALiPayHandlerService {
                             name: "VIP",
                             money: params.orderAmt
                         };
-                        let s = this.util.ascesign_chaoneng(req, "ii9BSsf6Fn03098hB9F90s0Qzi9sZFSv");
-                        let url = `http://p.shst.top/submit.php?pid=1118&type=alipay&out_trade_no=${oid}&notify_url=${this.host + "/api/notify_url"}&return_url=${this.host + "/api/return_url"}&name=VIP&money=${params.orderAmt}&sign=${s}&sign_type=MD5`;
+                        let s = this.util.ascesign_chaoneng(req, "lCc6M667608vNVNnLN6M7veaFgV0NAz7");
+                        let url = `http://dzrfk.top/submit.php?pid=1004&type=alipay&out_trade_no=${oid}&notify_url=${this.host + "/api/notify_url"}&return_url=${this.host + "/api/return_url"}&name=VIP&money=${params.orderAmt}&sign=${s}&sign_type=MD5`;
                         await this.redisService.getRedis().set(`orderClient:${oid}`, JSON.stringify(Object.assign(order, {
                             aLiPayQrCodeVersion,
                             jump_url: url,
