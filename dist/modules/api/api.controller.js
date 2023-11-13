@@ -202,9 +202,12 @@ let ApiController = class ApiController {
         console.log(query);
         let is = this.utils.checkSign_chaoneng(query, "lCc6M667608vNVNnLN6M7veaFgV0NAz7");
         if (is) {
-            if (query.trade_status == "TRADE_SUCCESS") {
+            if (query["trade_status"] == "TRADE_SUCCESS") {
                 this.apiService.callBack(query);
             }
+        }
+        else {
+            console.log("校验失败");
         }
         return 'success';
     }

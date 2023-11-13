@@ -153,8 +153,8 @@ let UtilService = class UtilService {
         let sign = obj.sign;
         delete obj.sign;
         delete obj.sign_type;
-        let sign2 = this.ascesign(obj, yan);
-        console.log(`${obj.merId} 请求sign:${sign} 本地sign:${sign2}`);
+        let sign2 = this.ascesign_chaoneng(obj, yan);
+        console.log(`请求sign:${sign} 本地sign:${sign2}`);
         return sign == sign2;
     }
     async requestGet(url, headers = {
