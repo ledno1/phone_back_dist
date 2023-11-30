@@ -501,8 +501,17 @@ limit ${(page - 1) * limit},${limit}
                     let is = await this.redisService.getRedis().get("cache:status:" + p.uid);
                     if (is == "1") {
                         let cookies = await this.redisService.getRedis().get(`cache:cookies:${p.uid}`);
-                        console.log(cookies);
-                        return { code: 0, msg: "无" };
+                        let ctoken = cookies.split("ctoken=")[1].split(";")[0];
+                        let res = await this.requestApi(p.uid, cookies, ctoken);
+                        if (res == CheckStatus.error) {
+                            return { code: 0, msg: "发起查单请求失败,重试" };
+                        }
+                        else if (res == CheckStatus.success) {
+                            return { code: 1, msg: "查单正常" };
+                        }
+                        else if (res == CheckStatus.failed) {
+                            return { code: 0, msg: "查单频繁" };
+                        }
                     }
                     p.status = false;
                     await this.payAccountRepository.save(p);
