@@ -22,19 +22,23 @@ let TopOrderTemp = class TopOrderTemp extends base_entity_1.BaseEntity {
     amount;
     mid;
     status;
+    os;
     errInfo;
     pid;
     oid;
     mOid;
     mIp;
+    cIp;
+    payer;
+    fingerprint;
+    cPayAt;
+    cInAt;
     mNotifyUrl;
     callbackInfo;
     callback;
     channel;
     parentChannel;
     lOid;
-    queryUrl;
-    APIKey;
     lRate;
     zh;
     SysUser;
@@ -55,12 +59,16 @@ __decorate([
     (0, typeorm_1.Column)({
         type: "int",
         comment: "支付状态:-1支付超时,0未支付,1支付成功,2支付中 3强制回调 4支付成功强制回调",
-        default: -1
+        default: 2
     }),
     __metadata("design:type", Number)
 ], TopOrderTemp.prototype, "status", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: "varchar", length: 64, comment: "订单出错事件", nullable: true }),
+    (0, typeorm_1.Column)({ type: "varchar", length: 32, comment: "客户端访问网页收银台的设备系统类型", nullable: true }),
+    __metadata("design:type", String)
+], TopOrderTemp.prototype, "os", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: "varchar", length: 512, comment: "订单出错事件", default: "" }),
     __metadata("design:type", String)
 ], TopOrderTemp.prototype, "errInfo", void 0);
 __decorate([
@@ -68,11 +76,11 @@ __decorate([
     __metadata("design:type", Number)
 ], TopOrderTemp.prototype, "pid", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: "varchar", length: 64, comment: "自身平台订单号" }),
+    (0, typeorm_1.Column)({ type: "varchar", length: 64, comment: "自身平台订单号", unique: false }),
     __metadata("design:type", String)
 ], TopOrderTemp.prototype, "oid", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: "varchar", length: 64, comment: "上游平台订单号" }),
+    (0, typeorm_1.Column)({ type: "varchar", length: 64, comment: "上游平台订单号", unique: false }),
     __metadata("design:type", String)
 ], TopOrderTemp.prototype, "mOid", void 0);
 __decorate([
@@ -80,7 +88,27 @@ __decorate([
     __metadata("design:type", String)
 ], TopOrderTemp.prototype, "mIp", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: "varchar", length: 256, comment: "上游平台回调地址" }),
+    (0, typeorm_1.Column)({ type: "varchar", length: 64, comment: "收银台客户请求ip", nullable: true }),
+    __metadata("design:type", String)
+], TopOrderTemp.prototype, "cIp", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: "varchar", length: 64, comment: "客户标识", nullable: true }),
+    __metadata("design:type", String)
+], TopOrderTemp.prototype, "payer", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: "varchar", length: 64, comment: "客户浏览器指纹", nullable: true }),
+    __metadata("design:type", String)
+], TopOrderTemp.prototype, "fingerprint", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ name: 'c_pay_at', nullable: true }),
+    __metadata("design:type", Date)
+], TopOrderTemp.prototype, "cPayAt", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ name: 'c_in_at', nullable: true }),
+    __metadata("design:type", Date)
+], TopOrderTemp.prototype, "cInAt", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: "varchar", length: 512, comment: "上游平台回调地址" }),
     __metadata("design:type", String)
 ], TopOrderTemp.prototype, "mNotifyUrl", void 0);
 __decorate([
@@ -103,14 +131,6 @@ __decorate([
     (0, typeorm_1.Column)({ type: "varchar", length: 256, comment: "订单创建时使用的链接的oid,或者API平台的oid" }),
     __metadata("design:type", String)
 ], TopOrderTemp.prototype, "lOid", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ type: "varchar", length: 512, comment: "查单链接", nullable: true }),
-    __metadata("design:type", String)
-], TopOrderTemp.prototype, "queryUrl", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ type: "varchar", length: 50, comment: "提取APIKey", nullable: true }),
-    __metadata("design:type", String)
-], TopOrderTemp.prototype, "APIKey", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: "int", comment: "订单创建时该链接的支付通道实际费率" }),
     __metadata("design:type", Number)
