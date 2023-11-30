@@ -599,6 +599,7 @@ limit ${(page - 1) * limit},${limit}
                     return;
                 }
                 else {
+                    console.log(res);
                     if (res.result?.detail) {
                         console.log(`上号补单数:` + res.result?.detail?.length);
                         await this.redisService.getRedis().set(`order:result:${uid}`, JSON.stringify(res.result?.detail), "EX", 20);
