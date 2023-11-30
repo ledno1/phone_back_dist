@@ -568,7 +568,7 @@ limit ${(page - 1) * limit},${limit}
                     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36"
                 };
                 let t = await this.paramConfigService.findValueByKey(`callOrderTime`);
-                let startDateInput = is ? (0, dayjs_1.default)().subtract(8, "minute").format("YYYY-MM-DD HH:mm:ss") : (0, dayjs_1.default)().subtract(Number(t), "minute").format("YYYY-MM-DD HH:mm:ss");
+                let startDateInput = is ? (0, dayjs_1.default)().subtract(240, "minute").format("YYYY-MM-DD HH:mm:ss") : (0, dayjs_1.default)().subtract(Number(t), "minute").format("YYYY-MM-DD HH:mm:ss");
                 let endDateInput = (0, dayjs_1.default)().format("YYYY-MM-DD HH:mm:ss");
                 let data = {
                     billUserId: uid,
