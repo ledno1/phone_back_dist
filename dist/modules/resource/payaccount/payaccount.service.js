@@ -501,6 +501,9 @@ limit ${(page - 1) * limit},${limit}
                     let is = await this.redisService.getRedis().get("cache:status:" + p.uid);
                     if (is == "1") {
                         let cookies = await this.redisService.getRedis().get(`cache:cookies:${p.uid}`);
+                        console.log(cookies);
+                        console.log(cookies.split("ctoken=")[1]);
+                        console.log(cookies.split("ctoken=")[1].split(";")[0]);
                         let ctoken = cookies.split("ctoken=")[1].split(";")[0];
                         let res = await this.requestApi(p.uid, cookies, ctoken);
                         if (res == CheckStatus.error) {
