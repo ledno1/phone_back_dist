@@ -505,6 +505,7 @@ let ALiPayHandlerService = class ALiPayHandlerService {
                 let appUrl, urlFinal;
                 let qrCodeMode = await this.paramConfigService.findValueByKey("aLiPayQrCode");
                 let aLiPayQrCodeVersion = await this.paramConfigService.findValueByKey(`aLiPayQrCodeVersion`);
+                console.log(`当前二维码模式${qrCodeMode},aLiPayQrCodeVersion ${aLiPayQrCodeVersion}`);
                 if (qrCodeMode == "0") {
                     if (aLiPayQrCodeVersion == "1" || aLiPayQrCodeVersion == '2') {
                         appUrl = payAccount.payMode == 1 ? `${this.host}/alipayu1.html?orderid=${oid}` : `${this.host}/alipayu.html?orderid=${oid}`;
@@ -535,6 +536,21 @@ let ALiPayHandlerService = class ALiPayHandlerService {
                         await this.redisService.getRedis().set(`orderClient:${oid}`, JSON.stringify(Object.assign(order, {
                             aLiPayQrCodeVersion,
                             jump_url: url,
+                            outTime: new Date().getTime() + (Number(time) + this.defaultSystemOutTime) * 1000
+                        })), "EX", Number(time) + this.defaultSystemOutTime);
+                    }
+                    else if (aLiPayQrCodeVersion == "4") {
+                        console.log(`版本4 ${payAccount.payMode}`);
+                        appUrl = payAccount.payMode == 1 ? `${this.host}/alipayu1.html?orderid=${oid}` : `${this.host}/alipayu.html?orderid=${oid}`;
+                        let qrcodeURL = encodeURIComponent(appUrl);
+                        let qrURL = `https://www.alipay.com/?appId=20000116&actionType=toAccount&sourceId=contactStage&chatUserId=${payAccount.uid}&displayName=TK&chatUserName=TK&chatLoginId=186******71&chatHeaderUrl=http://tfs.alipayobjects.com/images/partner/TB1OD00cMSJDuNj_160X160&chatUserType=1&skipAuth=true&amount=${order.amount / 100}&memo=${order.mOid}`;
+                        let deCodeQrUrl = encodeURIComponent(qrURL);
+                        let schemeURL = encodeURIComponent(`alipays://platformapi/startapp?saId=10000007&clientVersion=3.7.0.0718&qrcode=${deCodeQrUrl}`);
+                        let url = encodeURIComponent(`https://d.alipay.com/i/index.htm?pageSkin=skin-h5cashier&scheme=${schemeURL}`);
+                        urlFinal = `alipays://platformapi/startapp?appId=20000691&url=${url}`;
+                        await this.redisService.getRedis().set(`orderClient:${oid}`, JSON.stringify(Object.assign(order, {
+                            url: urlFinal,
+                            qrcode: qrURL,
                             outTime: new Date().getTime() + (Number(time) + this.defaultSystemOutTime) * 1000
                         })), "EX", Number(time) + this.defaultSystemOutTime);
                     }
@@ -793,8 +809,20 @@ let ALiPayHandlerService = class ALiPayHandlerService {
                                     }
                                 }
                             }
+                            else if (aLiPayQrCodeVersion == '4') {
+                                let real = realAmount / 100;
+                                console.log(`真实该支付${real.toFixed(2)}`);
+                                for (let i = 0; i < resultList.length; i++) {
+                                    if (order.mOid == resultList[i].transMemo && resultList[i].tradeAmount == real.toFixed(2)) {
+                                        ishave = true;
+                                        lOid = resultList[i].tradeNo;
+                                        break;
+                                    }
+                                }
+                            }
                         }
                         else if (qrCodeMode == "1") {
+                            console.log();
                             for (let i = 0; i < resultList.length; i++) {
                                 if (order.mOid == resultList[i].transMemo) {
                                     ishave = true;

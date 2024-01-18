@@ -82,7 +82,7 @@ let ApiController = class ApiController {
                                 throw new api_exception_1.ApiException(60015);
                             }
                             if (Number(a[0]) > Number(b) || Number(b) > Number(a[1])) {
-                                console.error(`订单金额不在范围内,${body.orderAmt} 不在 ${a[0]} - ${a[1]} 之间`);
+                                console.error(`请求金额:${Number(b)}订单金额不在范围内,${body.orderAmt} 不在 ${a[0]} - ${a[1]} 之间`);
                                 throw new api_exception_1.ApiException(60015);
                             }
                         }
@@ -149,16 +149,19 @@ let ApiController = class ApiController {
                                 throw new api_exception_1.ApiException(60015);
                             }
                             if (Number(a[0]) > Number(b) || Number(b) > Number(a[1])) {
-                                console.error(`订单金额不在范围内,${body.orderAmt} 不在 ${a[0]} - ${a[1]} 之间`);
+                                console.error(`请求金额:${Number(b)}订单金额不在范围内,${body.orderAmt} 不在 ${a[0]} - ${a[1]} 之间`);
                                 throw new api_exception_1.ApiException(60015);
                             }
                         }
                         else {
                             let a = item.amountType.split(",");
-                            let b = body.orderAmt.includes('.') ? body.orderAmt.split(".")[0] : body.orderAmt;
-                            if (!a.includes(b)) {
-                                console.error(body.orderAmt + "  金额不在范围内");
-                                throw new api_exception_1.ApiException(60015);
+                            console.log(a);
+                            if (!a.includes(body.orderAmt)) {
+                                let b = body.orderAmt.includes('.') ? body.orderAmt.split(".")[0] : body.orderAmt;
+                                if (!a.includes(b)) {
+                                    console.error(body.orderAmt + "  金额不在范围内2");
+                                    throw new api_exception_1.ApiException(60015);
+                                }
                             }
                         }
                     }
